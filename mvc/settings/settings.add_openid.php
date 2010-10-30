@@ -1,0 +1,5 @@
+<?
+
+include('templates/openidlogin.php');
+
+?>

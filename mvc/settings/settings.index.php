@@ -1,0 +1,6 @@
+<?
+
+$this->form->display();
+
+
+?>

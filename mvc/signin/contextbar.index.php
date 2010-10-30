@@ -1,0 +1,1 @@
+For your convenience, we support different methods of logging into your account: through email, OpenID (such as your Google account), Twitter or even Facebook.
