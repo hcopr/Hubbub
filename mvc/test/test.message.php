@@ -187,8 +187,12 @@
   unset($postFound6['m_data']);
   tlog(!$postFound6, 'Message gone from author stream', 'OK', 'fail '.dumpArray($postFound6));
 	foreach($wallPosts1['list'] as $pds)
-	  if($pds['m_id'] == $post->data['msgid']) $postFound5 = true; 
-  tlog(!$postFound5, 'Message gone from owner profile', 'OK', 'fail');
+	  if($pds['m_id'] == $post->data['msgid']) $postFound5 = $pds; 
+	$data1 = HubbubMessage::unpackData($postFound5);
+  tlog(!$postFound5, 'Message gone from owner profile', 'OK', 'fail '.dumpArray($data1));  
+
+  // WHY ARE THERE DUPLICATES?
+  // WHY ARE EMPTY ENTITIES BEING CREATED?
 
   $post->localUserEntity = $ne2->key();
   $post->executeHandler('delete');
@@ -200,10 +204,11 @@
   foreach($streamPosts1['list'] as $pds)
     if($pds['m_id'] == $post->data['msgid']) $postFound6 = $pds; 
   unset($postFound6['m_data']);
-  tlog(!$postFound6, 'Message gone from author stream', 'OK', 'fail '.dumpArray($postFound6));
+  tlog(!$postFound6, 'Message gone from author stream', 'OK', 'fail ');
 	foreach($wallPosts1['list'] as $pds)
-	  if($pds['m_id'] == $post->data['msgid']) $postFound5 = true; 
-  tlog(!$postFound5, 'Message gone from owner profile', 'OK', 'fail');  
+	  if($pds['m_id'] == $post->data['msgid']) $postFound5 = $pds; 
+	$data1 = HubbubMessage::unpackData($postFound5);
+  tlog(!$postFound5, 'Message gone from owner profile', 'OK', 'fail ');  
   
   // next, we'll try an invalid update where the author has suddenly changed
   $post->data['text'] = 'This update should not have happened.';
