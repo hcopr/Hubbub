@@ -5,7 +5,7 @@
     <script type="text/javascript" src="lib/all.js.php"></script>   
     <link type="text/css" rel="stylesheet" href="ext/jqueryui/css/flick/jquery-ui-1.8.4.custom.css"/> 
     <link type="text/css" rel="stylesheet" href="themes/default/default.css"/> 
-		<link rel="icon" type="image/png" href="themes/default/logo.png"/>
+		<link rel="icon" type="image/png" href="img/hubbub-logofarb32.png"/>
     <base href="<?php echo cfg('page.base') ?>"> 
   </head>
   <body>

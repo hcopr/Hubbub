@@ -1,20 +1,32 @@
 <?
 
+/*
+ * displays a list of posts
+ * @param $list List of post datasets
+ * @param $withContainer=false optional, makes postlist container around the list
+ */
 function tmpl_postlist($list, $withContainer = false)
 {
   if($withContainer) { ?><div id="postlist"><? }
 
-  if(sizeof($list)>0) foreach($list as $ds)
+  if(sizeof($list['list'])>0) foreach($list['list'] as $ds)
 	{
 		$data = HubbubMessage::unpackData($ds);
 		$typeFunction = 'tmpl_type_'.$ds['m_type'];
 		if(!is_callable($typeFunction)) $typeFunction = 'tmpl_type_notsupported';
+		if($list['blurp_entity'] && $ds['m_owner'] != $list['blurp_entity']) $typeFunction = 'tmpl_foreign_post_blurp';
     $typeFunction($data, $ds);
 	}
 
   if($withContainer) { ?></div><? }
 }
 
+/*
+ * display a list of comments
+ * @param $postDS The dataset of the parent post
+ * @param &$comments List of comment datasets
+ * @param $withContainer=false optional, makes the comment_list container around the list
+ */
 function tmpl_commentlist($postDS, &$comments, $withContainer = false)
 {
   if($withContainer) print('<div class="comment_list" id="comments_'.$postDS['m_key'].'">');
@@ -50,11 +62,31 @@ function tmpl_commentlist($postDS, &$comments, $withContainer = false)
   if($withContainer) { ?></div><? }
 }
 
+/*
+ * Single post display handler: for errors
+ */
 function tmpl_type_notsupported(&$data, &$ds)
 {
 	?><div class="smalltext">(cannot display "<?= getDefault($ds['m_type'], 'undefined') ?>" message)</div><?
 }
 
+function tmpl_foreign_post_blurp(&$data, &$ds)
+{
+	$excerpt = make_excerpt($data['text']);
+	?><div class="blurp_post" id="post_<?= $ds['m_key'] ?>">◇ <?= HubbubEntity::linkFromId($ds['m_author'], array('short' => true, 'nolink' => true)) ?>
+			  <a href="<?= actionUrl('index', 'view', array('id' => $ds['m_owner'], 'post' => getDefault($ds['m_parent'], $ds['m_key']))) ?>"><?= l10n('commented') ?></a>
+				<?= HubbubEntity::linkFromId($ds['m_owner']) ?>'s
+				<?= l10n('comment_on_wall') ?>:
+		<div class="smalltext blurp_excerpt">
+			<?= htmlspecialchars($excerpt) ?>
+		</div>
+  </div><?
+}
+
+
+/*
+ * Single post display handler: for standard posts
+ */
 function tmpl_type_post(&$data, &$ds)
 {
 	$comments = ProfileModel::getComments($ds['m_key']);
@@ -66,7 +98,11 @@ function tmpl_type_post(&$data, &$ds)
   ?><div class="post" id="post_<?= $ds['m_key'] ?>">
   	<div class="postimg"><img src="img/anonymous.png" width="64"/></div>
 		<div class="postcontent">
-			<div><?= HubbubEntity::linkFromId($ds['m_owner']) ?>
+			<div>
+			<?
+			if($ds['m_author'] != $ds['m_owner']) print(HubbubEntity::linkFromId($ds['m_author']).' ► ');
+			?>
+			<?= HubbubEntity::linkFromId($ds['m_owner']) ?>
 			<?= nl2br(htmlspecialchars($data['text'])) ?></div>
 			<div class="postmeta"><?= implode(' · ', $metaElements) ?></div>
       <div id="post_<?= $ds['m_key'] ?>_votething" style="display:none" class="comment_item">

@@ -18,6 +18,8 @@
           'logout' => 'Log out',
 					'.title' => 'Home',
           'change' => 'change',
+					'commented' => 'commented on',
+					'comment_on_wall' => 'profile',
 					'field.cannotbeempty' => 'please fill out this field',
           );
         break;
@@ -31,6 +33,8 @@
           'logout' => 'Abmelden',
 					'.title' => 'Home',
           'change' => 'ändern',
+          'commented' => 'hat einen Kommentar auf',
+          'comment_on_wall' => 'Profil hinterlassen',
 					'field.cannotbeempty' => 'bitte fülle dieses Feld aus',
           );
         break;
@@ -90,6 +94,19 @@
 		die();
 	}
   
+	function make_excerpt($text, $length = 64)
+	{
+		if(strlen($text) > $length) 
+    {
+    	$segments = explode(' ', $text);
+			$text = '';
+			if(is_array($segments)) foreach($segments as $seg)
+				if(strlen($text) < $length) $text .= ' '.$seg;
+			$text .= '…';
+    }
+		return(trim($text));
+	}
+	
 	// replaces the standard PHP error handler, mainly because we want a stack trace
   function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
   {
@@ -124,7 +141,7 @@
 		    user=? AND _local="Y"', array($controllerName));
 		  if(sizeof($entityDS) > 0)
 		  {
-		  	$GLOBALS['msg']['entity'] = $entityDS;
+		  	$GLOBALS['msg']['entity'] = HubbubEntity::ds2array($entityDS);
 		  	$GLOBALS['msg']['touser'] = $controllerName;
 		  	$controllerName = 'userpage';
 		  	$_REQUEST['action'] = 'index';
@@ -196,6 +213,11 @@
 					redirect(actionUrl('user', 'profile'));
 				}
 			}
+		}
+			
+		function key()
+		{
+			return($this->ds['u_key']);
 		}
 			
 		function loginWithId($id)
@@ -272,10 +294,12 @@
 		
 		function setUsername($username)
 		{
+		  $this->server = new HubbubServer(cfg('service.server'), true);
 			$this->loadEntity();
 			$this->entityDS['user'] = safename($username);
 			$this->entityDS['url'] = getDefault($this->entityDS['url'], $GLOBALS['config']['service']['server'].'/'.$username);
 			$this->entityDS['_local'] = 'Y';
+			$this->entityDS['_serverkey'] = $this->server->ds['s_key'];
 			$this->entityDS['server'] = cfg('service.server');
 			$ekey = DB_UpdateDataset('entities', $this->entityDS);
 			$this->ds['u_entity'] = $ekey;
@@ -346,14 +370,14 @@
 			die();
 		}
 		
-		function makeMenu($str, $add = array())
+		function makeMenu($str, $add = array(), $params = array())
 		{
 			$result = array();
 			$ctr = -1;
 			foreach(explode(',', $str) as $item)
 			{
 				$ctr++;
-				if(substr($item, 0, 1) == ':') $url = substr($item, 1); else $url = actionUrl($item, $this->name);
+				if(substr($item, 0, 1) == ':') $url = substr($item, 1); else $url = actionUrl($item, $this->name, $params);
 				$result[] = array('url' => $url, 'action' => $item, 'caption' => $this->l10n($item).$add[$ctr]);
 			} 
 			return($result);
@@ -443,6 +467,8 @@
 		function __construct($type = null)
 		{			
 		  if($type != null) $this->create($type);
+			$this->doPublish = 'N';
+			$this->localUserEntity = object('user')->entity;
 		}
 		
 		/**
@@ -453,6 +479,7 @@
 		function fail($reason)
 		{
 			$this->response = result_fail($reason, $this->response);
+			return(true);
 		}
 
     /**
@@ -461,8 +488,23 @@
      */
     function ok()
 		{
-			$this->response = result_ok($this->response);
+		  if($this->response['result'] != 'fail') 
+		    $this->response = result_ok($this->response);
+			return(true);
 		}
+		
+    function author($ads)
+    {
+      $this->data['author'] = $ads;
+    }
+		
+		function owner($ads)
+    {
+      $this->data['owner'] = $ads;
+    }
+		
+    function to($ads) { $this->owner($ads); }
+    function from($ads) { $this->author($ads); }
 		
     /**
      * Execute message event handler
@@ -478,16 +520,6 @@
       if(!is_callable($handlerFunc) && file_exists($handlerFile)) include_once($handlerFile);
       if(is_callable($handlerFunc)) $result = $handlerFunc($this->data, $this, $opt); 
 			return($result);
-		}
-		
-		function from($entity)
-		{
-			$this->data['from'] = $entity;
-		}
-		
-		function to($entity)
-		{
-			$this->data['to'] = $entity;
 		}
 		
 		function newMsgId()
@@ -509,6 +541,43 @@
 			$this->type = &$this->data['type'];
 			$this->executeHandler('create', $opt);
 		}
+
+		function load($p)
+		{
+		  $ds = DB_GetDataset('messages', $p['id'], getDefault($p['field'], 'm_key')); 
+		  if(sizeof($ds) == 0) return(false);
+			$this->data = $this->unpackData($ds);
+			$this->initEntities();
+      $this->ds = $ds;
+			return($this->executeHandler('load'));
+      return(true);		  
+    }
+		
+		function isInDB()
+		{
+		  $this->existingDS = DB_GetDataset('messages', $this->data['msgid'], 'm_id');
+		  return(sizeof($this->existingDS) > 0);
+    }
+		
+		function compareWithDS($ds, $fields)
+		{
+		  $fails = array();
+		  $data = $this->unpackData($ds);
+		  foreach($fields as $v)
+		  {
+		    if(!is_array($this->data[$v]))
+		    {
+		      // compare text fields by their string value
+		      if(trim($this->data[$v]) != trim($data[$v])) $fails[] = $v.':'.$this->data[$v].'!='.$data[$v];
+        }
+        else
+        {
+          // compare entity records by URL
+          if($this->data[$v]['url'] != $data[$v]['url']) $fails[] = $v;
+        }
+      }
+      return($fails);
+    }
 		
 		/**
 		 * saves the message to the database
@@ -518,15 +587,26 @@
 		{
 			$this->doSave = true;
 			$this->sanitizeDataset();
-      // if this message has a parent
+			if($this->isInDB())
+			{
+			  // if this message already exists in the database, we need to verify that it hasn't changed
+			  // any of the immutable fields: author, owner, parent, created
+			  $compareFails = $this->compareWithDS($this->existingDS, array('author', 'owner', 'parent', 'created'));
+			  if(sizeof($compareFails) > 0)
+			  {
+			    // fields have changed, we cannot allow this
+			    $this->fail('Immutable field violation: '.implode(', ', $compareFails)); 
+			    return(false);
+        }
+        $this->data['changed'] = time();
+      }
+      // if this message has a parent, we need to retrieve its DB key
       // todo: origin verification!
       if($this->data['parent'] != '')
       {
         $this->parentDS = DB_GetDataset('messages', $this->data['parent'], 'm_id');
         $this->parentKey = getDefault($this->parentDS['m_key'], '-1');
       }
-			$this->authorKey = $this->authorEntity->key();
-			$this->ownerKey = $this->fromEntity->key();
 			$this->executeHandler('save');
 			if($this->doSave)
 			{
@@ -543,21 +623,58 @@
 					'm_compression' => round(100-100*(strlen($packedData)/strlen($this->payload))),
 					'm_votehash' => $this->voteHash,
           'm_parent' => $this->parentKey,
+					'm_publish' => $this->doPublish,
+					'm_tag' => $this->vTag,
+					'm_deleted' => ($this->isDeleted) ? 'Y' : 'N',
 					);
+				if($this->existingDS['m_key'] > 0) $this->ds['m_key'] = $this->existingDS['m_key'];
 				$this->ds['m_key'] = DB_UpdateDataset('messages', $sd);
 				$this->ds = $sd;
 				$this->index($this->ds);
 			}
+			return(true);
 		}
 		
+		/**
+		 * Fill the index entries for this message so connected entities and servers can see it
+		 * @param array $ds The message dataset 
+		 */
 		function index(&$ds)
 		{
-			// assuming all friends can read this message 
-			DB_Update('REPLACE INTO '.getTableName('index').' (i_userkey,i_msgkey)
-			  SELECT u_entity,"'.$ds['m_key'].'" FROM '.getTableName('connections').' 
-				LEFT JOIN '.getTableName('users').' ON (u_entity = c_to)
-				WHERE c_from="'.object('user')->entity.'" AND c_status="friend" AND u_key > 0');
+			$optGroup = '';
+      if($ds['m_localgroup'] > 0) $optGroup = 'AND c_group = '.$ds['m_localgroup'];
+      else if($ds['m_localgroup'] < 0) $optGroup = 'AND c_group != '.$ds['m_localgroup'];
+			// assuming all local friends can read this message 
+			DB_Update('REPLACE INTO '.getTableName('index').' (i_entitykey,i_msgkey)
+			  SELECT c_to,"'.$ds['m_key'].'" FROM '.getTableName('connections').' '.
+			  'LEFT JOIN '.getTableName('entities').' ON (c_to = _key) '. 
+			  'WHERE c_from="'.$this->ownerKey.'" AND c_status="friend" AND _local="Y" '.$optGroup);
+			// log the servers of all nonlocal entities who should see the message
+			DB_Update('REPLACE INTO '.getTableName('index_servers').' (si_serverkey,si_msgkey) '.
+			  'SELECT _serverkey,"'.$ds['m_key'].'" FROM '.getTableName('connections').' '.
+			  'LEFT JOIN '.getTableName('entities').' ON (c_to = _key) '. 
+			  'WHERE c_from="'.$this->ownerKey.'" AND c_status="friend" '.$optGroup.' '.
+			  'GROUP BY _serverkey');
 		}
+		
+		/*
+		 * Update the index tables for a (new) entity that is now connected to the owner entity 
+		 */
+		function reIndexForEntity($msgOwnerKey, $forEntityKey)
+		{
+		  $forEntity = new HubbubEntity(array('_key' => $forEntityKey));
+		  $ourConnection = new HubbubConnection($msgOwnerKey, $forEntityKey);
+		  if($ourConnection->status() != 'friend') return;	
+		  $grp = $ourConnection->ds['c_group'];	  
+		  if($forEntity->ds['_local'] == 'Y')
+  		  DB_Update('REPLACE INTO '.getTableName('index').' (i_entitykey,i_msgkey) '.
+  		    'SELECT "'.$forEntityKey.'",m_key FROM '.getTableName('messages').' '.
+  		    'WHERE m_publish="Y" AND (m_localgroup = ? OR m_localgroup = 0 OR (m_localgroup != ?))', array($grp, -$grp));
+  		else
+  		  DB_Update('REPLACE INTO '.getTableName('index_servers').' (si_serverkey,si_msgkey) '.
+  		    'SELECT "'.$forEntity->ds['_serverkey'].'",m_key FROM '.getTableName('messages').' '.
+  		    'WHERE m_publish="Y" AND (m_localgroup = ? OR m_localgroup = 0 OR (m_localgroup != ?))', array($grp, -$grp));
+    }
 		
 		function unpackData($dataset)
 		{
@@ -576,20 +693,38 @@
 			$this->data = json_decode($this->payload, true);
 			$this->type = &$this->data['type'];
 			$this->response = array();
-      $this->fromEntity = new HubbubEntity($this->data['from']);
-      $this->toEntity = new HubbubEntity($this->data['to']);
+			$this->initEntities();
+      $this->sanitizeFields();
 			return($this->executeHandler('receive'));
 		}
-		
-		function sanitizeDataset()
-		{
-      if(!$this->data['from'] || sizeof($this->data['from']) == 0) $this->data['from'] = object('user')->selfEntityEx();
-      $this->fromEntity = new HubbubEntity($this->data['from']);
-      $this->toEntity = new HubbubEntity($this->data['to']);
+
+    /* init the object's properties from the data at hand */		
+    function initEntities()
+    {
+			$this->type = &$this->data['type'];
       $this->authorEntity = new HubbubEntity($this->data['author']);
+      $this->ownerEntity = new HubbubEntity($this->data['owner']);
+      $this->authorKey = $this->authorEntity->key();
+      $this->ownerKey = $this->ownerEntity->key();
+      $this->doPublish = getDefault($this->ds['m_publish'], 'N');
+      $this->isDeleted = $this->data['deleted'] == 'yes';
+    }
+
+		/* clean up fields and fill default values where necessary */
+		function sanitizeFields()
+		{
+			$this->data['author'] = HubbubEntity::ds2arrayShort($this->authorEntity->ds);
+      $this->data['owner'] = HubbubEntity::ds2arrayShort($this->ownerEntity->ds);
       $this->data['created'] = getDefault($this->data['created'], time());
       $this->data['changed'] = getDefault($this->data['changed'], time());
       $this->data['msgid'] = getDefault($this->data['msgid'], $this->newMsgId());
+    }
+		
+		/* load associated entity objects, clean up fields, prepare payload */
+		function sanitizeDataset()
+		{
+      $this->initEntities();
+      $this->sanitizeFields();
       $this->payload = json_encode($this->data);
 		}
 		
@@ -630,13 +765,14 @@
      * rejected.
      * @return 
      */
-    function validateSignature()
+    function validateSignature($signedBy = 'author')
     {
-      $this->fromServer = new HubbubServer($this->data['from']['server']);
+      $this->fromServer = new HubbubServer($this->data[$signedBy]['server']);
 			$validSignature = md5(trim($this->fromServer->inboundKey()).trim($this->payload));
 			//$this->usedSig = 's:'.$this->signature.'/v:'.$validSignature.'/f:'.$this->fromServer->inboundKey().'/e:'.md5($this->fromServer->inboundKey()).'/nk:'.md5($this->payload);
 			if($validSignature != $this->signature)
 			{
+				$this->expectedSignature = $validSignature;
 				$this->fail('invalid signature');
 				return(false);
 			}
@@ -650,22 +786,28 @@
     {     
       if($record != null) 
 			{
+			  if($record['type'] == 'server' || $record['user'] == '*')
+			  {
+			    $this->ds = $record;
+			    return;
+        }
 				// if the record contains a "_key"
-				if($record['_key'])
+				if($record['_key'] > 0)
 				{
 				  $this->ds = DB_GetDataset('entities', $record['_key']);
 					if($this->ds['_local'] == 'Y') $this->ds['server'] = cfg('service.server');
-					return;
+					if($this->ds['_key'] > 0) return;
 				}
 				// if the user is identified by their Hubbub URL:
 				if($record['url'] != '')
 				{
-					$ds = DB_GetDatasetWQuery('SELECT * FROM '.getTableName('entities').' WHERE url=?', array($record['url']));
-					if(sizeof($ds) > 0) return;
+					$this->ds = DB_GetDatasetWQuery('SELECT * FROM '.getTableName('entities').' WHERE url=?', array($record['url']));
+					if(sizeof($this->ds) > 0) return;
 				}
 				$record['server'] = strtolower(trim($record['server']));
 				if(!$this->load($record['user'], $record['server']) && $record['server'] != cfg('service.server'))
 				{
+				  $this->server = new HubbubServer($record['server']);
 					// if this entity isn't known yet, create it
 					$this->ds = array(
 					  'user' => $record['user'],
@@ -673,11 +815,47 @@
 						'url' => $record['url'],
 						'pic' => $record['pic'],
 						'name' => $record['name'],
+						'_serverkey' => $this->server->ds['s_key'],
 						);
-					$this->ds['_key'] = DB_UpdateDataset('entities', $this->ds);
+  			  $this->ds['_key'] = DB_UpdateDataset('entities', $this->ds);
 				}
 			}
     }
+		
+		function create($record, $isLocal)
+		{
+			if(!$this->load($record['user'], $record['server']))
+			{
+  		  $this->server = new HubbubServer($record['server']);
+	      $this->ds = array(
+	        'user' => $record['user'],
+	        'server' => $record['server'],
+	        'url' => $record['url'],
+	        'pic' => $record['pic'],
+	        'name' => $record['name'],
+	        '_serverkey' => $this->server->ds['s_key'],
+	        );
+	      if($isLocal) $this->ds['_local'] = 'Y'; else $this->ds['_local'] = 'N';
+        $this->ds['_key'] = DB_UpdateDataset('entities', $this->ds);
+			}
+			return($this->ds);
+		}
+		
+		function ds2array($ds)
+		{
+			$result = array();
+			if(is_array($ds)) foreach($ds as $k => $v) if(substr($k, 0, 1) != '_') $result[$k] = $v;
+			return($result);
+		}
+
+		function ds2arrayShort($ds)
+		{
+      return(array(
+        'url' => $ds['url'],
+        'server' => $ds['server'],
+        'user' => $ds['user'],
+        ));
+		}
 		
 		function key()
 		{
@@ -691,12 +869,18 @@
     	  '">'.htmlspecialchars(getDefault($ds['name'], $ds['url'])).'</a>');
     }
 		
-		function linkFromId($idkey)
+		function linkFromId($idkey, $options = array())
 		{
 			if(!isset($GLOBALS['entitycache'][$idkey])) 
 				$GLOBALS['entitycache'][$idkey] = DB_GetDataset('entities', $idkey);
       $entity = $GLOBALS['entitycache'][$idkey];
-			return('<a href="'.actionUrl('view', 'profile', array('id' => $idkey)).'">'.getDefault($entity['name'], '(unknown)').'</a>');
+			$entityName = $entity['name'];
+			if($options['short']) $entityName = CutSegment(' ', $entityName);
+			if($options['nolink']) return(getDefault($entityName, '(unknown)'));
+			if(object('user')->entity == $idkey)
+        return('<a href="'.actionUrl('index', 'profile').'">'.getDefault($entityName, '(unknown)').'</a>');
+			else
+        return('<a href="'.actionUrl('index', 'view', array('id' => $idkey)).'">'.getDefault($entityName, '(unknown)').'</a>');
 		}
 		
 		function load($user, $server)
@@ -716,6 +900,7 @@
 			return($match['count(*)'] == 0);
 		}
 		
+		/* find a local entity */
 		function findEntity($record)
 		{
 			$rec = array();
@@ -725,6 +910,7 @@
       return($ds);
 		}
 		
+		/*finding an entity an entity identified by user and server*/
     function findEntityGlobal($record)
     {
       $rec = array();
@@ -835,6 +1021,7 @@
 			return(array(
         'server' => $this->ds['s_url'],
         'type' => 'server',
+        'user' => '*',
 				));
 		}
 		
@@ -843,6 +1030,7 @@
       return(array(
         'server' => cfg('service.server'),
         'type' => 'server',
+        'user' => '*',
         ));
 		}
 		
@@ -860,7 +1048,7 @@
 			// make a trust_sendkey1 message
 			$msg = new HubbubMessage('trust_sendkey1');
 			$msg->to($this->entity());
-			$msg->from($this->localEntity());
+			$msg->data['author'] = $this->localEntity();
 			$this->save();
 			// make new key if there is none
       $this->ds['s_key_in'] = getDefault($this->ds['s_key_in'], md5(time().rand(1, 10000)));

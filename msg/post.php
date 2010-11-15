@@ -2,7 +2,11 @@
 
 function post_save(&$data, &$msg)
 {
-  // if this comment is a vote, we need to update the vote hash in order for it to display correctly
+  if($msg->ownerEntity->ds['_local'] == 'Y')
+	{
+		$msg->doPublish = 'Y';
+	}
+	// if this comment is a vote, we need to update the vote hash in order for it to display correctly
 	$msg->voteHash = '';
 	if(substr($data['text'], 0, 1) == '#' && $msg->parentKey > 0) 
 	{
@@ -37,5 +41,58 @@ function post_save(&$data, &$msg)
 	}
 	return(true);
 }
+
+function post_receive(&$data, &$msg)
+{
+  // this message must be signed by the owner, who originated it
+  if(!$msg->validateSignature('owner')) return(true);
+  // we're receiving this message because the sender(=owner) has published something on their profile
+  
+  $msg->save();
+  
+  $msg->ok();
+}
+
+function post_delete(&$data, &$msg)
+{
+  // in order to delete this message, we need to be either the owner or the author of it
+  if($msg->localUserEntity == $msg->ownerKey || $msg->localUserEntity == $msg->authorKey) 
+  {
+    // easiest case, because the message lives on this server
+    unset($msg->data['text']);
+    unset($msg->data['attachments']); 
+    $msg->isDeleted = true;
+    $msg->data['deleted'] = 'yes';
+  }
+  if($msg->localUserEntity == $msg->ownerKey) 
+  {
+    // if we're the owner, there is nothing left to do here    
+    $msg->save();
+    $msg->ok();
+    return(true);
+  }
+  else if($msg->localUserEntity == $msg->authorKey) 
+  {
+    // if we're not the owner, but the author of it, we need to send this sucker to its owner
+    // so they can actually publish the change
+    $msg->sendToUrl($msg->data['owner']['server']);
+    if($msg->response['result'] == 'OK')
+    {
+      // remote delete confirmed, everything is OK
+      $msg->ok();
+      $msg->save();
+      return(true);
+    }
+    else
+    {
+      // remote delete didn't work out
+      $msg->fail('remote delete failed: '.$msg->response['data']['reason']);
+      return(false);
+    }
+  }
+  $msg->fail('delete failed: insufficient rights');
+  return(false);  
+}
+
 
 ?>

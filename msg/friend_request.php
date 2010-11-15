@@ -25,7 +25,7 @@ function friend_request_after_sendtourl(&$data, &$msg)
   if($msg->responseData['data']['result'] == 'OK')
   {
 	  // get our side of the connection
-	  $con = new HubbubConnection($msg->fromEntity->key(), $msg->toEntity->key());
+	  $con = new HubbubConnection($msg->authorEntity->key(), $msg->ownerEntity->key());
 	  switch($con->status())
 	  {
 	    case('req.rcv'): {
@@ -55,7 +55,7 @@ function friend_request_receive(&$data, &$msg)
 	// allow only if the server is trusted
 	if(!$msg->validateSignature()) return(true);
   
-  $con = new HubbubConnection($msg->toEntity->key(), $msg->fromEntity->key());
+  $con = new HubbubConnection($msg->ownerEntity->key(), $msg->authorEntity->key());
   switch($con->status())
     {
   	case('req.sent'): {

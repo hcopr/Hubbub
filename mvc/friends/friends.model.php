@@ -29,7 +29,7 @@ class FriendsModel extends HubbubModel
 	function friend_request($toEntity, $msgtype = 'friend_request')
 	{
     $fr = new HubbubMessage($msgtype);
-    $fr->data['to'] = array('server' => $toEntity->ds['server'], 'user' => $toEntity->ds['user']); 
+    $fr->data['owner'] = array('server' => $toEntity->ds['server'], 'user' => $toEntity->ds['user']); 
     $res = $fr->sendToUrl($toEntity->ds['server']);
 		return($res);
 	}
@@ -52,12 +52,13 @@ class FriendsModel extends HubbubModel
     return($result);
 	}
 	
-	function getFriends($filter = 'friend')
+	function getFriends($filter = 'friend', $forUserEntity = null)
 	{
+		if($forUserEntity == null) $forUserEntity = object('user')->entity;
 		return(DB_GetList('SELECT * FROM '.getTableName('connections').'
 		  LEFT JOIN '.getTableName('entities').' ON (c_to = _key)
 		  WHERE c_from=? AND c_status=?
-		  ORDER BY `name` ASC', array(object('user')->id, $filter)));
+		  ORDER BY `name` ASC', array($forUserEntity, $filter)));
 	}
 	
 	function contactServer($url)

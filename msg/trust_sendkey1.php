@@ -13,19 +13,19 @@
  */
 function trust_sendkey1_receive(&$data, &$msg)
 {
-	if($data['from']['server'] == '')
-	  $msg->fail('invalid server field in "from" array');
+	if($data['author']['server'] == '')
+	  $msg->fail('invalid server field in "author" array');
 	else
 	{
 		// accept the new key (it's not confirmed yet)
-		$server = new HubbubServer($data['from']['server'], true);
+		$server = new HubbubServer($data['author']['server'], true);
 		$server->ds['s_newkey_out'] = $data['mykey'];
 		$server->ds['s_key_in'] = getDefault($server->ds['s_key_in'], md5(time().rand(1, 100000)));
     DB_UpdateField('servers', $server->ds['s_key'], 's_key_in', $server->ds['s_key_in']);
 		// now, get origin confirmation
 		$confirmMsg = new HubbubMessage('trust_sendkey2');
-		$confirmMsg->from($server->localEntity());
-		$confirmMsg->to($server->entity());
+		$confirmMsg->author($server->localEntity());
+		$confirmMsg->owner($server->entity());
 		$confirmMsg->data['mykey'] = $server->ds['s_key_in'];
 		$response = $confirmMsg->sendtourl($server->ds['s_url'], $server->ds['s_newkey_out']);
 		$responseData = $response['data'];

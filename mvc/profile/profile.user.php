@@ -1,5 +1,5 @@
 <?
-$myOldUsername = $this->user->getUsername();
+    $myOldUsername = $this->user->getUsername();
     
     $ctr = 1;
 		// let's get the attributes exported to us from other services

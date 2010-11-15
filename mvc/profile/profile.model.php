@@ -3,19 +3,27 @@
 class ProfileModel extends HubbubModel
 {
 
-  function getPostList($owner)
+  function getPostList($owner, $singlePostId = null)
   {
-    return(DB_GetList('SELECT * FROM '.getTableName('messages').'
-      WHERE m_owner = ? AND m_parent = 0 AND m_deleted = "N" AND m_type="post"
-      ORDER BY m_created DESC', array($owner)));
+  	if($singlePostId != null) $match = 'AND m_key='.($singlePostId+0);
+  	return(array(
+		  'blurp_entity' => $owner,
+		  'current_entity' => $owner,
+		  'list' =>
+			  DB_GetList('SELECT * FROM '.getTableName('messages').'
+	      WHERE ((m_owner = ? AND m_parent = 0) OR (m_author = ? AND m_owner != ?)) AND m_deleted = "N" AND m_type="post" '.$match.'
+	      ORDER BY m_created DESC', array($owner, $owner, $owner))));
   }
   
-  function getStream($forUserKey, $ownerKey)
+  function getStream($ownerKey)
   {
-    return(DB_GetList('SELECT * FROM '.getTableName('messages').' 
-		  LEFT JOIN '.getTableName('index').' ON (i_msgkey = m_key AND i_userkey = ?)
-      WHERE (i_userkey = ? OR m_owner = ?) AND m_parent = 0 AND m_deleted = "N" AND m_type="post" 
-      ORDER BY m_created DESC', array($forUserKey, $forUserKey, $ownerKey)));
+    return(array(
+		  'current_entity' => $ownerKey,
+			'list' => 
+			  DB_GetList('SELECT * FROM '.getTableName('messages').' 
+  			  LEFT JOIN '.getTableName('index').' ON (i_msgkey = m_key AND (i_entitykey = ? OR m_owner = ?))
+  	      WHERE m_parent = 0 AND m_deleted = "N" AND m_type="post" 
+  	      ORDER BY m_created DESC', array($ownerKey, $ownerKey))));
   }
   
 	function getComments($forPostKey, $getLimit = 3)
@@ -40,31 +48,36 @@ class ProfileModel extends HubbubModel
 	
 	function deletePost($postKey)
 	{
-    $msg = DB_GetDataset('messages', $postKey);
-    if(object('user')->entity == $msg['m_owner'] || object('user')->entity == $msg['m_author'])
-    {
-      $msg['m_deleted'] = 'Y';
-      DB_UpdateDataset('messages', $msg);
-			return(true);
-    }		
+	  $msg = new HubbubMessage('post');
+	  $msg->load(array('id' => $postKey, 'field' => 'm_key'));
+	  $result = $msg->executeHandler('delete');
+	  $this->msg = $msg;
+	  return($result);
+	}
+	
+	function makePostMessage($type, $post)
+	{
+		$msg = new HubbubMessage($type);
+		foreach($post as $k => $v) $msg->data[$k] = $v;
+    $msg->save();
+		return($msg);
+	}
+	
+	function Post($p)
+	{
+		// posts and comments have the same basic structure: author, owner and text
+		// if the author is also the owner, we do not need to send a foreign_post message
+		if($p['author']['_key'] == $p['owner']['_key'])
+		{
+			$msg = $this->makePostMessage('post', $p);
+			
+		}
 		else
 		{
-			return(false);
+      $msg = $this->makePostMessage('foreign_post', $p);
+			
 		}
-	}
-	
-	function postToProfile($post)
-	{
-		$msg = new HubbubMessage('post');
-		foreach($post as $k => $v) $msg->data[$k] = $v;
-		$msg->save();
 		return($msg->ds);
-	}
-	
-	function postComment($comment)
-	{
-		// todo: origin verification!
-    return($this->postToProfile($comment));
 	}
 
 }

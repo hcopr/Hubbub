@@ -37,7 +37,8 @@ function friend_remove_receive(&$data, &$msg)
   // allow only if the server is trusted
   if(!$msg->validateSignature()) return(true);
   
-  $con = new HubbubConnection($msg->toEntity->key(), $msg->fromEntity->key());
+  $con = new HubbubConnection($msg->ownerEntity->key(), $msg->authorEntity->key());
+  if($con->status() != 'friend') return($msg->fail('no connection'));
 	$con->status('undefined');
   $msg->ok();
   return(true);

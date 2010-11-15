@@ -290,14 +290,14 @@ h1 span {
 }
 .comment_text {
   margin-left: 40px;
+	line-height: 150%;
 }
 .comment_meta {
-  margin-top: -6px;
 }
-.comment_item, .comment_item div {
+.blurp_post, .comment_item, .comment_item div {
   font-size: 9pt;
 }
-.comment_item {
+.blurp_post, .comment_item {
 	width: 632px;
   background: #eee;
 	padding: 4px;
@@ -306,4 +306,12 @@ h1 span {
 .smallbtn {
 	padding: 1px;
 	font-size: 9pt;
+}
+.blurp_post {
+	margin-left: 54px;
+	background: none;
+	line-height: 150%;
+}
+.blurp_excerpt {
+	margin-left: 16px;
 }

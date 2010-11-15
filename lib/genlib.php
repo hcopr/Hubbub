@@ -98,33 +98,6 @@
       "</log>\r\n\r\n");
   }	
 	
-	function SysLogMsg($type, $user, $message)
-	{
-		global $config;
-		if(is_array($message))
-		{
-			ob_start();
-			print_r($message);
-			$message = ob_get_clean();
-		}
-		mail($config['admincontact'], 'log: '.$type.' ('.$user.')', $message);
-	}
-  
-  function file_exists_incontext($file)
-  {
-    global $config;
-    foreach($config['context'] as $ctx)
-		{
-			$fname = $GLOBALS['app.basepath'].$ctx.$file;
-      if (file_exists($fname)) 
-			{
-				$GLOBALS['cfname'] = $fname;
-				return(true);
-			}
-		}
-    return(false);
-  }
-  
   function profiler_microtime_diff($b, $a)
   {
     list($a_dec, $a_sec) = explode(" ", $a);
@@ -158,47 +131,9 @@
     return(actionUrl($_REQUEST['action'], $_REQUEST['controller'], $params));
   }
   
-  function criticalError($module, $message)
-  {
-    ob_start(); print_r($_REQUEST); $request = ob_get_clean();
-    ob_start(); print_r($ENV); $env = ob_get_clean();   
-    $err = array(
-      'e_module' => $module,
-      'e_message' => $message,
-      'e_context' => $request,
-      'e_env' => $env,
-      'e_ip' => $ENV['REMOTE_ADDR'],
-      );
-    DB_UpdateDataset('errors', $err);
-  }
-
   function cr2br($str)
   {
     return(preg_replace('#\r?\n#', '<br />', $str));
-  }
-  
-  function cache_textout($name)
-  {
-    global $config;
-    $filename = 'cache/'.$name;
-    if (!file_exists($filename)) return(false);
-    if (time()-filectime($filename) > $config['site.cache.timeout']) return(false);
-    profile_point('cache-hit "'.$name.'", object age '.(time()-filectime($filename)).' sec');
-    $fp = fopen($filename, 'rb');
-    return(fpassthru($fp));
-  }
-  
-  function cache_storetext($name, $content, $display = false)
-  {
-    global $config;
-    @mkdir('cache', 0777);
-    $filename = 'cache/'.$name;
-    @unlink($filename);
-    $open = fopen($filename, 'a+');
-    fwrite($open, $content);
-    fclose($open);
-    chmod($filename, 0777);    
-    if ($display) print($content);
   }
   
   function parse_timestamp($ts)
@@ -212,18 +147,7 @@
     $second = $ts;
     return(mktime($hour, $minute, $second, $month, $day, $year));
   }
-  
-  // convert array hash to url-encoded parameter string
-  function array2Url($ar, $concat = '&amp;')
-  {
-    $result = '';
-    if (is_array($ar))
-    foreach ($ar as $k => $v)
-      if ($k != '' && $v != '')
-        $result[] = $k.'='.urlencode($v);
-      return(implode($concat, $result));
-  }
-  
+   
   function interpretQueryString($qs)
   {
     global $config;
@@ -331,14 +255,6 @@
     mail($to, $subject, $content, $headers);
   }
 
-  function feedTag($action, $controller, $type = 'RSS 2.0')
-  {
-    global $config;
-    return('<link rel="alternate" '.
-           'type="application/rss+xml" title="'.$type.
-           '" href="'.$config['site.base'].actionUrl($action, $controller).'" />');
-  }
-
   function actionUrl($action = '', $controller = '', $params = array())
   {
     global $config;
@@ -370,11 +286,6 @@
     return($result);
   }
 
-  function make_link($title, $action = null, $controller = null, $params = array())
-  {
-    return('<a href="'.actionUrl($action, $controller, $params).'">'.htmlentities($title).'</a>');  
-  }
-
   function execTemplate($templateFileName, $params = array())
   {
     foreach ($params as $k => $v) $$k = $v;
@@ -386,9 +297,7 @@
   function getFirst($array)
 	{
 		foreach(func_get_args() as $a)
-		{
 			if($a != null && trim($a) != '') return($a);
-		}
 	}
 
   // if $def1 is empty, use $def2
@@ -626,28 +535,33 @@
     return(gmmktime($hour, $minute, $second, $month, $day, $year)); 
   }
   
-  function ageToString($unixDate, $new = 'new', $ago = 'ago', $today = '', $nooffset = true)
+  function ageToString($unixDate, $new = 'new', $ago = 'ago')
   {
     global $config;
     $result = '';
     $oneMinute = 60;
     $oneHour = $oneMinute*60;
     $oneDay = $oneHour*24;
-    if ($nooffset)
-      $difference = (time()) - $unixDate;
-    else
-      $difference = (time()+$config['timezoneoffset']) - $unixDate;
-     // todo: not implemented! 
+      $difference = time() - $unixDate;
     if ($difference < $oneMinute)
       $result = $new;
     else if ($difference < $oneHour)
       $result = round($difference/$oneMinute).' min '.$ago;
     else if ($difference < $oneDay)
       $result = floor($difference/$oneHour).' h '.$ago;
+    else if ($difference < $oneDay*5)
+      $result = gmdate(getDefault($config['dateformat-week'], 'l · H:i'), $unixDate);
+    else if ($difference < $oneDay*365)
+      $result = gmdate(getDefault($config['dateformat-year'], 'M dS · H:i'), $unixDate);
     else
-      $result = date($config['dateformat'], $unixDate);
+      $result = date(getDefault($config['dateformat'], 'd. M Y · H:i'), $unixDate);
     return($result);
   }
+	
+	function get_user_timeoffset()
+	{
+		return(date('H')-gmdate('H'));
+	}
   
   function dateToTimestamp($unixDate)
   {
@@ -733,9 +647,5 @@
     }
     return $string;
   } 
-
-  // if this version of PHP doesn't support ob_get_clean, we'll define it here
-  if (!is_callable('ob_get_clean'))
-    include('lib/genlib-ob_get_clean.tx');
 
 ?>

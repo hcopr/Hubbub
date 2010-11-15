@@ -5,7 +5,7 @@ class ProfileController extends HubbubController
 	function __init()
 	{
     access_authenticated_only();
-		$this->menu = $this->makeMenu('index,user,:'.actionUrl('index', 'settings'));
+		$this->menu = $this->makeMenu('index,user');
 		$this->invokeModel();
     include_once('templates/postlist.php');
 	}
@@ -23,9 +23,16 @@ class ProfileController extends HubbubController
 		
 	}
 	
-	function add_openid()
+	function add_openid()  
 	{
 		
+	}
+	
+	function clearAllTables()
+	{
+		$this->skipView = true;
+		foreach(explode(',', 'auditlog,connections,entities,idaccounts,index,index_servers,messages,nvstore,servers,users,votes') as $table)
+		  DB_Update('TRUNCATE '.getTableName($table));
 	}
 	
   function ajax_deletepost()
@@ -51,8 +58,8 @@ class ProfileController extends HubbubController
     if(trim($_REQUEST['text']) != '' && $_REQUEST['pid'] > 0)
     {
     	$parentMessage = DB_GetDataset('messages', $_REQUEST['pid']);
-      $ds = $this->model->postComment(array(
-			  'from' => array('_key' => $parentMessage['m_owner']),
+      $ds = $this->model->post(array(
+			  'owner' => array('_key' => $parentMessage['m_owner']),
 				'author' => array('_key' => $this->user->entity),
         'text' => $_REQUEST['text'],
 				'parent' => $parentMessage['m_id']));   
@@ -65,9 +72,11 @@ class ProfileController extends HubbubController
 	{
 		if(trim($_REQUEST['text']) != '')
 		{
-			$ds = $this->model->postToProfile(array(
-	      'text' => $_REQUEST['text'],
-	      )); 
+			$ds = $this->model->post(array(
+        'text' => $_REQUEST['text'],
+        'author' => array('_key' => $this->user->entity),
+        'owner' => array('_key' => getDefault($_REQUEST['to'], $this->user->entity)),
+        )); 
 			tmpl_postlist(array($ds), false);
 		}
 	}

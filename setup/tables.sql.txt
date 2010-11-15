@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.3
--- Generation Time: Oct 30, 2010 at 03:17 PM
+-- Generation Time: Nov 14, 2010 at 05:33 AM
 -- Server version: 5.1.45
 -- PHP Version: 4.4.8
 
@@ -42,10 +42,12 @@ CREATE TABLE `h2_connections` (
   `c_from` int(11) NOT NULL,
   `c_to` int(11) NOT NULL,
   `c_status` varchar(10) NOT NULL,
+  `c_group` int(11) NOT NULL,
   PRIMARY KEY (`c_key`),
   KEY `c_from` (`c_from`),
   KEY `c_to` (`c_to`),
-  KEY `c_status` (`c_status`)
+  KEY `c_status` (`c_status`),
+  KEY `c_group` (`c_group`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -103,6 +105,20 @@ CREATE TABLE `h2_index` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `h2_localgroups`
+--
+
+CREATE TABLE `h2_localgroups` (
+  `lg_key` int(11) NOT NULL AUTO_INCREMENT,
+  `lg_entity` int(11) NOT NULL,
+  `lg_name` varchar(128) NOT NULL,
+  PRIMARY KEY (`lg_key`),
+  KEY `lg_entity` (`lg_entity`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `h2_messages`
 --
 
@@ -118,7 +134,9 @@ CREATE TABLE `h2_messages` (
   `m_data` longblob NOT NULL,
   `m_compression` smallint(6) NOT NULL,
   `m_deleted` varchar(1) NOT NULL DEFAULT 'N',
+  `m_publish` varchar(1) NOT NULL DEFAULT 'N',
   `m_votehash` varchar(32) NOT NULL,
+  `m_localgroup` int(11) NOT NULL,
   PRIMARY KEY (`m_key`),
   KEY `m_id` (`m_id`),
   KEY `m_owner` (`m_owner`),
@@ -126,7 +144,8 @@ CREATE TABLE `h2_messages` (
   KEY `m_created` (`m_created`),
   KEY `m_changed` (`m_changed`),
   KEY `m_deleted` (`m_deleted`),
-  KEY `m_votehash` (`m_votehash`)
+  KEY `m_votehash` (`m_votehash`),
+  KEY `m_publish` (`m_publish`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -193,4 +212,3 @@ CREATE TABLE `h2_votes` (
   `v_count` int(11) NOT NULL,
   PRIMARY KEY (`v_msg`,`v_choice`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
