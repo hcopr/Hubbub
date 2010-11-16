@@ -1,4 +1,9 @@
 <?php
+/**
+ * Author: udo.schroeter@gmail.com
+ * Project: Hubbub2
+ * Description: provides the CQForm object that abstracts HTML forms
+ */
 
 class CQForm
 {

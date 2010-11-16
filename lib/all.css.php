@@ -1,4 +1,9 @@
 <?
+/**
+ * Author: udo.schroeter@gmail.com
+ * Project: Hubbub2
+ * Description: combines CSS files for output to optimize browser loading
+ */
 
 header('content-type: text/css; charset=UTF-8');
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");

@@ -1,18 +1,9 @@
 <?php
-
-/* File:    databasephp: the central database layer of the CMS
- * Type:    CMS function library
- * Author:  udo.schroeter@gmail.com
- * License: commercially licensed as part of the CMS package
- * Todo:    /
- * Changes: -
+/**
+ * Author: udo.schroeter@gmail.com
+ * Project: Hubbub2
+ * Description: functional MySQL database wrapper (provides functions that have the prefix DB_*)
  */
-global $config, $db_link;
-$DB_HOST = cfg('db.host');
-$DB_USER = cfg('db.user');
-$DB_PASS = cfg('db.password');
-$DB_NAME = cfg('db.database');
-$GLOBALS['db_link'] = $db_link;
 
 $DBERR = '';
 
@@ -77,12 +68,11 @@ function MakeNamesList(&$ds)
 function MakeValuesList(&$ds)
 {
   $result = '';
-  global $db_link;
   if (sizeof($ds) > 0)
     foreach ($ds as $k => $v)
     {
       if ($k!='')
-        $result = $result.',"'.mysql_real_escape_string($v, $db_link).'"';
+        $result = $result.',"'.mysql_real_escape_string($v, $GLOBALS['db_link']).'"';
     }
   return substr($result,1);
 }
@@ -167,16 +157,15 @@ function DB_ListFields($tablename)
 // gets a list of keys for the table
 function DB_GetKeys($tablename)
 {
-  global $db_link;
   checkTableName($tablename);
   if (cfg('db.keys.'.$tablename)) return(cfg('db.keys.'.$tablename));
-  if ($db_link != null)
+  if ($GLOBALS['db_link'] != null)
   {
     if (!isset($GLOBALS['dbkeytmp'][$tablename]))
     {
       $pk = Array();
       $sql = 'SHOW KEYS FROM `'.$tablename.'`';
-      $res = mysql_query($sql, $db_link) or $DBERR = (mysql_error().'{ '.$sql.' }');
+      $res = mysql_query($sql, $GLOBALS['db_link']) or $DBERR = (mysql_error().'{ '.$sql.' }');
       if (trim($DBERR)!='') logError('error_sql', $DBERR);
       
 			while ($row = @mysql_fetch_assoc($res))
@@ -257,9 +246,6 @@ function DB_Select($table, $params)
 // updates/creates the $dataset in the $tablename
 function DB_UpdateDataset($tablename, &$dataset, $keyvalue = null, $keyname = null, $options = array())
 {
-  global $db_link;
-  //DB_ProfileCall('UPDATE '.$tablename);
-
   checkTableName($tablename);
   $keynames = DB_GetKeys($tablename);
   if ($keyname == null)
@@ -286,9 +272,9 @@ function DB_UpdateDataset($tablename, &$dataset, $keyvalue = null, $keyname = nu
   $query='REPLACE INTO '.$tablename.' ('.MakeNamesList($pureData).
       ') VALUES('.MakeValuesList($pureData).');';
   
-  mysql_query($query, $db_link) or $DBERR = (mysql_error().'{ '.$query.' }');
+  mysql_query($query, $GLOBALS['db_link']) or $DBERR = (mysql_error().'{ '.$query.' }');
   if (trim($DBERR)!='') logError('error_sql', $DBERR);
-  $dataset[$keyname] = getDefault($dataset[$keyname], mysql_insert_id($db_link));
+  $dataset[$keyname] = getDefault($dataset[$keyname], mysql_insert_id($GLOBALS['db_link']));
   $pureData[$keyname] = $dataset[$keyname];
   
   if(cfg('db.searchtable'))
@@ -301,8 +287,7 @@ function DB_UpdateDataset($tablename, &$dataset, $keyvalue = null, $keyname = nu
 // get all the tables in the current database
 function DB_GetTables()
 {
-  global $db_link, $DB_NAME, $DBERR;
-  $result = mysql_list_tables($DB_NAME, $db_link);
+  $result = mysql_list_tables(cfg('db.database'), $GLOBALS['db_link']);
   $tableList = array();
   while ($row = mysql_fetch_row($result))
       $tableList[$row[0]] = $row[0];
@@ -333,11 +318,9 @@ function DB_GetDatasetMatch($table, $matchOptions, $fillIfEmpty = true, $noMatch
 // from table $tablename, get dataset with key $keyvalue
 function DB_GetDataSet($tablename, $keyvalue, $keyname = null, $options = array())
 {
-  global $db_link;
-
   $fields = @$options['fields'];
   $fields = getDefault($fields, '*'); 
-  if (!$db_link) return(array());
+  if (!$GLOBALS['db_link']) return(array());
   if (@$options['nocache'] == true && cfg('db.usecache')) 
   {
     unset($GLOBALS['dbtmp'][$tablename][$keyname.'.'.$keyvalue]); 
@@ -357,8 +340,8 @@ function DB_GetDataSet($tablename, $keyvalue, $keyname = null, $options = array(
 
       $query = 'SELECT '.$fields.' FROM '.$tablename.' '.$options['join'].' WHERE '.$keyname.'="'.
         mysql_escape_string($keyvalue).'";';
-      $rs = mysql_query($query, $db_link)
-        or $DBERR = mysql_error($db_link).' { Query: "'.$query.'" }';
+      $rs = mysql_query($query, $GLOBALS['db_link'])
+        or $DBERR = mysql_error($GLOBALS['db_link']).' { Query: "'.$query.'" }';
       
       if ($DBERR != '') logError('error_sql', $DBERR);
 
@@ -386,7 +369,6 @@ function DB_GetDataSet($tablename, $keyvalue, $keyname = null, $options = array(
 function DB_RemoveDataset($tablename, $keyvalue, $keyname = null)
 {
   //DB_ProfileCall('REMOVE DATASET '.$tablename.' '.$keyvalue);
-  global $db_link;
   checkTableName($tablename);
   if ($keyname == null)
   {
@@ -395,8 +377,8 @@ function DB_RemoveDataset($tablename, $keyvalue, $keyname = null)
   }
 
   $rs = mysql_query('DELETE FROM '.$tablename.' WHERE '.$keyname.'="'.
-  mysql_real_escape_string($keyvalue, $db_link).'";', $db_link)
-    or $DBERR = mysql_error($db_link).'{ '.$query.' }';
+  mysql_real_escape_string($keyvalue, $GLOBALS['db_link']).'";', $GLOBALS['db_link'])
+    or $DBERR = mysql_error($GLOBALS['db_link']).'{ '.$query.' }';
   if (trim($DBERR)!='') logError('error_sql', $DBERR);
 }
 
@@ -427,12 +409,10 @@ function DB_ParseQueryParams($query, $parameters = null)
 // retrieve dataset identified by SQL $query
 function DB_GetDataSetWQuery($query, $parameters = null)
 {
-  global $DBTID, $db_link;
-
   $query = DB_ParseQueryParams($query, $parameters);
 
-  $rs = mysql_query($query, $db_link)
-    or $DBERR = mysql_error($db_link).'{ '.$query.' }';
+  $rs = mysql_query($query, $GLOBALS['db_link'])
+    or $DBERR = mysql_error($GLOBALS['db_link']).'{ '.$query.' }';
 
   if (trim($DBERR)!='') logError('error_sql', $DBERR);
 	
@@ -450,7 +430,6 @@ function DB_GetDataSetWQuery($query, $parameters = null)
 // execute a simple update $query
 function DB_Update($query, $parameters = null)
 {
-  global $db_link;
   $query = trim($query);
   $query = DB_ParseQueryParams($query, $parameters);
   if (substr($query, -1, 1) == ';')
@@ -464,13 +443,12 @@ function DB_Update($query, $parameters = null)
 // get a list of datasets matching the $query
 function DB_GetList($query, $parameters = null, $opt = array())
 {
-  global $db_link;
   $result = array();
   $error = '';
 
   $query = DB_ParseQueryParams($query, $parameters);
 
-  $lines = mysql_query($query, $db_link) or $error = mysql_error($db_link).'{ '.$query.' }';
+  $lines = mysql_query($query, $GLOBALS['db_link']) or $error = mysql_error($GLOBALS['db_link']).'{ '.$query.' }';
 
   if (trim($error) != '')
   {
@@ -498,11 +476,11 @@ function DB_GetList($query, $parameters = null, $opt = array())
 
 profile_point('DB_Init(parse)');
 ob_start();
-$db_link = @mysql_connect($DB_HOST, $DB_USER, $DB_PASS) or
-  $DBERR = 'The database connection to server '.$DB_USER.'@'.$DB_HOST.' could not be established (code: '.@mysql_error($db_link).')';
+$GLOBALS['db_link'] = @mysql_connect(cfg('db.host'), cfg('db.user'), cfg('db.password')) or
+  $DBERR = 'The database connection to server '.cfg('db.user').'@'.cfg('db.host').' could not be established (code: '.@mysql_error($GLOBALS['db_link']).')';
 
-@mysql_select_db($DB_NAME, $db_link) or
-  $DBERR = 'The database connection to database '.$DB_NAME.' on '.$DB_USER.'@'.$DB_HOST.' could not be established. (code: '.@mysql_error($db_link).')';
+@mysql_select_db(cfg('db.database'), $GLOBALS['db_link']) or
+  $DBERR = 'The database connection to database '.cfg('db.database').' on '.cfg('db.user').'@'.cfg('db.host').' could not be established. (code: '.@mysql_error($GLOBALS['db_link']).')';
 
 profile_point('DB_Init(mysql_connect)');
 ob_get_clean();
@@ -515,7 +493,7 @@ if ($DBERR != '')
 }
 else
 {
-  mysql_query("SET NAMES 'utf8'", $db_link);
+  mysql_query("SET NAMES 'utf8'", $GLOBALS['db_link']);
 }
 
 ?>

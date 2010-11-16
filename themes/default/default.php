@@ -63,7 +63,7 @@
         <?
 				}
 				?><td width="*" valign="top">
-          <div id="content"><?php echo $GLOBALS['content']['main'] ?></div>
+          <div id="content"><?php echo $GLOBALS['content.startuperrors'].$GLOBALS['content']['main'] ?></div>
         </td>
         <!--<td width="200" valign="top">
           <span style="color:gray"><?php
