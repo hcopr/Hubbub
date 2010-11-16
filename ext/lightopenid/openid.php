@@ -134,6 +134,36 @@ class LightOpenID
 
     protected function request($url, $method='GET', $params=array())
     {
+      $rq = cqrequest($url, $params, 5, true, $method == 'HEAD');
+      
+      if($method == 'HEAD')
+      {
+        foreach($rq['headers'] as $name => $header) {
+          $name = strtolower($name);
+          $headers[$name] = trim($header);
+          
+          # Following possible redirections. The point is just to have
+          # claimed_id change with them, because get_headers() will
+          # follow redirections automatically.
+          # We ignore redirections with relative paths.
+          # If any known provider uses them, file a bug report.
+          if($name == 'location') {
+              if(strpos($headers[$name], 'http') === 0) {
+                  $this->claimed_id = $headers[$name];
+              } elseif($headers[$name][0] == '/') {
+                  $parsed_url = parse_url($this->claimed_id);
+                  $this->claimed_id = $parsed_url['scheme'] . '://'
+                                    . $parsed_url['host']
+                                    . $headers[$name];
+              }
+          }
+        }        
+
+        return $headers;
+      }
+      
+      return($rq['body']);
+             
         if(!$this->hostExists($url)) {
             throw new ErrorException('Invalid request.');
         }

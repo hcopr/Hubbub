@@ -6,7 +6,7 @@ if($link) mysql_select_db($_REQUEST['database']);
 
 $icon = 'database';
 
-$_SESSION['install'] = $_REQUEST;
+$_SESSION['installer']['database'] = $_REQUEST;
 unset($_SESSION['install']['cmd']);
 
 if($link && $_REQUEST['cmd'] == 'installtables')

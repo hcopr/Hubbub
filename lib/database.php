@@ -476,7 +476,7 @@ function DB_GetList($query, $parameters = null, $opt = array())
 
 profile_point('DB_Init(parse)');
 ob_start();
-$GLOBALS['db_link'] = @mysql_connect(cfg('db.host'), cfg('db.user'), cfg('db.password')) or
+$GLOBALS['db_link'] = @mysql_pconnect(cfg('db.host'), cfg('db.user'), cfg('db.password')) or
   $DBERR = 'The database connection to server '.cfg('db.user').'@'.cfg('db.host').' could not be established (code: '.@mysql_error($GLOBALS['db_link']).')';
 
 @mysql_select_db(cfg('db.database'), $GLOBALS['db_link']) or

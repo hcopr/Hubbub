@@ -61,6 +61,8 @@
   // include the server-specific config
   if(file_exists('conf/'.$_SERVER['HTTP_HOST'].'.php'))
     require('conf/'.$_SERVER['HTTP_HOST'].'.php');
+  else if(file_exists('conf/default.php'))
+    require('conf/default.php');
 	else
 	{
 	  // if no server-specific config was found, load the installer

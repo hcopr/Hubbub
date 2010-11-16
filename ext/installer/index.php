@@ -1,6 +1,6 @@
 <?
 
-  h2_errorhandler(-1, 'Server-specific config file missing (domain '.$_SERVER['SERVER_NAME'].')', __FILE__, 0);
+  h2_errorhandler(-1, 'Server-specific config file missing (domain '.$_SERVER['HTTP_HOST'].')', __FILE__, 0);
 
 ?>
 <br/>

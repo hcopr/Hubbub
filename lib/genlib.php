@@ -54,7 +54,7 @@ function WriteToFile($filename, $content)
   $open = fopen($filename, 'a+');
   fwrite($open, $content);
   fclose($open);
-  chmod($filename, 0666);
+  chmod($filename, 0660);
 }
 
 // standard logging function (please log only to the log/ folder)
@@ -340,13 +340,14 @@ function dumpArray(&$array)
 }
 
 /* makes a GET or POST request to an URL */
-function cqrequest($url, $post = array(), $timeout = 2, $headerMode = true)
+function cqrequest($url, $post = array(), $timeout = 2, $headerMode = true, $onlyHeaders = false)
 {
   $ch = curl_init();
   $resheaders = array();
   $resbody = array();
   curl_setopt($ch, CURLOPT_URL, $url);
   if(sizeof($post)>0) curl_setopt($ch, CURLOPT_POST, 1);
+  if($onlyHeaders) curl_setopt($ch, CURLOPT_NOBODY, 1);
 
   // this is a workaround for a parameter bug that prevents params starting with an @ from working correctly
   foreach($post as $k => $v) if(substr($v, 0, 1) == '@') $post[$k] = '\\'.$v;

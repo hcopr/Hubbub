@@ -20,9 +20,13 @@ $onChange = 'checkFields();';
 $surl = parse_url($_SERVER['HTTP_REFERER']);
 $port = ($surl['port'] == '' || $surl['port'] == 80) ? '' : ':'.$surl['port'];
 $sbase = $surl['host'].$port.$surl['path'];
+$sbase = getDefault($sbase, $_SESSION['installer']['server_base']);
+if(substr($sbase, -1) == '/') $sbase = substr($sbase, 0, -1);
 
 $form->add('string', 'hosturl', 'Server URL', array('default' => $sbase, 'onchange' => $onChange, 
   'infomarker' => '^ This address must be publicly available via HTTP'));
+$form->add('string', 'adminpw', 'Admin password', array('default' => substr(base64_encode(md5(time())), 0, 8), 'onchange' => $onChange, 
+  'infomarker' => '^ Please make a note of your admin password'));
 
 $form->add('button', 'btn', 'Check', array('onclick' => $onChange));
 
@@ -38,7 +42,7 @@ $form->display();
   function checkFields(parm)
   {
     $('#db_check').html('<img src="themes/default/ajax-loader.gif"/>');
-    $.post('?p=step2_check', {'cmd' : parm, 'serverurl' : $('#fld_hosturl').val(), 'path' : '<?= $surl['path'] ?>'}, function(data)
+    $.post('?p=step2_check', {'cmd' : parm, 'apwd' : $('#fld_adminpw').val(), 'serverurl' : $('#fld_hosturl').val(), 'path' : '<?= $surl['path'] ?>'}, function(data)
       {
         $('#db_check').html(data);        
       }
