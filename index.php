@@ -2,7 +2,7 @@
 
   require('lib/genlib.php');
   require('lib/hubbub2.php');
-  require('conf/config.php'); 
+  require('lib/config.php'); 
   require('lib/database.php'); 
 
   init_hubbub_environment();
