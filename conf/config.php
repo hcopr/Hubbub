@@ -53,13 +53,22 @@
 		'maxaccounts' => 30,
 		'currentusers' => 1,
 		// the Hubbub server URL, please change this if your Hubbub instance is running in a subdirectory
-		'server' => $_SERVER['SERVER_NAME'],
+		'server' => $_SERVER['HTTP_HOST'],
     );
   $GLOBALS['config']['page']['template'] = 'default';
 		
   // include the server-specific config
-  if(file_exists('conf/'.$_SERVER['SERVER_NAME'].'.php'))
-    require('conf/'.$_SERVER['SERVER_NAME'].'.php');
+  if(file_exists('conf/'.$_SERVER['HTTP_HOST'].'.php'))
+    require('conf/'.$_SERVER['HTTP_HOST'].'.php');
 	else
-    die(h2_errorhandler(-1, 'Server-specific config file missing (domain '.$_SERVER['SERVER_NAME'].')', __FILE__, 0));
+	{
+	  if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/')
+	    interpretQueryString($_SERVER['REQUEST_URI']);    
+    ob_start();
+    $GLOBALS['config']['page']['title'] = 'Install';
+    include('ext/installer/'.getDefault(getDefault($_REQUEST['p'], $_REQUEST['controller']), 'index').'.php');
+    $GLOBALS['content']['main'] = ob_get_clean();
+    include('themes/default/default.php');
+    die();
+  }
 ?>

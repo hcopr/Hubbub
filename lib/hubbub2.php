@@ -110,6 +110,7 @@
 	// replaces the standard PHP error handler, mainly because we want a stack trace
   function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
   {
+    if($GLOBALS['errorhandler_ignore']) return;
     $bt = debug_backtrace();
     ?><div class="errormsg" style="border: 1px solid red; padding: 8px; font-size: 8pt; font-family: consolas; background: #ffffe0;">
       <b>Hubbub Runtime Error: <br/><span style="color: red"><?php echo $errstr ?></span></b><br/>
@@ -121,10 +122,6 @@
         if(cfg('debug.showparams') && is_array($trace['args'])) print(implode(', ', $trace['args']));
         print(') in '.$trace['file'].' | Line '.$trace['line'].'<br/>');
       }
-      /*ob_start();
-      print_r($bt);
-      $report = ob_get_clean();*/
-			
     ?></div><?php
     if(cfg('debug.verboselog')) logToFile('log/error.php.log', $report);
     return(true);

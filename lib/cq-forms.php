@@ -166,7 +166,8 @@ class CQForm
       $properties = $caption;
       $caption = ''; 
     }
-    $properties['caption'] = getDefault($caption, $GLOBALS['currentcontroller']->l10n($name, '', true));
+    if(is_object($GLOBALS['currentcontroller'])) $l10nCaption = $GLOBALS['currentcontroller']->l10n($name, '', true);
+    $properties['caption'] = getDefault($caption, $l10nCaption);
     $properties['name'] = $name;
     $properties['type'] = getDefault($type, 'string');
     $elname = md5($name); $ectr = 1;

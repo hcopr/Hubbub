@@ -315,3 +315,21 @@ h1 span {
 .blurp_excerpt {
 	margin-left: 16px;
 }
+.result_box {
+  padding: 12px;
+  margin-top: 8px;
+  border: 1px solid #ac8;
+  background: #ffe; 
+  border-radius: 16px;
+  -moz-border-radius: 16px;
+}
+.green {
+  color: green;
+}
+.gray {
+  color: gray;
+}
+.red {
+  color: red;
+}
+

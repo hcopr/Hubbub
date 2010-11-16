@@ -326,6 +326,16 @@ function tableform_submit($p, &$form)
   ?></td></tr><?php  
 }
 
+function tableform_button($p, &$form)
+{
+	?><tr><td valign="top" class="form-td-caption">&nbsp;</td><td>
+	<?php 
+  $fvals = array();
+  ?><input type="button" name="btn<?= $el['name'] ?>" value="<?php echo $p['caption'] ?>"
+    onclick="<?= $p['onclick'] ?>"/><?php 
+  ?></td></tr><?php  
+}
+
 function tableform_end($p, &$form)
 {
   foreach ($p['params'] as $k => $v)

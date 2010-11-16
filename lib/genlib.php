@@ -76,7 +76,7 @@
     $open = fopen($filename, 'a+');
     fwrite($open, $content);
     fclose($open);
-    chmod($filename, 0777);
+    chmod($filename, 0666);
   }
 
   // standard logging function (please log only to the log/ folder)
@@ -425,35 +425,38 @@
 	  return (str_replace("\n", "\r\n", ob_get_clean()));
 	}
 	
-	function cqrequest($url, $post, $timeout = 2, $headerMode = true)
+	function cqrequest($url, $post = array(), $timeout = 2, $headerMode = true)
 	{
 	  $ch = curl_init();
 	  $resheaders = array();
 	  $resbody = array();
 	  curl_setopt($ch, CURLOPT_URL, $url);
-	  curl_setopt($ch, CURLOPT_POST, 1);
+	  if(sizeof($post)>0) curl_setopt($ch, CURLOPT_POST, 1);
 	
 	  foreach($post as $k => $v)
 	    if(substr($v, 0, 1) == '@')
 	      $post[$k] = '\\'.$v;
 	
 	  curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
-	  curl_setopt($ch, CURLOPT_HEADER, 1);  
+	  if($headerMode) curl_setopt($ch, CURLOPT_HEADER, 1);  
 	  curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); 
 	  curl_setopt($ch, CURLOPT_RETURNTRANSFER  ,1);  // RETURN THE CONTENTS OF THE CALL
 	
 	  $result = curl_exec($ch);
-	  curl_close ($ch);
+	  curl_close($ch);
+	  
+	  $resBody = '';
 	  
 	  foreach(explode(chr(13), $result) as $line)
 	  {
 	    $line = trim($line);
 	    if($line == '')
 	    {
-	      if($ignoreELine != true) $headerMode = false;
-	      $ignoreELine = false;
+	      //if($ignoreELine) 
+	      $headerMode = false;
+	      //$ignoreELine = true;
 	    }
-	    else if ($headerMode)
+	    if ($headerMode)
 	    {
 	      if(substr($line, 0, 4) == 'HTTP')
 	      {
@@ -477,7 +480,7 @@
 	  return(array(
 	    'result' => $resheaders['code'],
 	    'headers' => $resheaders,
-	    'body' => $resbody));
+	    'body' => $resBody));
 	}
 	
   $config['site']['dateformat'] = getDefault(

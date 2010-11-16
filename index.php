@@ -1,11 +1,12 @@
 <?php
 
-  ob_start("ob_gzhandler");
   require('lib/genlib.php');
   require('lib/hubbub2.php');
   require('conf/config.php'); 
   require('lib/database.php'); 
+
   init_hubbub_environment();
+  ob_start("ob_gzhandler");
 	
 	$baseCtr = getController(getDefault($_REQUEST['controller'], cfg('service.defaultcontroller')));
 	invokeAction($baseCtr, $_REQUEST['action']);
