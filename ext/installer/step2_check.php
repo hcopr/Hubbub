@@ -16,7 +16,7 @@ $prettyUrls = $capData['controller'] == 'checkenv1';
 @unlink('.htaccess');
 @WriteToFile('.htaccess', '<IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteBase '.$_REQUEST['path'].'
+  RewriteBase '.$_REQUEST['path'].'/
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule . index.php [L]

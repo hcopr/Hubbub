@@ -24,6 +24,15 @@ ob_start();
 	
 <?
 $GLOBALS['content']['pane'] = ob_get_clean();
+
+if($_SESSION['msg'])
+{
+  ?><div class="banner fail">
+    <?= $_SESSION['msg'] ?>
+  </div><?
+  unset($_SESSION['msg']);
+}
+
 ?>
 <div id="more">
 	<div class="pretentious_citation">

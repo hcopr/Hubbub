@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.3
--- Generation Time: Nov 14, 2010 at 05:33 AM
+-- Generation Time: Nov 17, 2010 at 03:45 PM
 -- Server version: 5.1.45
 -- PHP Version: 4.4.8
 
@@ -43,6 +43,7 @@ CREATE TABLE `h2_connections` (
   `c_to` int(11) NOT NULL,
   `c_status` varchar(10) NOT NULL,
   `c_group` int(11) NOT NULL,
+  `c_auto_approve` varchar(1) NOT NULL DEFAULT 'Y',
   PRIMARY KEY (`c_key`),
   KEY `c_from` (`c_from`),
   KEY `c_to` (`c_to`),
@@ -65,6 +66,7 @@ CREATE TABLE `h2_entities` (
   `pic` varchar(128) NOT NULL,
   `name` varchar(128) NOT NULL,
   `_local` varchar(1) NOT NULL,
+  `_serverkey` int(11) NOT NULL,
   PRIMARY KEY (`_key`),
   KEY `_username` (`user`),
   KEY `_local` (`_local`),
@@ -97,9 +99,21 @@ CREATE TABLE `h2_idaccounts` (
 --
 
 CREATE TABLE `h2_index` (
-  `i_userkey` int(11) NOT NULL,
+  `i_entitykey` int(11) NOT NULL,
   `i_msgkey` int(11) NOT NULL,
-  PRIMARY KEY (`i_userkey`,`i_msgkey`)
+  PRIMARY KEY (`i_entitykey`,`i_msgkey`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `h2_index_servers`
+--
+
+CREATE TABLE `h2_index_servers` (
+  `si_serverkey` int(11) NOT NULL,
+  `si_msgkey` int(11) NOT NULL,
+  PRIMARY KEY (`si_serverkey`,`si_msgkey`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -137,6 +151,7 @@ CREATE TABLE `h2_messages` (
   `m_publish` varchar(1) NOT NULL DEFAULT 'N',
   `m_votehash` varchar(32) NOT NULL,
   `m_localgroup` int(11) NOT NULL,
+  `m_tag` varchar(1) NOT NULL,
   PRIMARY KEY (`m_key`),
   KEY `m_id` (`m_id`),
   KEY `m_owner` (`m_owner`),
@@ -145,7 +160,8 @@ CREATE TABLE `h2_messages` (
   KEY `m_changed` (`m_changed`),
   KEY `m_deleted` (`m_deleted`),
   KEY `m_votehash` (`m_votehash`),
-  KEY `m_publish` (`m_publish`)
+  KEY `m_publish` (`m_publish`),
+  KEY `m_tag` (`m_tag`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

@@ -1,4 +1,5 @@
 <?
+
     $myOldUsername = $this->user->getUsername();
     
     $ctr = 1;

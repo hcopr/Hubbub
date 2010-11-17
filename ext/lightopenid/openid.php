@@ -134,7 +134,8 @@ class LightOpenID
 
     protected function request($url, $method='GET', $params=array())
     {
-      $rq = cqrequest($url, $params, 5, true, $method == 'HEAD');
+      if($method != 'POST') $get_params = '?'.http_build_query($params, '', '&');
+      $rq = cqrequest($url.$get_params, ($method == 'POST') ? $params : array(), 5, true, $method == 'HEAD');
       
       if($method == 'HEAD')
       {
@@ -300,7 +301,7 @@ class LightOpenID
         for ($i = 0; $i < 5; $i ++) {
             if ($yadis) {
                 $headers = $this->request($url, 'HEAD');
-
+                #print_r($headers);
                 $next = false;
                     if (isset($headers['x-xrds-location'])) {
                         $url = $this->build_url(parse_url($url), parse_url(trim($headers['x-xrds-location'])));
@@ -375,6 +376,8 @@ class LightOpenID
             }
 
             if (!$content) $content = $this->request($url, 'GET');
+            
+            print('server: '.$server.$content);
 
             # At this point, the YADIS Discovery has failed, so we'll switch
             # to openid2 HTML discovery, then fallback to openid 1.1 discovery.
@@ -549,6 +552,7 @@ class LightOpenID
      */
     function validate()
     {
+        if(sizeof($this->data)==0) $this->data = $_REQUEST;
         $this->claimed_id = isset($this->data['openid_claimed_id'])?$this->data['openid_claimed_id']:$this->data['openid_identity'];
         $params = array(
             'openid.assoc_handle' => $this->data['openid_assoc_handle'],
@@ -588,9 +592,8 @@ class LightOpenID
         }
 
         $params['openid.mode'] = 'check_authentication';
-
+        
         $response = $this->request($server, 'POST', $params);
-
         return preg_match('/is_valid\s*:\s*true/i', $response);
     }
     

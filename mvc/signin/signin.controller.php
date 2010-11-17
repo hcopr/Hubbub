@@ -53,6 +53,8 @@ class SigninController extends HubbubController
       }
 			else
 			{
+			  $_SESSION['msg'] = 'Something went wrong when signing in with OpenID.';
+			  #logToFile('log/openid.error.log', $_REQUEST);
 				$this->redirect('index', 'signin');
 			}
 		}
