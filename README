@@ -1,19 +1,20 @@
-This is the Hubbub2 repository. For more information on this project, please
-refer to http://hubbub.at or email me if you got questions and comments:
-udo.schroeter@gmail.com
+This is the Hubbub2 repository. For more information on this project, please refer to 
+http://hubbub.at or email me if you got questions and comments: udo.schroeter@gmail.com
 
 Prototype:
-The source code for the protoype is no longer available, let's pretend it never
-existed. It was horrible, and hence true to its purpose, which it served well.
+The source code for the protoype is no longer available, let's pretend it never existed. 
+It was horrible, and hence true to its purpose, which it served well.
 
 Installation:
-Please don't install this, yet. It doesn't work. When it starts working, this
-message will change. But if you must, pull down the repository and execute the
-  > setup/tables.sql 
-script. Then clone the example config file in 
-  > conf/example.com.php
-and rename it to whatever your server name (domain) is. If you have no idea what
-your server name is, look at the $_SERVER['SERVER_NAME'] variable. If you install
-Hubbub in a subdirectory within your domain (like http://bob.com/hubbub), you 
-should open the .htaccess file and change the RewriteBase line to whatever your
-subdirectory is. All done! Yes, we will try to automate this, but it'll be a while.
+Please don't install this, yet. It doesn't work. When it starts working, this message will
+change. But if you must, pull down the repository and execute the installer by opening up
+the pertinent location in your browser. Follow the instructions.
+
+A word about "pretty" URLs:
+We are using the standard URL rewrite rule that Wordpress uses (RewriteRule . index.php [L]),
+this maps an arbitrary URL and hands it over to index.php. 
+On Apache, the necessary .htaccess file is created automatically by the installer, please 
+make sure mod_rewrite is enabled in your config.
+On NGINX, you can simply insert or modify the try_files directive in your nginx.conf to
+include index.php (plus the path to your installation if needed):
+  try_files $uri $uri/ index.php;
