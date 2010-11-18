@@ -32,7 +32,7 @@ $GLOBALS[\'config\'][\'db\'] = array(
 
 $GLOBALS[\'config\'][\'service\'][\'adminpw\'] = \''.$c['admin_password'].'\';
 $GLOBALS[\'config\'][\'service\'][\'server\'] = \''.$c['server_base'].'\';
-$GLOBALS[\'config\'][\'service\'][\'url_rewrite\'] = \''.($c['enable_rewrite'] ? 'true' : 'false').'\';
+$GLOBALS[\'config\'][\'service\'][\'url_rewrite\'] = '.($c['enable_rewrite'] ? 'true' : 'false').';
 
 /** Twitter Connector:
  * Uncomment this to allow login via Twitter. If you want your users to be able

@@ -12,7 +12,7 @@ function init_hubbub_environment()
     interpretQueryString($_SERVER['REQUEST_URI']);    
 	$GLOBALS['obj']['user'] = new HubbubUser();
 	
-	switch($GLOBALS['obj']['user']->lang)
+	switch(object('user')->lang)
 	{
     case('en'): {
       $GLOBALS['l10n'] = array(
@@ -58,7 +58,7 @@ function init_hubbub_environment()
 
 function l10n($s)
 {
-  if(is_object($GLOBALS['obj']['controller'])) return($GLOBALS['obj']['controller']->l10n($s));
+  if(is_object(object('controller'))) return(object('controller')->l10n($s));
 }
 
 /* retrieve a config value (don't use $GLOBALS['config'] directly if possible) */
@@ -287,7 +287,7 @@ class HubbubUser
 	  $this->server = new HubbubServer(cfg('service.server'), true);
 		$this->loadEntity();
 		$this->entityDS['user'] = safename($username);
-		$this->entityDS['url'] = getDefault($this->entityDS['url'], $GLOBALS['config']['service']['server'].'/'.$username);
+		$this->entityDS['url'] = getDefault($this->entityDS['url'], cfg('service.server').'/'.(cfg('service.url_rewrite')?'':'?').$username);
 		$this->entityDS['_local'] = 'Y';
 		$this->entityDS['_serverkey'] = $this->server->ds['s_key'];
 		$this->entityDS['server'] = cfg('service.server');

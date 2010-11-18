@@ -10,7 +10,7 @@ $GLOBALS['config']['db'] = array(
 
 $GLOBALS['config']['service']['adminpw'] = 'Y2EwZTRl';
 $GLOBALS['config']['service']['server'] = 'hubme.net';
-$GLOBALS['config']['service']['url_rewrite'] = 'true';
+$GLOBALS['config']['service']['url_rewrite'] = true;
 
 /** Twitter Connector:
  * Uncomment this to allow login via Twitter. If you want your users to be able

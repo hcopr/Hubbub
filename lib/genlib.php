@@ -95,49 +95,13 @@ function selfUrl($options = array())
 /* takes a query string or request_uri and parses it for parameters */
 function interpretQueryString($qs)
 {
-  // todo: this is horrible and needs to be cleaned up 
-  $scriptDirSeg = explode('/', $_SERVER['SCRIPT_NAME']);
-  for($a = 0; $a < getDefault($_ENV['dirlevels'], 1); $a++) unset($scriptDirSeg[sizeof($scriptDirSeg)-1]);
-  $scriptDir = implode('/', $scriptDirSeg);
-  
-  if (strlen($scriptDir)>0)
-  $qs = substr($qs, strlen($scriptDir));
-  
-  $GLOBALS['config']['page']['base'] = 'http://'.$_SERVER['HTTP_HOST'];
-  if ($_SERVER['SERVER_PORT'] != 80) $GLOBALS['config']['page']['base'] .= ':'.$_SERVER['SERVER_PORT'];
-  $GLOBALS['config']['page']['base'] .= $scriptDir.'/';
-
-  if (substr($qs, 0, 1) == '/' && substr($qs, 0, 2) != '/?')
-  {
-    if (strpos($qs, '?') > 0)
-    {
-      $sc = CutSegment('?', $qs);
-      parse_str($qs, $p);
-      foreach($p as $k => $v)
-      $_REQUEST[$k] = $v;
-      $qs = $sc;      
-    }
-    
-    $seg = explode('-', substr($qs, 1));
-    $config['url_segments'] = $seg;
-    $_REQUEST['controller'] = getDefault($seg[0]);
-    $_REQUEST['action'] = getDefault($seg[1]);
-    unset($seg[1]);
-    unset($seg[0]);
-    $k = null;
-    foreach ($seg as $s)
-    {
-      if ($k == null) 
-      {
-        $k = $s;  
-      }
-      else
-      {
-        $_REQUEST[$k] = $s;
-        $k = null;
-      }
-    }
-  }
+  $qs = getDefault($_SERVER['QUERY_STRING'], substr($_SERVER['REQUEST_URI'], 1));
+  while($qs[0] == '?' || $qs[0] == '/') $qs = substr($qs, 1);
+  $call = explode('-', CutSegment('?', $qs));
+  parse_str($qs, $rq);
+  foreach($rq as $k => $v) $_REQUEST[$k] = $v;    
+  $_REQUEST['controller'] = getDefault($call[0], cfg('service.defaultcontroller'));
+  $_REQUEST['action'] = getDefault($call[1], cfg('service.defaultaction'));
 }
 
 /* makes hidden field form params from current URL */
@@ -188,22 +152,20 @@ function send_mail($to, $template, $params = array())
 
 /* makes an URL calling a specific controller with a specific action */
 function actionUrl($action = '', $controller = '', $params = array())
-{
-  $controller = getDefault($controller, $_REQUEST['controller']);
-  $controller = getDefault($controller, cfg('service.defaultcontroller'));
-  $action = getDefault($action, $_REQUEST['action']);
-  $action = getDefault($action, cfg('service.defaultaction'));    
-  
-  if (!is_array($params))
-    $params = stringParamsToArray($params);
-  
+{ 
   $p = '';
-  if(sizeof($params) > 0) $p = '?'.http_build_query($params);
-  
-  // the only reason we're including site.base here is that there's
-  // a bug in IE that causes the browser to ignore the BASE tag
-  // when javascript document.location is used :-(
-  return(cfg('service.base').$controller.'-'.$action.$p);
+  if (!is_array($params)) $params = stringParamsToArray($params);
+  $controller = getDefault($controller, $_REQUEST['controller']);
+  $action = getDefault($action, $_REQUEST['action']);
+  if(sizeof($params) > 0) $p = '?'.http_build_query($params);  
+  if($GLOBALS['config']['service']['url_rewrite'])
+  {
+    return(cfg('service.base').$controller.'-'.$action.$p);
+  }
+  else 
+  {
+    return(cfg('service.base').'?'.$controller.'-'.$action.$p);
+  }  
 }
 
 /* internal function needed to parse parameters in the form of "p1=bla,p2=blub" into a proper array */
