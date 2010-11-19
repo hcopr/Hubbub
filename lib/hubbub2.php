@@ -602,7 +602,7 @@ class HubbubMessage
 		{
 			$this->payload = json_encode($this->data);
 			$packedData = gzdeflate($this->payload);
-			$sd = array(
+			$this->ds = array(
 			  'm_id' => $this->data['msgid'],
 				'm_owner' => $this->ownerKey,
 				'm_author' => getDefault($this->authorKey, $this->ownerKey),
@@ -618,8 +618,7 @@ class HubbubMessage
 				'm_deleted' => ($this->isDeleted) ? 'Y' : 'N',
 				);
 			if($this->existingDS['m_key'] > 0) $this->ds['m_key'] = $this->existingDS['m_key'];
-			$this->ds['m_key'] = DB_UpdateDataset('messages', $sd);
-			$this->ds = $sd;
+			$this->ds['m_key'] = DB_UpdateDataset('messages', $this->ds);
 			$this->index($this->ds);
 		}
 		return(true);

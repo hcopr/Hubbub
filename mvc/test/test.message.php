@@ -173,23 +173,23 @@
   $post->owner($ne1->ds);
   $post->data['text'] = 'This is a message, it will be deleted. Umlauts like üöä should be preserved.';
   $post->save();
-  tlog($post->ds['m_key'] > 0, 'post saved locally '.$post->ds['m_key'], 'OK', 'fail');  
+  tlog($post->ds['m_key'] > 0, 'post saved locally', 'OK (#'.$post->ds['m_key'].')', 'fail');  
 
   $post->executeHandler('delete');
+  tlog($post->existingDS['m_key'] == $post->ds['m_key'], 'checking for duplicate DS ('.$post->existingDS['m_key'].':'.$post->ds['m_key'].')', 'OK', 'fail');
   tlog($post->response['result'] == 'OK', 'Owner deletes message', 'OK ('.$post->ds['m_key'].':'.$post->ds['m_id'].')', 'fail ('.$post->response['reason'].')');
   tlog($post->data['deleted'] == 'yes', '"deleted" property set', 'OK', 'fail');  
   $mds = DB_GetDataset('messages', $post->ds['m_key']);
-  tlog($mds['m_deleted'] == 'Y', 'm_deleted in DB', 'OK', 'fail');  
+  tlog($mds['m_deleted'] == 'Y', 'm_deleted in DB', 'OK (#'.$mds['m_key'].')', 'fail');  
 	$streamPosts1 = $this->profile->getStream($ne2->key());
 	$wallPosts1 = $this->profile->getPostList($ne1->key());
+  $postFound9 = -1; $postFound10 = -1;
   foreach($streamPosts1['list'] as $pds)
-    if($pds['m_id'] == $post->data['msgid']) $postFound6 = $pds; 
-  unset($postFound6['m_data']);
-  tlog(!$postFound6, 'Message gone from author stream', 'OK', 'fail '.dumpArray($postFound6));
+    if($pds['m_id'] == $post->data['msgid']) $postFound9 = $pds['m_id']; 
+  tlog($postFound9 == -1, 'Message gone from author stream', 'OK', 'fail (#'.$postFound9.')');
 	foreach($wallPosts1['list'] as $pds)
-	  if($pds['m_id'] == $post->data['msgid']) $postFound5 = $pds; 
-	$data1 = HubbubMessage::unpackData($postFound5);
-  tlog(!$postFound5, 'Message gone from owner profile', 'OK', 'fail '.dumpArray($data1));  
+	  if($pds['m_id'] == $post->data['msgid']) $postFound10 = $pds['m_id']; 
+	tlog($postFound10 == -1, 'Message gone from owner profile', 'OK', 'fail ('.$postFound10.')');  
 
   // WHY ARE THERE DUPLICATES?
   // WHY ARE EMPTY ENTITIES BEING CREATED?
@@ -201,14 +201,13 @@
   tlog($post->isDeleted, '"deleted" internal property set', 'OK', 'fail');  
 	$streamPosts1 = $this->profile->getStream($ne2->key());
 	$wallPosts1 = $this->profile->getPostList($ne1->key());
+  $postFound9 = -1; $postFound10 = -1;
   foreach($streamPosts1['list'] as $pds)
-    if($pds['m_id'] == $post->data['msgid']) $postFound6 = $pds; 
-  unset($postFound6['m_data']);
-  tlog(!$postFound6, 'Message gone from author stream', 'OK', 'fail ');
+    if($pds['m_id'] == $post->data['msgid']) $postFound9 = $pds['m_id']; 
+  tlog($postFound9 == -1, 'Message gone from author stream', 'OK', 'fail (#'.$postFound9.')');
 	foreach($wallPosts1['list'] as $pds)
-	  if($pds['m_id'] == $post->data['msgid']) $postFound5 = $pds; 
-	$data1 = HubbubMessage::unpackData($postFound5);
-  tlog(!$postFound5, 'Message gone from owner profile', 'OK', 'fail ');  
+	  if($pds['m_id'] == $post->data['msgid']) $postFound10 = $pds['m_id']; 
+	tlog($postFound10 == -1, 'Message gone from owner profile', 'OK', 'fail ('.$postFound10.')');  
   
   // next, we'll try an invalid update where the author has suddenly changed
   $post->data['text'] = 'This update should not have happened.';

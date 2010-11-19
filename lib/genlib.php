@@ -98,6 +98,7 @@ function interpretQueryString($qs)
   $qs = getDefault($_SERVER['QUERY_STRING'], substr($_SERVER['REQUEST_URI'], 1));
   while($qs[0] == '?' || $qs[0] == '/') $qs = substr($qs, 1);
   $call = explode('-', CutSegment('?', $qs));
+  if(stristr($call[0], '/') != '') CutSegment('/', $call[0]);
   parse_str($qs, $rq);
   foreach($rq as $k => $v) $_REQUEST[$k] = $v;    
   $_REQUEST['controller'] = getDefault($call[0], cfg('service.defaultcontroller'));
