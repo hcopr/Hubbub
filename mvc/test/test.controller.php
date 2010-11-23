@@ -5,7 +5,7 @@ class TestController extends HubbubController
 	function __init()
 	{
     access_authenticated_only();
-    $this->menu = $this->makeMenu('index,message');
+    $this->menu = $this->makeMenu('index,message,vis');
 		$this->invokeModel('friends');
 		$this->invokeModel('profile');
 		$this->invokeModel('endpoint');
@@ -24,6 +24,12 @@ class TestController extends HubbubController
   {
   	
   }
+  
+  function vis()
+  {
+    
+  }
+  
 }
 
 function tlog($condition, $context, $successMsg, $failMsg)

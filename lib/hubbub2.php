@@ -630,7 +630,7 @@ class HubbubMessage
 	 */
 	function index(&$ds)
 	{
-		$optGroup = '';
+		/*$optGroup = '';
     if($ds['m_localgroup'] > 0) $optGroup = 'AND c_group = '.$ds['m_localgroup'];
     else if($ds['m_localgroup'] < 0) $optGroup = 'AND c_group != '.$ds['m_localgroup'];
 		// assuming all local friends can read this message 
@@ -643,7 +643,7 @@ class HubbubMessage
 		  'SELECT _serverkey,"'.$ds['m_key'].'" FROM '.getTableName('connections').' '.
 		  'LEFT JOIN '.getTableName('entities').' ON (c_to = _key) '. 
 		  'WHERE c_from="'.$this->ownerKey.'" AND c_status="friend" '.$optGroup.' '.
-		  'GROUP BY _serverkey');
+		  'GROUP BY _serverkey');*/
 	}
 	
 	/*
