@@ -26,7 +26,7 @@ class EndpointController extends HubbubController
   function cron()
   {
 		$this->skipView = false;
-
+    $this->invokeModel();
   }
  
 }

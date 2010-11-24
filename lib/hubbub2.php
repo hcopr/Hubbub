@@ -588,7 +588,6 @@ class HubbubMessage
 		    $this->fail('Immutable field violation: '.implode(', ', $compareFails)); 
 		    return(false);
       }
-      $this->data['changed'] = time();
     }
     // if this message has a parent, we need to retrieve its DB key
     // todo: origin verification!
@@ -606,8 +605,8 @@ class HubbubMessage
 			  'm_id' => $this->data['msgid'],
 				'm_owner' => $this->ownerKey,
 				'm_author' => getDefault($this->authorKey, $this->ownerKey),
-				'm_created' => gmdate('Y-m-d H:i:s', getDefault($this->data['created'], time())),
-				'm_changed' => gmdate('Y-m-d H:i:s', $this->data['changed']),
+				'm_created' => getDefault($this->data['created'], time()),
+				'm_changed' => getDefault($this->data['changed'], $this->data['created']),
 				'm_type' => $this->data['type'],
 				'm_data' => $packedData,
 				'm_compression' => round(100-100*(strlen($packedData)/strlen($this->payload))),
@@ -617,11 +616,17 @@ class HubbubMessage
 				'm_tag' => $this->vTag,
 				'm_deleted' => ($this->isDeleted) ? 'Y' : 'N',
 				);
-			if($this->existingDS['m_key'] > 0) $this->ds['m_key'] = $this->existingDS['m_key'];
+			if($this->existingDS['m_key'] > 0)
+			{
+        $this->ds['m_key'] = $this->existingDS['m_key'];
+			  // only update an existing message if the "changed" stamp is later than before
+			  if($this->existingDS['m_changed'] > 0 && $this->data['changed'] <= $this->existingDS['m_changed']) return(false);
+			}
 			$this->ds['m_key'] = DB_UpdateDataset('messages', $this->ds);
 			$this->index($this->ds);
+			return(true);
 		}
-		return(true);
+		return(false);
 	}
 	
 	/**
@@ -688,6 +693,15 @@ class HubbubMessage
     $this->sanitizeFields();
 		return($this->executeHandler('receive'));
 	}
+	
+	function receive_single(&$dataArray)
+	{
+    $this->data = $dataArray;
+		$this->type = &$this->data['type'];
+		$this->initEntities();
+    $this->sanitizeFields();
+		return($this->executeHandler('receive_single'));
+  }
 
   /* init the object's properties from the data at hand */		
   function initEntities()
@@ -707,7 +721,7 @@ class HubbubMessage
 		$this->data['author'] = HubbubEntity::ds2arrayShort($this->authorEntity->ds);
     $this->data['owner'] = HubbubEntity::ds2arrayShort($this->ownerEntity->ds);
     $this->data['created'] = getDefault($this->data['created'], time());
-    $this->data['changed'] = getDefault($this->data['changed'], time());
+    $this->data['changed'] = getDefault($this->data['changed'], $this->data['created']);
     $this->data['msgid'] = getDefault($this->data['msgid'], $this->newMsgId());
   }
 	

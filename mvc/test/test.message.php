@@ -155,6 +155,7 @@
 
   // now, we'll update an existing message that has already been committed to DB
   $post->data['text'] = 'This message text has changed now';
+  $post->data['changed'] = time()+1;
   $post->sendToUrl($ne1->ds['server']);
   tlog($post->responseData['data']['result'] == 'OK', 'updated post sentToUrl('.$post->authorEntity->ds['url'].')', 'OK', 'fail ('.$post->responseData['data']['reason'].')');
 	$wallPosts1 = $this->profile->getPostList($ne1->key());
@@ -174,7 +175,7 @@
   $post->data['text'] = 'This is a message, it will be deleted. Umlauts like üöä should be preserved.';
   $post->save();
   tlog($post->ds['m_key'] > 0, 'post saved locally', 'OK (#'.$post->ds['m_key'].')', 'fail');  
-
+  $post->data['changed'] = time()+2;
   $post->executeHandler('delete');
   tlog($post->existingDS['m_key'] == $post->ds['m_key'], 'checking for duplicate DS ('.$post->existingDS['m_key'].':'.$post->ds['m_key'].')', 'OK', 'fail');
   tlog($post->response['result'] == 'OK', 'Owner deletes message', 'OK ('.$post->ds['m_key'].':'.$post->ds['m_id'].')', 'fail ('.$post->response['reason'].')');

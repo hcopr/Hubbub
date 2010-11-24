@@ -13,6 +13,7 @@
   
   // sadly, include paths aren't standardized, so we have to roll our own
 	ini_set('include_path', implode($config['os.path.separator'], array('.', '../')));
+  date_default_timezone_set('UTC');
   
 	// set cookies  
   session_name('hubbub2');

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 24, 2010 at 11:18 AM
+-- Generation Time: Nov 24, 2010 at 12:27 PM
 -- Server version: 5.1.47
 -- PHP Version: 5.3.3
 
@@ -120,8 +120,8 @@ CREATE TABLE `h2_messages` (
   `m_parent` int(11) NOT NULL,
   `m_owner` int(11) NOT NULL,
   `m_author` int(11) NOT NULL,
-  `m_created` datetime NOT NULL,
-  `m_changed` datetime NOT NULL,
+  `m_created` bigint(20) NOT NULL,
+  `m_changed` bigint(20) NOT NULL,
   `m_type` varchar(16) NOT NULL,
   `m_data` longblob NOT NULL,
   `m_compression` smallint(6) NOT NULL,
@@ -169,6 +169,7 @@ CREATE TABLE `h2_servers` (
   `s_newkey_out` varchar(32) NOT NULL,
   `s_status` varchar(32) NOT NULL,
   `s_lastpolled` bigint(20) NOT NULL,
+  `s_lastdata` bigint(20) NOT NULL,
   `s_lastresult` varchar(64) NOT NULL,
   PRIMARY KEY (`s_key`),
   KEY `s_url` (`s_url`),

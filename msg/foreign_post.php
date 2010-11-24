@@ -2,7 +2,8 @@
 
 function foreign_post_save(&$data, &$msg)
 {
-  //$msg->vTag = 'A'; // queue for approval  
+  //$msg->vTag = 'A'; // queue for approval 
+  $msg->doSave = false; 
 }
 
 function foreign_post_receive(&$data, &$msg)
