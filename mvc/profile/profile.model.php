@@ -23,6 +23,7 @@ class ProfileModel extends HubbubModel
 			  DB_GetList('SELECT * FROM '.getTableName('messages').' 
   			  LEFT JOIN '.getTableName('connections').' ON (c_to = m_owner AND (c_from = ? OR m_owner = ?))
   	      WHERE m_parent = 0 AND m_deleted = "N" AND m_type="post" AND (c_from != 0 OR m_owner = ?)
+  	      GROUP BY m_key
   	      ORDER BY m_created DESC', array($ownerKey, $ownerKey, $ownerKey))));
   }
   

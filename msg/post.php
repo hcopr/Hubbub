@@ -46,10 +46,13 @@ function post_receive(&$data, &$msg)
 {
   // this message must be signed by the owner, who originated it
   if(!$msg->validateSignature('owner')) return(true);
+  post_receive_single($data, $msg);
+}
+
+function post_receive_single(&$data, &$msg)
+{
   // we're receiving this message because the sender(=owner) has published something on their profile
-  
-  $msg->save();
-  
+  $msg->save();  
   $msg->ok();
 }
 

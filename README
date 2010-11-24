@@ -3,12 +3,14 @@ http://hubbub.at or email me if you got questions and comments: udo.schroeter@gm
 
 Prototype:
 The source code for the protoype is no longer available, let's pretend it never existed. 
-It was horrible, and hence true to its purpose, which it served well.
+It was horrible, and hence true to its purpose, which it served well. Please don't install 
+this version, yet. It doesn't work. When it starts working, this message will change. 
 
 Installation:
-Please don't install this, yet. It doesn't work. When it starts working, this message will
-change. But if you must, pull down the repository and execute the installer by opening up
-the pertinent location in your browser. Follow the instructions.
+---------------------------------------------------------------------------------------------
+Pull down the repository and execute the installer by opening up the pertinent location in
+your browser. Follow the instructions. After installation, you still need to configure your
+cron tab (see below).
 
 A word about "pretty" URLs:
 We are using the standard URL rewrite rule that Wordpress uses (RewriteRule . index.php [L]),
@@ -18,3 +20,20 @@ make sure mod_rewrite is enabled in your config.
 On NGINX, you can simply insert or modify the try_files directive in your nginx.conf to
 include index.php (plus the path to your installation if needed):
   try_files $uri $uri/ index.php;
+
+Installing Cron Poller
+---------------------------------------------------------------------------------------------
+This is important: to poll messages from other servers, you need to create an entry in your
+server's crontab that executes the polling mechanism in regular intervals. This is not done
+by the installer since this task is reserved for the root user only on most Unix/Linux systems.
+Open your crontab file from the command line (goes something like this)
+  > sudo nano /etc/crontab
+after which an editor will open. Add the following line to the file:
+  */5 * * * * root php -f <yourPath>/cron.php > /dev/null 2>&1
+where <yourPath> is the path to your cron.php file. This setting will execute the cron poller
+every 5 minutes. This doesn't mean Hubbub will poll every server every 5 minutes, however.
+Instead, the polling interval per server is located in the config option server.poll_interval
+and is set to 10 minutes by default. If you don't have access to your crontab, you can use
+a local or web-based cron service that calls cron.php regularly.
+
+

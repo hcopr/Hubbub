@@ -16,6 +16,7 @@ function feed_poll_receive(&$data, &$msg)
   foreach(DB_GetList('SELECT * FROM '.getTableName('messages').
     ' LEFT JOIN '.getTableName('connections').' ON (c_toserverkey = '.$serverKey.' AND (c_from = m_owner OR c_from = m_author)) '.
     ' WHERE c_toserverkey > 0 AND m_publish="Y" AND m_changed >= "'.($msg->data['last']+0).'" '.
+    ' GROUP BY m_key '.
     ' LIMIT '.cfg('service.maxfeedsize', 200)) as $msgDS)
   {
     $resultCount++;
