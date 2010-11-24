@@ -111,7 +111,7 @@
   tlog($feed['data']['result'] == 'OK', 'Endpoint pollFeed('.$ne1->ds['server'].') Result Code', 'OK', 'fail ('.$feed['data']['reason'].')');
   foreach($feed['data']['feed'] as $item)
     if($item['msgid'] ==   $post->ds['m_id']) $postFound3 = $item;
-  tlog(isset($postFound3), 'Posted item found in feed', 'OK', 'fail');  
+  tlog(isset($postFound3), 'Posted item found in remote feed', 'OK', 'fail');  
   tlog($postFound3['text'] == $post->data['text'], 'Post content unicode test', 'OK', 'fail');  
   
   tsection('Foreign Posts');

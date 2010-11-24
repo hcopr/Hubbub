@@ -1,16 +1,16 @@
 -- phpMyAdmin SQL Dump
--- version 2.11.10.1
+-- version 3.3.8
 -- http://www.phpmyadmin.net
 --
--- Host: 127.0.0.3
--- Generation Time: Nov 17, 2010 at 03:45 PM
--- Server version: 5.1.45
--- PHP Version: 4.4.8
+-- Host: localhost
+-- Generation Time: Nov 24, 2010 at 11:18 AM
+-- Server version: 5.1.47
+-- PHP Version: 5.3.3
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 --
--- Database: `db276568_4`
+-- Database: `hubbub2`
 --
 
 -- --------------------------------------------------------
@@ -44,11 +44,13 @@ CREATE TABLE `h2_connections` (
   `c_status` varchar(10) NOT NULL,
   `c_group` int(11) NOT NULL,
   `c_auto_approve` varchar(1) NOT NULL DEFAULT 'Y',
+  `c_toserverkey` int(11) NOT NULL,
   PRIMARY KEY (`c_key`),
   KEY `c_from` (`c_from`),
   KEY `c_to` (`c_to`),
   KEY `c_status` (`c_status`),
-  KEY `c_group` (`c_group`)
+  KEY `c_group` (`c_group`),
+  KEY `c_serverkey` (`c_toserverkey`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -91,30 +93,6 @@ CREATE TABLE `h2_idaccounts` (
   KEY `ia_url` (`ia_url`),
   KEY `ia_type` (`ia_type`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `h2_index`
---
-
-CREATE TABLE `h2_index` (
-  `i_entitykey` int(11) NOT NULL,
-  `i_msgkey` int(11) NOT NULL,
-  PRIMARY KEY (`i_entitykey`,`i_msgkey`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `h2_index_servers`
---
-
-CREATE TABLE `h2_index_servers` (
-  `si_serverkey` int(11) NOT NULL,
-  `si_msgkey` int(11) NOT NULL,
-  PRIMARY KEY (`si_serverkey`,`si_msgkey`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -190,8 +168,11 @@ CREATE TABLE `h2_servers` (
   `s_key_in` varchar(32) NOT NULL,
   `s_newkey_out` varchar(32) NOT NULL,
   `s_status` varchar(32) NOT NULL,
+  `s_lastpolled` bigint(20) NOT NULL,
+  `s_lastresult` varchar(64) NOT NULL,
   PRIMARY KEY (`s_key`),
-  KEY `s_url` (`s_url`)
+  KEY `s_url` (`s_url`),
+  KEY `s_lastpolled` (`s_lastpolled`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

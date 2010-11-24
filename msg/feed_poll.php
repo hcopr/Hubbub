@@ -8,13 +8,13 @@ function feed_poll_receive(&$data, &$msg)
   
   $msg->response['_listing_from'] = gmdate('Y-m-d H:i:s', $msg->data['last']);
   $msg->response['_for_server'] = $msg->authorEntity->ds['server'].':'.$forServer->ds['s_key'];
-
+  $serverKey = $forServer->ds['s_key'];
   // let's get a list of items 
   $msg->response['feed'] = array();
   
   foreach(DB_GetList('SELECT * FROM '.getTableName('messages').
-    ' LEFT JOIN '.getTableName('index_servers').' ON (si_serverkey = '.$forServer->ds['s_key'].' AND si_msgkey = m_key) '.
-    ' WHERE si_serverkey > 0 AND m_publish="Y" AND m_changed >= "'.gmdate('Y-m-d H:i:s', $msg->data['last']).'" '.
+    ' LEFT JOIN '.getTableName('connections').' ON (c_toserverkey = '.$serverKey.' AND (c_from = m_owner OR c_from = m_author)) '.
+    ' WHERE c_toserverkey > 0 AND m_publish="Y" AND m_changed >= "'.gmdate('Y-m-d H:i:s', $msg->data['last']).'" '.
     ' LIMIT '.cfg('service.maxfeedsize', 200)) as $msgDS)
   {
     $resultCount++;

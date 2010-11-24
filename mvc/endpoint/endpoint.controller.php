@@ -22,6 +22,13 @@ class EndpointController extends HubbubController
 			'SENT', $response['result'], $response['reason']);*/
     print(json_encode($response));
   }
+  
+  function cron()
+  {
+		$this->skipView = false;
+
+  }
+ 
 }
 
 ?>

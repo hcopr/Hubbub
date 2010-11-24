@@ -651,6 +651,7 @@ class HubbubMessage
 	 */
 	function reIndexForEntity($msgOwnerKey, $forEntityKey)
 	{
+	  /* THIS IS OBSOLETE
 	  $forEntity = new HubbubEntity(array('_key' => $forEntityKey));
 	  $ourConnection = new HubbubConnection($msgOwnerKey, $forEntityKey);
 	  if($ourConnection->status() != 'friend') return;	
@@ -663,6 +664,7 @@ class HubbubMessage
 		  DB_Update('REPLACE INTO '.getTableName('index_servers').' (si_serverkey,si_msgkey) '.
 		    'SELECT "'.$forEntity->ds['_serverkey'].'",m_key FROM '.getTableName('messages').' '.
 		    'WHERE m_publish="Y" AND (m_localgroup = ? OR m_localgroup = 0 OR (m_localgroup != ?))', array($grp, -$grp));
+		    */
   }
 	
 	function unpackData($dataset)
@@ -1083,8 +1085,13 @@ class HubbubConnection
 	
    function save()
 	 {
-	 	 if($this->ds['c_from'] != 0 && $this->ds['c_to'] != 0)
-	 	   DB_UpdateDataset('connections', $this->ds);
+	 	 if($this->ds['c_from'] == 0 && $this->ds['c_to'] == 0) return;
+	   if($this->ds['c_toserverkey'] == 0)
+	   {
+	     $toEntity = new HubbubEntity(array('_key' => $this->ds['c_to']));
+       $this->ds['c_toserverkey'] = $toEntity->ds['_serverkey'];
+     }
+ 	   DB_UpdateDataset('connections', $this->ds);
 	 }
 	 
 	 function status($status = null)
