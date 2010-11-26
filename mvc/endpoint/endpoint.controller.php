@@ -28,6 +28,18 @@ class EndpointController extends HubbubController
 		$this->skipView = false;
     $this->invokeModel();
   }
+  
+  function verifyPwd()
+  {
+    if(md5(cfg('service.ping_password')) == $_REQUEST['p'])
+    {
+      ?>OK<? 
+    }
+    else
+    {
+      ?>fail<? 
+    }
+  }
  
 }
 

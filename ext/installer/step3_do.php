@@ -32,6 +32,7 @@ $GLOBALS[\'config\'][\'db\'] = array(
 
 $GLOBALS[\'config\'][\'service\'][\'adminpw\'] = \''.$c['admin_password'].'\';
 $GLOBALS[\'config\'][\'service\'][\'server\'] = \''.$c['server_base'].'\';
+$GLOBALS[\'config\'][\'service\'][\'ping_password\'] = \''.md5($c['server_base'].time()).'\';
 $GLOBALS[\'config\'][\'service\'][\'url_rewrite\'] = '.($c['enable_rewrite'] ? 'true' : 'false').';
 
 /** Twitter Connector:
