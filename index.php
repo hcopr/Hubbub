@@ -4,6 +4,7 @@
 
   // init environment
   ob_start();
+  chdir(dirname(__FILE__));
   require('lib/genlib.php');
   require('lib/hubbub2.php');
   profile_point('classes ready');
@@ -45,6 +46,6 @@
   if($_REQUEST['controller'] != 'endpoint')
     h2_statlog('web', $_REQUEST['controller'].'.'.$_REQUEST['action']);  
   else
-    h2_statlog('srv', $_REQUEST['action'].'.'.$GLOBALS['stats']['msgtype'].'.'.$GLOBALS['stats']['response']);  
+    h2_statlog('ept', $GLOBALS['stats']['msgtype'].'('.$GLOBALS['stats']['response'].')');  
 		
 ?>

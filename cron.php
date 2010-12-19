@@ -1,5 +1,6 @@
 <?php
 
+  $GLOBALS['profiler_start'] = microtime();
   // init environment
   chdir(dirname(__FILE__));
   require('lib/genlib.php');

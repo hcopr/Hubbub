@@ -110,14 +110,21 @@ function h2_statlog($type, $call)
   $logTypes = array(
     array('st_type' => $type, 'st_call' => $call, 'st_interval' => gmdate('Y-m-d')),
     );
+  $ctr = getDefault($_REQUEST['controller'], 'endpoint');
+  if($ctr == 'endpoint') $ctr = $GLOBALS['stats']['msgtype'].'('.$GLOBALS['stats']['response'].')';
   if($_SERVER['REMOTE_ADDR'] != '')
-    $logTypes[] = array('st_type' => 'ip', 'st_call' => getDefault($_SERVER['REMOTE_ADDR'], 'internal').':'.getDefault($_REQUEST['controller'], 'endpoint'), 'st_interval' => gmdate('Y-m-d'));
+  {
+    $logTypes[] = array('st_type' => 'ip', 'st_call' => 'req '.getDefault($_SERVER['REMOTE_ADDR'], 'internal').' '.$ctr, 'st_interval' => gmdate('Y-m-d'));
+    $logTypes[] = array('st_type' => 'ip', 'st_call' => 'all '.getDefault($_SERVER['REMOTE_ADDR'], 'internal').' ', 'st_interval' => gmdate('Y-m-d'));
+  }
   foreach($logTypes as $lds)
   {
     $ds = DB_GetDatasetMatch('usagestats', $lds);
     $ds['st_count']++;
     $ds['st_msec_total'] += profiler_microtime_diff(microtime(), $GLOBALS['profiler_start']);
     $ds['st_msec_avg'] = number_format($ds['st_msec_total']/$ds['st_count'], 2);
+    $ds['st_mem_total'] += number_format(memory_get_peak_usage(true) / (1024*1024), 3);
+    $ds['st_mem_avg'] = number_format($ds['st_mem_total'] / $ds['st_count'], 1);
     DB_UpdateDataset('usagestats', $ds);
   }
 }

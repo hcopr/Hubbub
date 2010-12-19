@@ -16,7 +16,7 @@ foreach(json_decode(
   '"get_accountverify_credentials()","getattributes()","ksort()","init()","subscribe()","reload()","file_get_contents()","validate()","attr()","css()","append()","button()","parse_url()","confirm()","new()",'.
   '"senttourl()","elseif()","catch()","getmessage()","typefunction()","loadthread()","deletecomment()","nl2br()","springcomment()","springvote()","postvote()","cancelvote()","closecommentifempty()","postcomment()",'.
   '"autoresize()","fadeto()","alert()","prepend()","rowcallback2()","chdir()","dirname()","fadeout()","callback()","handlerfunc()","mysql_connect()","mysql_errno()","phpversion()","base64_encode()",'.
-  '"controllerclassname()","modelclassname()"]', true)
+  '"controllerclassname()","modelclassname()","memory_get_peak_usage()"]', true)
   as $b) $builtIn[$b] = true;
   
 foreach(explode(',', 
