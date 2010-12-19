@@ -474,15 +474,14 @@ function DB_GetList($query, $parameters = null, $opt = array())
 // include settings from database
 // ***************************************************************************
 
-profile_point('DB_Init(parse)');
+profile_point('DB_Init(code)');
+profile_point('DB_Init(call_0)');
 ob_start();
-$GLOBALS['db_link'] = @mysql_pconnect(cfg('db.host'), cfg('db.user'), cfg('db.password')) or
+$GLOBALS['db_link'] = mysql_pconnect(cfg('db.host'), cfg('db.user'), cfg('db.password')) or
   $DBERR = 'The database connection to server '.cfg('db.user').'@'.cfg('db.host').' could not be established (code: '.@mysql_error($GLOBALS['db_link']).')';
 
-@mysql_select_db(cfg('db.database'), $GLOBALS['db_link']) or
+mysql_select_db(cfg('db.database'), $GLOBALS['db_link']) or
   $DBERR = 'The database connection to database '.cfg('db.database').' on '.cfg('db.user').'@'.cfg('db.host').' could not be established. (code: '.@mysql_error($GLOBALS['db_link']).')';
-
-profile_point('DB_Init(mysql_connect)');
 ob_get_clean();
 
 if ($DBERR != '')
@@ -495,5 +494,7 @@ else
 {
   mysql_query("SET NAMES 'utf8'", $GLOBALS['db_link']);
 }
+
+profile_point('DB_Init(mysql_connect/select_db)');
 
 ?>

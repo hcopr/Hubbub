@@ -3,7 +3,7 @@
 function foreign_post_save(&$data, &$msg)
 {
   //$msg->vTag = 'A'; // queue for approval 
-  $msg->doSave = false; 
+  //$msg->doSave = false; 
 }
 
 function foreign_post_receive(&$data, &$msg)
@@ -17,6 +17,7 @@ function foreign_post_receive(&$data, &$msg)
   {
     // if we're gonna approve this anyway, there is no reason to store the message
     // let's just create a post out of this
+    WriteToFile('log/activity.log', $data['msgid'].' foreign_post received, accepted'.chr(10));
     $post = new HubbubMessage('post');
     $post->data = $msg->data;
     $post->data['type'] = 'post';
@@ -25,7 +26,9 @@ function foreign_post_receive(&$data, &$msg)
     $post->data['changed'] = time();
     $post->data['received'] = time();
     $post->save();
+    WriteToFile('log/activity.log', $post->data['msgid'].' created from foreign_post'.chr(10));
     $msg->response['post'] = $post->data;
+    $msg->doSave = false;
   }
   else
   {

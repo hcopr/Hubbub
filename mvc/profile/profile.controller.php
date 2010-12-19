@@ -64,7 +64,16 @@ class ProfileController extends HubbubController
         'text' => $_REQUEST['text'],
 				'parent' => $parentMessage['m_id']));   
 			$comments = array('list' => array($ds)); 	
-			if(substr($_REQUEST['text'], 0, 1) != '#') tmpl_commentlist($parentMessage, $comments, false);
+			if(substr($_REQUEST['text'], 0, 1) != '#') 
+			{
+			  ob_start();
+			  tmpl_commentlist($parentMessage, $comments, false);
+			  $comment = ob_get_clean();
+      }
+      print(json_encode(array(
+        'result' => 'OK',
+        'post' => $comment,
+        )));
     }
 	}
 
@@ -77,7 +86,12 @@ class ProfileController extends HubbubController
         'author' => array('_key' => $this->user->entity),
         'owner' => array('_key' => getDefault($_REQUEST['to'], $this->user->entity)),
         )); 
-			tmpl_postlist(array($ds), false);
+      ob_start();
+			tmpl_postlist(array('list' => array($ds)), false);
+			print(json_encode(array(
+			  'post' => ob_get_clean(),
+			  'result' => 'OK',
+			  )));
 		}
 	}
 	

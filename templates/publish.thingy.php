@@ -37,11 +37,19 @@
 		$.post('<?= actionUrl('ajax_post', 'profile') ?>', 
 		  {'text' : $('#publish_text').val()<? if($this->viewEntity) print(", 'to' : ".$this->viewEntity) ?> }, 
 			function(data) {
-				$('#publish_text').val('');
-			  $('#postlist').prepend(data);
-	      $('#publisher').fadeTo('normal', 1);
-	      $('#status_indicator').html('&nbsp;');
-		  });
+			  if(data.result != 'OK')
+			  {
+			    if(!data.reason) data.reason = '';
+			    alert('There was a problem publishing your post. '+data.reason);
+			  }
+			  else
+			  {
+  			  $('#publish_text').val('');
+  			  $('#postlist').prepend(data.post);
+  	      $('#publisher').fadeTo('normal', 1);
+  	      $('#status_indicator').html('&nbsp;');
+        }
+		  }, 'json');
 	}
 	
 </script><div id="log"></div>

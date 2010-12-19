@@ -6,25 +6,22 @@
  */
 
 /* inits the profiler that allows performance measurement */
-$profiler_last = getDefault($profiler_time_start, microtime());
-$profiler_report = array();
+$GLOBALS['profiler_last'] = getDefault($GLOBALS['profiler_start'], microtime());
 
 /* makes a commented profiler entry */ 
 function profile_point($text)
 {
-  global $profiler_report, $profiler_time_start, $profiler_last;
   $thistime = microtime();
-  $profiler_report[] = profiler_microtime_diff($thistime,$profiler_time_start).' '.
-    profiler_microtime_diff($thistime,$profiler_last).' :: '.$text;
-  $profiler_last = $thistime;
+  $GLOBALS['profiler_log'][] = profiler_microtime_diff($thistime, $GLOBALS['profiler_start']).' ('.profiler_microtime_diff($thistime, $GLOBALS['profiler_last']).') :: '.$text;
+  $GLOBALS['profiler_last'] = $thistime;
 }
 
 /* subtracts to profiler timestamps and returns miliseconds */
-function profiler_microtime_diff($b, $a)
+function profiler_microtime_diff(&$b, &$a)
 {
   list($a_dec, $a_sec) = explode(" ", $a);
   list($b_dec, $b_sec) = explode(" ", $b);
-  return number_format($b_sec - $a_sec + $b_dec - $a_dec, 4);
+  return number_format(1000*($b_sec - $a_sec + $b_dec - $a_dec), 3);
 }
 
 /* wrapper that searches an array for an entry */
@@ -47,6 +44,13 @@ function file_list($dir)
   return($result);
 }
 
+/* open new file (overwrite if it already exists) */
+function newFile($filename, $content)
+{
+  if(file_exists($filename)) unlink($filename);
+  WriteToFile($filename, $content); 
+}
+
 /* append any string to the given file */
 function WriteToFile($filename, $content)
 {
@@ -54,7 +58,7 @@ function WriteToFile($filename, $content)
   $open = fopen($filename, 'a+');
   fwrite($open, $content);
   fclose($open);
-  chmod($filename, 0660);
+  chmod($filename, 0775);
 }
 
 // standard logging function (please log only to the log/ folder)

@@ -87,4 +87,6 @@
       $("button, input:submit, input:button, a.btn").button();
     </script>
   </body>
+  <? profile_point('page template'); ?>
+  <!-- <?= print_r($GLOBALS['profiler_log']); ?> -->
 </html>

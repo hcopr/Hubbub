@@ -1,0 +1,5 @@
+<?
+
+
+?>
+MAIL MESSAGE VIEW

@@ -52,14 +52,17 @@ class ProfileModel extends HubbubModel
 	  $msg = new HubbubMessage('post');
 	  $msg->load(array('id' => $postKey, 'field' => 'm_key'));
 	  $result = $msg->executeHandler('delete');
+    $msg->notify();
 	  $this->msg = $msg;
 	  return($result);
 	}
 	
 	function makePostMessage($type, $post)
 	{
+	  // note/todo: if this works correctly, we should see a duplicate message if we're posting on someone else's profile
 		$msg = new HubbubMessage($type);
 		foreach($post as $k => $v) $msg->data[$k] = $v;
+    $msg->notify();
     $msg->save();
 		return($msg);
 	}

@@ -459,6 +459,7 @@ class HubbubMessage
 	  if($type != null) $this->create($type);
 		$this->doPublish = 'N';
 		$this->localUserEntity = object('user')->entity;
+		$this->doSave = true;
 	}
 	
 	/**
@@ -568,6 +569,15 @@ class HubbubMessage
     }
     return($fails);
   }
+
+  /**
+   * issues a direct notification to closest connections
+   */
+  function notify()
+  {
+		$this->sanitizeDataset();
+		$this->executeHandler('notify');
+  }
 	
 	/**
 	 * saves the message to the database
@@ -575,7 +585,6 @@ class HubbubMessage
 	 */
 	function save()
 	{
-		$this->doSave = true;
 		$this->sanitizeDataset();
 		if($this->isInDB())
 		{
@@ -742,8 +751,10 @@ class HubbubMessage
 	{			
 	  $this->sanitizeDataset();
 	  $this->toServer = new HubbubServer($url);
-		if($this->toServer->isTrusted() || $forceKey != null) $this->signForServer($this->toServer, $forceKey);
     $this->executeHandler('before_sendtourl', array('url' => $url));
+    $this->payload = json_encode($this->data);
+		if($this->toServer->isTrusted() || $forceKey != null) $this->signForServer($this->toServer, $forceKey);
+	  WriteToFile('log/activity.log', $this->data['msgid'].' signed send '.$this->signature.chr(10));
 	  $result = HubbubEndpoint::request($url, array('hubbub_msg' => $this->payload, 'hubbub_sig' => $this->signature));
 		//audit_log('msg.send:'.$this->data['type'], $this->signature.': '.$this->payload);
 	  $this->responseData = $result;
@@ -760,7 +771,8 @@ class HubbubMessage
 	function signForServer($srvObj, $overrideKey = '')
 	{
 		$overrideKey = getDefault($overrideKey, $srvObj->outboundKey());
-		$this->signature = md5($overrideKey.$this->payload);
+		$this->signature = md5($overrideKey.trim($this->payload));
+    WriteToFile('log/activity.log', $this->data['msgid'].' signing payload '.$overrideKey.':'.md5($this->payload).'='.$this->signature.chr(10));
 	}
 			
   /**
@@ -779,6 +791,7 @@ class HubbubMessage
 		{
 			$this->expectedSignature = $validSignature;
 			$this->fail('invalid signature');
+			WriteToFile('log/activity.log', $this->data['msgid'].' rcv INVALID signature '.$this->signature.' for payload '.$this->fromServer->inboundKey().':'.md5($this->payload).'='.$validSignature.'!'.$this->signature.chr(10));
 			return(false);
 		}
 		else return(true);

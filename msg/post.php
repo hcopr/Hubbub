@@ -1,9 +1,30 @@
 <?
 
+/* event handler to notify closest connections when a message changes */
+function post_notify(&$data, &$msg)
+{
+  if($msg->ownerEntity == $msg->localUserEntity)
+  {
+    // if the sending user is the owner, we can send an update straight out to all connections
+    WriteToFile('log/activity.log', $data['msgid'].' sending out notifications'.chr(10));
+  }
+  else if($msg->authorEntity == $msg->localUserEntity)
+  {
+    // if we're just the author though, all we can do is send a foreign_post request
+    $msg->type = 'foreign_post';
+    $msg->data['type'] = 'foreign_post';
+    WriteToFile('log/activity.log', $data['msgid'].' changed type to foreign_post'.chr(10));
+    $msg->notify();
+  }
+}
+
+/* event handler before a message is saved to local DB */
 function post_save(&$data, &$msg)
 {
+  WriteToFile('log/activity.log', $data['msgid'].' save'.chr(10));
   if($msg->ownerEntity->ds['_local'] == 'Y')
 	{
+    WriteToFile('log/activity.log', $data['msgid'].' declared public'.chr(10));
 		$msg->doPublish = 'Y';
 	}
 	// if this comment is a vote, we need to update the vote hash in order for it to display correctly
@@ -42,6 +63,7 @@ function post_save(&$data, &$msg)
 	return(true);
 }
 
+/* event handler for receiving a message per direct request */
 function post_receive(&$data, &$msg)
 {
   // this message must be signed by the owner, who originated it
@@ -49,16 +71,20 @@ function post_receive(&$data, &$msg)
   post_receive_single($data, $msg);
 }
 
+/* event handler to process a single message that is part of a stream (already authenticated) */
 function post_receive_single(&$data, &$msg)
 {
   // we're receiving this message because the sender(=owner) has published something on their profile
+  WriteToFile('log/activity.log', $data['msgid'].':'.$msg->authorEntity.':'.$msg->ownerEntity.' received'.chr(10));
   $msg->save();  
   $msg->ok();
 }
 
+/* event handler that deletes a message */
 function post_delete(&$data, &$msg)
 {
   // in order to delete this message, we need to be either the owner or the author of it
+  WriteToFile('log/activity.log', $data['msgid'].' deletion'.chr(10));
   if($msg->localUserEntity == $msg->ownerKey || $msg->localUserEntity == $msg->authorKey) 
   {
     // easiest case, because the message lives on this server
@@ -66,10 +92,12 @@ function post_delete(&$data, &$msg)
     unset($msg->data['attachments']); 
     $msg->isDeleted = true;
     $msg->data['deleted'] = 'yes';
+    WriteToFile('log/activity.log', $data['msgid'].' local message, deleted'.chr(10));
   }
   if($msg->localUserEntity == $msg->ownerKey) 
   {
     // if we're the owner, there is nothing left to do here    
+    WriteToFile('log/activity.log', $data['msgid'].' deleted by owner'.chr(10));
     $msg->save();
     $msg->ok();
     return(true);
@@ -82,6 +110,7 @@ function post_delete(&$data, &$msg)
     if($msg->response['result'] == 'OK')
     {
       // remote delete confirmed, everything is OK
+      WriteToFile('log/activity.log', $data['msgid'].' deleted remotely'.chr(10));
       $msg->ok();
       $msg->save();
       return(true);
@@ -89,6 +118,7 @@ function post_delete(&$data, &$msg)
     else
     {
       // remote delete didn't work out
+      WriteToFile('log/activity.log', $data['msgid'].' remote delete failed: '.$msg->response['data']['reason'].chr(10));
       $msg->fail('remote delete failed: '.$msg->response['data']['reason']);
       return(false);
     }
