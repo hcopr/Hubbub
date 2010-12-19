@@ -6,7 +6,7 @@
  */
 
 /* some basic environment initialization */
-function init_hubbub_environment()
+function h2_init_hubbub_environment()
 {
   if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/')
     interpretQueryString($_SERVER['REQUEST_URI']);    
@@ -77,7 +77,7 @@ function object($name)
 }
 
 /* logs a transaction into the database */
-function audit_log($op, $data = '', $code = '', $result = '', $reason = '')
+function h2_audit_log($op, $data = '', $code = '', $result = '', $reason = '')
 {
 	if(object('user') != null) $usrname = object('user')->getUsername();
 	$log = array(
@@ -92,7 +92,7 @@ function audit_log($op, $data = '', $code = '', $result = '', $reason = '')
 }
 
 /* shortens a string and appends an ellipsis sign if needed */
-function make_excerpt($text, $length = 64)
+function h2_make_excerpt($text, $length = 64)
 {
 	if(strlen($text) > $length) 
   {
@@ -103,6 +103,20 @@ function make_excerpt($text, $length = 64)
 		$text .= '…';
   }
 	return(trim($text));
+}
+
+function h2_statlog($type, $call)
+{
+  foreach(array(gmdate('Y-m'), gmdate('Y-m-d')) as $interval)
+  {
+    $ds = DB_GetDatasetMatch('usagestats', array(
+      'st_type' => $type,
+      'st_call' => $call,
+      'st_interval' => $interval,
+      ));
+    $ds['st_count']++;
+    DB_UpdateDataset('usagestats', $ds);
+  }
 }
 
 /* replaces the standard PHP error handler, mainly because we want a stack trace */
@@ -126,7 +140,7 @@ function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
 }
 	
 /* use this to instance a controller object */
-function getController($controllerName)
+function h2_getController($controllerName)
 {
 	$controllerFile = 'mvc/'.strtolower($controllerName).'/'.strtolower($controllerName).'.controller.php';
 	if(!file_exists($controllerFile))
@@ -153,14 +167,15 @@ function getController($controllerName)
 }
 
 /* executing an action on a controller object */
-function invokeAction(&$controller, $action)
+function h2_invokeAction(&$controller, $action)
 {
   $controller->invokeAction($action);
 }
 
 /* invoke a controller's view */
-function invokeView(&$controller, $action)
+function h2_invokeView(&$controller, $action)
 {
+  h2_statlog('mvc', $controller->name.'.'.$action);
 	return($controller->invokeView($action));
 }
 
@@ -262,12 +277,6 @@ class HubbubUser
 	{
 		$this->loadEntity();
 		return($this->entityDS);
-	}
-	
-	function selfEntityEx()
-	{
-    $this->loadEntity();
-    return($this->entityDS);
 	}
 	
 	function loadEntity()
@@ -660,27 +669,6 @@ class HubbubMessage
 		  'GROUP BY _serverkey');*/
 	}
 	
-	/*
-	 * Update the index tables for a (new) entity that is now connected to the owner entity 
-	 */
-	function reIndexForEntity($msgOwnerKey, $forEntityKey)
-	{
-	  /* THIS IS OBSOLETE
-	  $forEntity = new HubbubEntity(array('_key' => $forEntityKey));
-	  $ourConnection = new HubbubConnection($msgOwnerKey, $forEntityKey);
-	  if($ourConnection->status() != 'friend') return;	
-	  $grp = $ourConnection->ds['c_group'];	  
-	  if($forEntity->ds['_local'] == 'Y')
-		  DB_Update('REPLACE INTO '.getTableName('index').' (i_entitykey,i_msgkey) '.
-		    'SELECT "'.$forEntityKey.'",m_key FROM '.getTableName('messages').' '.
-		    'WHERE m_publish="Y" AND (m_localgroup = ? OR m_localgroup = 0 OR (m_localgroup != ?))', array($grp, -$grp));
-		else
-		  DB_Update('REPLACE INTO '.getTableName('index_servers').' (si_serverkey,si_msgkey) '.
-		    'SELECT "'.$forEntity->ds['_serverkey'].'",m_key FROM '.getTableName('messages').' '.
-		    'WHERE m_publish="Y" AND (m_localgroup = ? OR m_localgroup = 0 OR (m_localgroup != ?))', array($grp, -$grp));
-		    */
-  }
-	
 	function unpackData($dataset)
 	{
 		return(json_decode(gzinflate($dataset['m_data']), true));
@@ -756,7 +744,7 @@ class HubbubMessage
 		if($this->toServer->isTrusted() || $forceKey != null) $this->signForServer($this->toServer, $forceKey);
 	  WriteToFile('log/activity.log', $this->data['msgid'].' signed send '.$this->signature.chr(10));
 	  $result = HubbubEndpoint::request($url, array('hubbub_msg' => $this->payload, 'hubbub_sig' => $this->signature));
-		//audit_log('msg.send:'.$this->data['type'], $this->signature.': '.$this->payload);
+		//h2_audit_log('msg.send:'.$this->data['type'], $this->signature.': '.$this->payload);
 	  $this->responseData = $result;
     $this->executeHandler('after_sendtourl', array('url' => $url, 'result' => $result));
 		return($result);
@@ -942,11 +930,6 @@ class HubbubEntity
 
 class HubbubEndpoint
 {
-	function parseHubbubURL($url)
-	{
-		return($url);
-	}
-	
 	function parseResponse($txt)
 	{
     $result = array();
@@ -1135,14 +1118,14 @@ class HubbubConnection
 	 		
 }
 
-function nv_store($name, $value)
+function h2_nv_store($name, $value)
 {
   $nm = $_SESSION['uid'].'/'.$name;
 	$ds = array('nv_name' => $nm, 'nv_value' => json_encode($value));
 	DB_UpdateDataset('nvstore', $ds);
 }
 
-function nv_retrieve($name)
+function h2_nv_retrieve($name)
 {
   $nm = $_SESSION['uid'].'/'.$name;
 	$ds = DB_GetDatasetWQuery('SELECT * FROM '.getTableName('nvstore').' WHERE nv_name LIKE ?', array($nm));

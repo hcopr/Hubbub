@@ -72,7 +72,7 @@ class SigninModel extends HubbubModel
     $twitterInfo->response; 
     $ads['ia_comments'] = $twitterInfo->response['name'].' (@'.$twitterInfo->response['screen_name'].')';         
 		$this->newAccount($ads);
-    nv_store('twitterinfo/'.$ads['ia_key'], $twitterInfo->response);
+    h2_nv_store('twitterinfo/'.$ads['ia_key'], $twitterInfo->response);
   }
 	
   function completeOpenID(&$openid)
@@ -81,7 +81,7 @@ class SigninModel extends HubbubModel
 		$attr = $openid->getAttributes();
 		$ads['ia_comments'] = trim($attr['contact/email']);
 		$this->newAccount($ads);
-    nv_store('openid/'.$ads['ia_key'], $attr);
+    h2_nv_store('openid/'.$ads['ia_key'], $attr);
   }
 	
 }

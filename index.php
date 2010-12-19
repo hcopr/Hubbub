@@ -10,7 +10,7 @@
   require('lib/config.php'); 
   profile_point('config loaded');
   require('lib/database.php'); 
-  init_hubbub_environment();  
+  h2_init_hubbub_environment();  
   // if there was output up to this point, it has to be an error message
   $GLOBALS['content.startuperrors'] = trim(ob_get_clean());
 
@@ -19,11 +19,11 @@
   profile_point('environment ready');
 
   // instantiate controller, invoke action, render view	
-	$baseCtr = getController(getDefault($_REQUEST['controller'], cfg('service.defaultcontroller')));
+	$baseCtr = h2_getController(getDefault($_REQUEST['controller'], cfg('service.defaultcontroller')));
   profile_point('controller invoked');
-	invokeAction($baseCtr, $_REQUEST['action']);
+	h2_invokeAction($baseCtr, $_REQUEST['action']);
   profile_point('action executed');
-	$GLOBALS['content']['main'] = invokeView($baseCtr, $_REQUEST['action']);
+	$GLOBALS['content']['main'] = h2_invokeView($baseCtr, $_REQUEST['action']);
   profile_point('view executed');
 			
 	// output through page template

@@ -6,12 +6,12 @@
   require('lib/hubbub2.php');
   require('lib/config.php'); 
   require('lib/database.php'); 
-  init_hubbub_environment();  
+  h2_init_hubbub_environment();  
   // if there was output up to this point, it has to be an error message
  
   // instantiate controller, invoke action, render view	
-	$baseCtr = getController('endpoint');
-	invokeAction($baseCtr, 'cron');
-	print(invokeView($baseCtr, 'cron'));
+	$baseCtr = h2_getController('endpoint');
+	h2_invokeAction($baseCtr, 'cron');
+	print(h2_invokeView($baseCtr, 'cron'));
 		
 ?>

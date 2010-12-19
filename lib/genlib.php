@@ -24,21 +24,42 @@ function profiler_microtime_diff(&$b, &$a)
   return number_format(1000*($b_sec - $a_sec + $b_dec - $a_dec), 3);
 }
 
-/* wrapper that searches an array for an entry */
-function isInArray(&$array, $entry)
+/* this should be part of PHP actually */
+function inStr($haystack, $needle)
 {
-  return(array_search($entry, $array) === false); 
+  return(!(stripos(trim($haystack), trim($needle)) === false));
+}
+
+function strStartsWith($haystack, $needle)
+{
+  return(substr(strtolower($haystack), 0, strlen($needle)) == strtolower($needle));
+}
+
+function strEndsWith($haystack, $needle)
+{
+  return(substr(strtolower($haystack), -strlen($needle)) == strtolower($needle));
 }
 
 /* retrieves a list of files from a directory */
-function file_list($dir)
+function file_list($dir, $pattern = null, $recurse = false)
 {
   $result = array();
   if(is_dir($dir) && $handle = opendir($dir))
   {
-    while(($file = readdir($handle)) !== false)
-      if(substr($file, 0, 1)!='.' && $file != "Thumbs.db"/*pesky windows, images..*/)
-        $result[$dir.$file] = $file;
+    while(($file = readdir($handle)) !== false) 
+      if(substr($file, 0, 1)!='.' && $file != "Thumbs.db")
+      {
+        if(is_dir($dir.$file))
+        {
+          if($recurse === true) foreach(file_list($dir.$file.'/', $pattern, true) as $f => $sf)
+            $result[$f] = $sf;
+        }
+        else
+        {
+          if($pattern == null || instr($file, $pattern))
+            $result[$dir.$file] = $file;
+        }
+      }
     closedir($handle);
   }
   return($result);
@@ -80,22 +101,6 @@ function logToFile($filename, $content, $clearfile = false)
     "</log>\r\n\r\n");
 }	
 
-/* reconstruct the current URL, plus optional paradmeters */
-function selfUrl($options = array())
-{
-  $params = array();
-	$session_name = session_name();
-  
-	foreach($_REQUEST as $k => $v)
-	  if($k != '' && !$_SESSION[$k] && !$_COOKIE[$k] && $k != $session_name 
-      && $k != 'controller' && $k != 'action'
-			&& $k != 'c' && $k != 'a') $params[$k] = $v;
-	foreach($options as $k => $v)
-	  $params[$k] = $v;
-	
-  return(actionUrl($_REQUEST['action'], $_REQUEST['controller'], $params));
-}
-
 /* takes a query string or request_uri and parses it for parameters */
 function interpretQueryString($qs)
 {
@@ -107,29 +112,6 @@ function interpretQueryString($qs)
   foreach($rq as $k => $v) $_REQUEST[$k] = $v;    
   $_REQUEST['controller'] = getDefault($call[0], cfg('service.defaultcontroller'));
   $_REQUEST['action'] = getDefault($call[1], cfg('service.defaultaction'));
-}
-
-/* makes hidden field form params from current URL */
-function selfFormParams($options = array(), $unset = array(), $onlyStandardParams = true)
-{
-  global $site;
-  if ($onlyStandardParams == true)
-  {
-    foreach ($_REQUEST as $k => $v)
-    if ($k != 'PHPSESSID' && $k != '/~' && $k != 'cmd' && $v != '')
-      $optList[$k] = $v;
-  }
-  else
-  {
-    $optList['site'] = $_REQUEST['site'];
-    $optList['node'] = $_REQUEST['node'];
-  }
-  foreach ($options as $k => $v)
-      $optList[$k] = $v;
-  foreach ($unset as $k)
-      unset($optList[$k]);
-  foreach ($optList as $k => $v)
-      print('<input type="hidden" name="'.$k.'" value="'.$v.'"/>');
 }
 
 /* logs an error, duh */
@@ -149,7 +131,7 @@ function logError($logfile, $msg, $level = 0)
 	}
 }
 
-/* templated mail sending function */
+/* templated mail sending func */
 function send_mail($to, $template, $params = array())
 {
   mail($to, $subject, execTemplate($template, $params), $headers);
@@ -360,30 +342,6 @@ function cqrequest($url, $post = array(), $timeout = 2, $headerMode = true, $onl
     'body' => trim($resBody)));
 }
 
-function stringListToArray($txt)
-{
-  $result = array();
-  $lines = explode("\n", $txt);
-  if (sizeof($lines)>0)
-    foreach ($lines as $line)
-    {
-      $line = trim($line);
-      $k = CutSegment('=',$line);
-      $result[$k] = $line;
-    }
-  return($result);
-}
-
-/* converts an array of strings into a string list */
-function arrayToStringList($array)
-{
-  $result = '';
-  if (is_array($array))
-    foreach ($array as $k => $v)
-      $result .= $k.'='.$v."\n";
-  return($result);
-}
-
 /* convert an SQL timestamp into a human-friendly output */
 function SqlCoolTime($raw)
 {
@@ -435,11 +393,6 @@ function get_user_timeoffset()
 function dateToString($unixDate)
 {
   return(date(cfg('service.dateformat'), $unixDate));
-}
-
-function timeToString($unixDate)
-{
-  return(date(cfg('service.timeformat'), $unixDate));
 }
 
 function dateTimeToString($unixDate)

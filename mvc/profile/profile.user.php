@@ -4,9 +4,9 @@
     
     $ctr = 1;
 		// let's get the attributes exported to us from other services
-    $twitterInfo = nv_retrieve('twitterinfo/%');
-		$fbInfo = nv_retrieve('fb.basic/%');
-		$openInfo = nv_retrieve('openid/%');
+    $twitterInfo = h2_nv_retrieve('twitterinfo/%');
+		$fbInfo = h2_nv_retrieve('fb.basic/%');
+		$openInfo = h2_nv_retrieve('openid/%');
 		
 		$defaultEmail = getFirst($openInfo['contact/email'], $fbInfo['email'], $this->user->ds['u_email']);
 		

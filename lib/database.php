@@ -13,17 +13,6 @@ function getTableName($table)
   return(mysql_real_escape_string($table));
 }
 
-function DB_KVList($datasets, $table, $vfield)
-{
-  $result = array();
-  $keys = DB_GetKeys($table);
-  foreach ($datasets as $item)
-  {
-    $result[$item[$keys[0]]] = $item[$vfield];
-  }
-  return($result);
-}
-
 function checkTableName(&$table)
 {
 	$prefix = cfg('db.prefix');
@@ -44,11 +33,6 @@ function DB_StripPrefix($tableName)
   if ( $preFix == cfg('db.prefix') ) 
     $tableName = substr($tableName, strlen(cfg('db.prefix')));
   return($tableName); 
-}
-
-function getSQLDateTime($unixTimeStamp)
-{
-  return(date('Y-m-d H:i:s', $unixTimeStamp));
 }
 
 // create a comma-separated list of keys in $ds
@@ -116,12 +100,11 @@ function DB_UpdateField($tableName, $rowId, $fieldName, $value)
 // retrieves a list of fields and their metadata for the give table
 function DB_ListFields($tablename)
 {
-  //DB_ProfileCall('LIST FIELDS '.$tablename);
   checkTableName($tablename);
   $fieldDesc = array();
   
-  $metaFields = array();#DB_GetFieldMetaInfo($tablename);
-     
+  $metaFields = array();
+  
   $result = mysql_query("SELECT * FROM ".$tablename." LIMIT 1");
   $fields = @mysql_num_fields($result);
   $table = @mysql_field_table($result, 0);
@@ -223,26 +206,6 @@ function DB_UnpackDataset($table, &$rawds)
   }
 }
 
-function DB_SplitDataset(&$ds, $fieldPrefix, $result = array())
-{
-  foreach($ds as $k => $v)
-  {
-    if (substr($k, 0, strlen($fieldPrefix)) == $fieldPrefix)
-      $result[$k] = $v;
-  }
-  return($result);
-}
-
-/*$list = DB_Select('mytable', where(), order(), limit());
-
-#function where()
-
-function DB_Select($table, $params)
-{
-	
-}*/
-
-
 // updates/creates the $dataset in the $tablename
 function DB_UpdateDataset($tablename, &$dataset, $keyvalue = null, $keyname = null, $options = array())
 {
@@ -277,9 +240,6 @@ function DB_UpdateDataset($tablename, &$dataset, $keyvalue = null, $keyname = nu
   $dataset[$keyname] = getDefault($dataset[$keyname], mysql_insert_id($GLOBALS['db_link']));
   $pureData[$keyname] = $dataset[$keyname];
   
-  if(cfg('db.searchtable'))
-    DB_UpdateSearchIndex($tablename, $pureData[$keyname], $pureData);
-    
   profile_point('DB_UpdateDataset('.$tablename.', '.DB_UpdateDataset.')');
   return $pureData[$keyname];
 }
@@ -330,7 +290,6 @@ function DB_GetDataSet($tablename, $keyvalue, $keyname = null, $options = array(
     $result = array();
     if ($keyvalue != '' && $keyvalue != '0')
     {
-      //DB_ProfileCall('GET DATASET '.$tablename.' '.$keyvalue);
       checkTableName($tablename);
       if ($keyname == null)
       {
@@ -368,7 +327,6 @@ function DB_GetDataSet($tablename, $keyvalue, $keyname = null, $options = array(
 
 function DB_RemoveDataset($tablename, $keyvalue, $keyname = null)
 {
-  //DB_ProfileCall('REMOVE DATASET '.$tablename.' '.$keyvalue);
   checkTableName($tablename);
   if ($keyname == null)
   {
@@ -474,8 +432,7 @@ function DB_GetList($query, $parameters = null, $opt = array())
 // include settings from database
 // ***************************************************************************
 
-profile_point('DB_Init(code)');
-profile_point('DB_Init(call_0)');
+profile_point('DB_Init: code');
 ob_start();
 $GLOBALS['db_link'] = mysql_pconnect(cfg('db.host'), cfg('db.user'), cfg('db.password')) or
   $DBERR = 'The database connection to server '.cfg('db.user').'@'.cfg('db.host').' could not be established (code: '.@mysql_error($GLOBALS['db_link']).')';
@@ -495,6 +452,6 @@ else
   mysql_query("SET NAMES 'utf8'", $GLOBALS['db_link']);
 }
 
-profile_point('DB_Init(mysql_connect/select_db)');
+profile_point('DB_Init: mysql_connect/select_db');
 
 ?>

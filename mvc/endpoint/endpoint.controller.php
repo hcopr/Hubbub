@@ -16,8 +16,7 @@ class EndpointController extends HubbubController
       $response = array('result' => 'fail', 'reason' => 'invalid message type', 'op' => $this->msg->type);
 		else
       $response = $this->msg->response;
-		/*
-		audit_log('msg.receive:'.$this->msg->data['type'], 
+		/* h2_audit_log('msg.receive:'.$this->msg->data['type'], 
 		  $this->msg->data['from']['server'].':'.$this->msg->data['from']['user'].'>'.$this->msg->data['to']['user'].' '.$this->msg->usedSig, 
 			'SENT', $response['result'], $response['reason']);*/
     print(json_encode($response));

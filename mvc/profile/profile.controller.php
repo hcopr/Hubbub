@@ -28,13 +28,6 @@ class ProfileController extends HubbubController
 		
 	}
 	
-	function clearAllTables()
-	{
-		$this->skipView = true;
-		foreach(explode(',', 'auditlog,connections,entities,idaccounts,index,index_servers,messages,nvstore,servers,users,votes') as $table)
-		  DB_Update('TRUNCATE '.getTableName($table));
-	}
-	
   function ajax_deletepost()
   {
     $result = array();

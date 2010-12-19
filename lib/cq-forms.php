@@ -41,33 +41,6 @@ class CQForm
     }
   }
   
-  function validateDS(&$ds)
-  {
-    global $config;
-    $errors = array();
-    $controller = &$config['currentcontroller'];
-    include_once($this->presentationDir.$this->presentationName.'.php');
-    foreach ($this->elements as $e)
-    {
-      $value = $ds[$e['name']];
-      switch ($e['validate'])
-      {
-        case('notempty'): {
-          if (trim($value) == '') $errors[$e['name']] = 
-            $controller->l10n('field.cannotbeempty', $this->l10nBundle); 
-          break;
-        }
-        case('email'): {
-          if (!eregi("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$", 
-            $value)) $errors[$e['name']] = 
-              $controller->l10n('field.invalidemail', $this->l10nBundle); 
-          break;
-        }
-      }
-    }
-    return($errors);
-  }
-
   function getData()
   {
     global $config;
@@ -113,57 +86,6 @@ class CQForm
     return($this->ds);
   }
   
-  function addFromDataset($ds, $table = null, $params = array())
-  {
-    if (!is_array($params)) 
-	  $params = stringParamsToArray($params);
-    $info = array();
-    if ($table != null)
-    {
-      $ftypemap = array(
-        'int' => 'string',
-        'string' => 'string',
-        'blob' => 'text',
-        'text' => 'text',
-        'date' => 'string',
-        'datetime' => 'string',
-        );
-      $info = DB_ListFields($table);
-      $keys = DB_GetKeys($table);
-      $this->params[$this->defaultIdFieldname] = $ds[$keys[0]]; 
-      $this->tableName = $table;
-    }
-	
-    if (isset($params['show'])) 
-      foreach(explode(';', $params['show']) as $se)
-	      $visible[$se] = true;
-    else
-      foreach ($info as $se => $fld)
-	      $visible[$se] = true;
-		
-    $ctr = 0;
-    $caption = explode(';', $params['caption']);
-    
-    foreach ($visible as $k => $enabled)
-    {
-      $fld = $info[$k];
-      $v = $ds[$k];
-      $fieldType = getDefault($ftypemap[$fld['type']], 'string');
-      if ($keys[0] == $k) $fieldType = 'readonly';
-      $this->add($fieldType, $k, getDefault($caption[$ctr], $k));
-      $this->ds[$k] = $v;
-      $ctr++;      
-    }
-    
-    foreach ($info as $k => $fld) if (!$visible[$k])
-    {
-      $this->add('hidden', $k, $k);
-      $this->ds[$k] = $ds[$k];
-    }
-    
-    $this->add('submit', 'submitbtn', 'Save');
-  }
-
   function add($type, $name = null, $caption = '', $properties = array())
   {
     if (is_array($caption))

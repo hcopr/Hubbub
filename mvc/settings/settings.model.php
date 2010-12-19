@@ -1,12 +1,7 @@
 <?
 
 class SettingsModel extends HubbubModel
-{
-	function getLogoForHost($host, $type)
-	{
-		return('img/authtypes/'.$type.'.png');
-	}
-	
+{	
 	function CheckNewUrl($newUrl)
 	{
     require_once('lib/hubbub2_loadurl.php');

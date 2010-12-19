@@ -12,9 +12,9 @@ function tmpl_postlist($list, $withContainer = false)
   if(sizeof($list['list'])>0) foreach($list['list'] as $ds)
 	{
 		$data = HubbubMessage::unpackData($ds);
-		$typeFunction = 'tmpl_type_'.$ds['m_type'];
+		$typeFunction = 'dyn_type_'.$ds['m_type'];
 		if(!is_callable($typeFunction)) $typeFunction = 'tmpl_type_notsupported';
-		if($list['blurp_entity'] && $ds['m_owner'] != $list['blurp_entity']) $typeFunction = 'tmpl_foreign_post_blurp';
+		if($list['blurp_entity'] && $ds['m_owner'] != $list['blurp_entity']) $typeFunction = 'dyn_foreign_post_blurp';
     $typeFunction($data, $ds);
 	}
 
@@ -65,14 +65,14 @@ function tmpl_commentlist($postDS, &$comments, $withContainer = false)
 /*
  * Single post display handler: for errors
  */
-function tmpl_type_notsupported(&$data, &$ds)
+function dyn_type_notsupported(&$data, &$ds)
 {
 	?><div class="smalltext">(cannot display "<?= getDefault($ds['m_type'], 'undefined') ?>" message)</div><?
 }
 
-function tmpl_foreign_post_blurp(&$data, &$ds)
+function dyn_foreign_post_blurp(&$data, &$ds)
 {
-	$excerpt = make_excerpt($data['text']);
+	$excerpt = h2_make_excerpt($data['text']);
 	?><div class="blurp_post" id="post_<?= $ds['m_key'] ?>">◇ <?= HubbubEntity::linkFromId($ds['m_author'], array('short' => true, 'nolink' => true)) ?>
 			  <a href="<?= actionUrl('index', 'view', array('id' => $ds['m_owner'], 'post' => getDefault($ds['m_parent'], $ds['m_key']))) ?>"><?= l10n('commented') ?></a>
 				<?= HubbubEntity::linkFromId($ds['m_owner']) ?>'s
@@ -87,7 +87,7 @@ function tmpl_foreign_post_blurp(&$data, &$ds)
 /*
  * Single post display handler: for standard posts
  */
-function tmpl_type_post(&$data, &$ds)
+function dyn_type_post(&$data, &$ds)
 {
 	$comments = ProfileModel::getComments($ds['m_key']);
 	$metaElements = array(

@@ -16,7 +16,7 @@
 <div id="mode_login">
 <?
 
-  $lf = new CQForm('emllogin', array('ajax' => 'submitLogin'));
+  $lf = new CQForm('emllogin', array('ajax' => 'js_submitLogin'));
   $lf->add('string', 'email');
   $lf->add('password', 'password');
   $lf->add('submit', 'Log In');
@@ -27,7 +27,7 @@
 <div id="mode_signup" style="display: none;">
 <?
 
-  $su = new CQForm('emlsignup', array('ajax' => 'submitSignup'));
+  $su = new CQForm('emlsignup', array('ajax' => 'js_submitSignup'));
   $su->add('string', 'eml');
   $su->add('passworddouble', 'pwd');
   $su->add('submit', 'Create Account');
@@ -40,14 +40,14 @@
 
 </div>
 <script>
-  function submitLogin(param)
+  function js_submitLogin(param)
   {
 	  $.post('<?= actionUrl('ajax_emaillogin', 'signin') ?>', { 'email' : param.email, 'password' : param.password }, function(data) {
 		  $('#emllogin_result').html(data);
 		  });
   }
 
-  function submitSignup(param)
+  function js_submitSignup(param)
   {
 
   }
