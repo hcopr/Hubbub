@@ -48,6 +48,9 @@
 	
 	// global config array
   $GLOBALS['config']['service'] = array(
+    // enable stats
+    'statlog' => true,
+    // server's standard date/time format
     'dateformat' => 'H:i d.m.Y',
     'name' => 'Hubbub2',
 		'defaultcontroller' => 'home',

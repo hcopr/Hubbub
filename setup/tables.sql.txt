@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 24, 2010 at 12:27 PM
+-- Generation Time: Dec 19, 2010 at 06:02 AM
 -- Server version: 5.1.47
 -- PHP Version: 5.3.3
 
@@ -19,7 +19,8 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 -- Table structure for table `h2_auditlog`
 --
 
-CREATE TABLE `h2_auditlog` (
+DROP TABLE IF EXISTS `h2_auditlog`;
+CREATE TABLE IF NOT EXISTS `h2_auditlog` (
   `l_key` int(11) NOT NULL AUTO_INCREMENT,
   `l_op` varchar(32) NOT NULL,
   `l_user` varchar(32) NOT NULL,
@@ -29,7 +30,7 @@ CREATE TABLE `h2_auditlog` (
   `l_result` varchar(4) NOT NULL,
   `l_reason` varchar(128) NOT NULL,
   PRIMARY KEY (`l_key`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -37,7 +38,8 @@ CREATE TABLE `h2_auditlog` (
 -- Table structure for table `h2_connections`
 --
 
-CREATE TABLE `h2_connections` (
+DROP TABLE IF EXISTS `h2_connections`;
+CREATE TABLE IF NOT EXISTS `h2_connections` (
   `c_key` int(11) NOT NULL AUTO_INCREMENT,
   `c_from` int(11) NOT NULL,
   `c_to` int(11) NOT NULL,
@@ -45,13 +47,17 @@ CREATE TABLE `h2_connections` (
   `c_group` int(11) NOT NULL,
   `c_auto_approve` varchar(1) NOT NULL DEFAULT 'Y',
   `c_toserverkey` int(11) NOT NULL,
+  `c_count_sent` int(11) NOT NULL,
+  `c_count_rcvd` int(11) NOT NULL,
   PRIMARY KEY (`c_key`),
   KEY `c_from` (`c_from`),
   KEY `c_to` (`c_to`),
   KEY `c_status` (`c_status`),
   KEY `c_group` (`c_group`),
-  KEY `c_serverkey` (`c_toserverkey`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+  KEY `c_serverkey` (`c_toserverkey`),
+  KEY `c_count_sent` (`c_count_sent`),
+  KEY `c_count_rcvd` (`c_count_rcvd`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=41 ;
 
 -- --------------------------------------------------------
 
@@ -59,7 +65,8 @@ CREATE TABLE `h2_connections` (
 -- Table structure for table `h2_entities`
 --
 
-CREATE TABLE `h2_entities` (
+DROP TABLE IF EXISTS `h2_entities`;
+CREATE TABLE IF NOT EXISTS `h2_entities` (
   `_key` int(11) NOT NULL AUTO_INCREMENT,
   `user` varchar(128) NOT NULL,
   `url` varchar(128) NOT NULL,
@@ -74,7 +81,7 @@ CREATE TABLE `h2_entities` (
   KEY `_local` (`_local`),
   KEY `url` (`url`),
   KEY `server` (`server`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=59 ;
 
 -- --------------------------------------------------------
 
@@ -82,7 +89,8 @@ CREATE TABLE `h2_entities` (
 -- Table structure for table `h2_idaccounts`
 --
 
-CREATE TABLE `h2_idaccounts` (
+DROP TABLE IF EXISTS `h2_idaccounts`;
+CREATE TABLE IF NOT EXISTS `h2_idaccounts` (
   `ia_key` int(11) NOT NULL AUTO_INCREMENT,
   `ia_type` varchar(16) NOT NULL,
   `ia_url` varchar(250) NOT NULL,
@@ -92,7 +100,7 @@ CREATE TABLE `h2_idaccounts` (
   KEY `ia_user` (`ia_user`),
   KEY `ia_url` (`ia_url`),
   KEY `ia_type` (`ia_type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
@@ -100,13 +108,14 @@ CREATE TABLE `h2_idaccounts` (
 -- Table structure for table `h2_localgroups`
 --
 
-CREATE TABLE `h2_localgroups` (
+DROP TABLE IF EXISTS `h2_localgroups`;
+CREATE TABLE IF NOT EXISTS `h2_localgroups` (
   `lg_key` int(11) NOT NULL AUTO_INCREMENT,
   `lg_entity` int(11) NOT NULL,
   `lg_name` varchar(128) NOT NULL,
   PRIMARY KEY (`lg_key`),
   KEY `lg_entity` (`lg_entity`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -114,7 +123,8 @@ CREATE TABLE `h2_localgroups` (
 -- Table structure for table `h2_messages`
 --
 
-CREATE TABLE `h2_messages` (
+DROP TABLE IF EXISTS `h2_messages`;
+CREATE TABLE IF NOT EXISTS `h2_messages` (
   `m_key` int(11) NOT NULL AUTO_INCREMENT,
   `m_id` varchar(64) NOT NULL,
   `m_parent` int(11) NOT NULL,
@@ -140,7 +150,7 @@ CREATE TABLE `h2_messages` (
   KEY `m_votehash` (`m_votehash`),
   KEY `m_publish` (`m_publish`),
   KEY `m_tag` (`m_tag`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=51 ;
 
 -- --------------------------------------------------------
 
@@ -148,7 +158,8 @@ CREATE TABLE `h2_messages` (
 -- Table structure for table `h2_nvstore`
 --
 
-CREATE TABLE `h2_nvstore` (
+DROP TABLE IF EXISTS `h2_nvstore`;
+CREATE TABLE IF NOT EXISTS `h2_nvstore` (
   `nv_name` varchar(32) NOT NULL,
   `nv_value` longtext NOT NULL,
   PRIMARY KEY (`nv_name`)
@@ -160,7 +171,8 @@ CREATE TABLE `h2_nvstore` (
 -- Table structure for table `h2_servers`
 --
 
-CREATE TABLE `h2_servers` (
+DROP TABLE IF EXISTS `h2_servers`;
+CREATE TABLE IF NOT EXISTS `h2_servers` (
   `s_key` int(11) NOT NULL AUTO_INCREMENT,
   `s_url` varchar(128) NOT NULL,
   `s_name` varchar(128) NOT NULL,
@@ -174,7 +186,30 @@ CREATE TABLE `h2_servers` (
   PRIMARY KEY (`s_key`),
   KEY `s_url` (`s_url`),
   KEY `s_lastpolled` (`s_lastpolled`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `h2_usagestats`
+--
+
+DROP TABLE IF EXISTS `h2_usagestats`;
+CREATE TABLE IF NOT EXISTS `h2_usagestats` (
+  `st_key` int(11) NOT NULL AUTO_INCREMENT,
+  `st_type` varchar(8) NOT NULL,
+  `st_call` varchar(32) NOT NULL,
+  `st_interval` int(11) NOT NULL,
+  `st_count` bigint(20) NOT NULL,
+  `st_msec_total` double NOT NULL,
+  `st_msec_avg` double NOT NULL,
+  `st_mem_total` double NOT NULL,
+  `st_mem_avg` double NOT NULL,
+  PRIMARY KEY (`st_key`),
+  KEY `st_type` (`st_type`),
+  KEY `st_call` (`st_call`),
+  KEY `st_interval` (`st_interval`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
 
 -- --------------------------------------------------------
 
@@ -182,7 +217,8 @@ CREATE TABLE `h2_servers` (
 -- Table structure for table `h2_users`
 --
 
-CREATE TABLE `h2_users` (
+DROP TABLE IF EXISTS `h2_users`;
+CREATE TABLE IF NOT EXISTS `h2_users` (
   `u_key` int(11) NOT NULL AUTO_INCREMENT,
   `u_name` varchar(128) NOT NULL,
   `u_email` varchar(128) NOT NULL,
@@ -194,7 +230,7 @@ CREATE TABLE `h2_users` (
   PRIMARY KEY (`u_key`),
   KEY `u_entity` (`u_entity`),
   KEY `u_sessionkey` (`u_sessionkey`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=26 ;
 
 -- --------------------------------------------------------
 
@@ -202,7 +238,8 @@ CREATE TABLE `h2_users` (
 -- Table structure for table `h2_votes`
 --
 
-CREATE TABLE `h2_votes` (
+DROP TABLE IF EXISTS `h2_votes`;
+CREATE TABLE IF NOT EXISTS `h2_votes` (
   `v_msg` int(11) NOT NULL,
   `v_choice` varchar(32) NOT NULL,
   `v_text` varchar(128) NOT NULL,

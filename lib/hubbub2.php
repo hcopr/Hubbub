@@ -107,15 +107,17 @@ function h2_make_excerpt($text, $length = 64)
 
 function h2_statlog($type, $call)
 {
+  if(!cfg('service.statlog')) return;
+  $itvl = gmdate('Ymd');
   $logTypes = array(
-    array('st_type' => $type, 'st_call' => $call, 'st_interval' => gmdate('Y-m-d')),
+    array('st_type' => $type, 'st_call' => $call, 'st_interval' => $itvl),
     );
   $ctr = getDefault($_REQUEST['controller'], 'endpoint');
   if($ctr == 'endpoint') $ctr = $GLOBALS['stats']['msgtype'].'('.$GLOBALS['stats']['response'].')';
   if($_SERVER['REMOTE_ADDR'] != '')
   {
-    $logTypes[] = array('st_type' => 'ip', 'st_call' => 'req '.getDefault($_SERVER['REMOTE_ADDR'], 'internal').' '.$ctr, 'st_interval' => gmdate('Y-m-d'));
-    $logTypes[] = array('st_type' => 'ip', 'st_call' => 'all '.getDefault($_SERVER['REMOTE_ADDR'], 'internal').' ', 'st_interval' => gmdate('Y-m-d'));
+    $logTypes[] = array('st_type' => 'ip', 'st_call' => 'req '.getDefault($_SERVER['REMOTE_ADDR'], 'internal').' '.$ctr, 'st_interval' => $itvl);
+    $logTypes[] = array('st_type' => 'ip', 'st_call' => 'all '.getDefault($_SERVER['REMOTE_ADDR'], 'internal').' ', 'st_interval' => $itvl);
   }
   foreach($logTypes as $lds)
   {
@@ -127,6 +129,9 @@ function h2_statlog($type, $call)
     $ds['st_mem_avg'] = number_format($ds['st_mem_total'] / $ds['st_count'], 1);
     DB_UpdateDataset('usagestats', $ds);
   }
+  // delete stats after ten days
+  if(rand(0, 100) == 1) 
+    DB_Update('DELETE DELAYED FROM '.getTableName('usagestats').' WHERE st_interval < '.gmdate('Ymd', time()-60*60*24*10));
 }
 
 /* replaces the standard PHP error handler, mainly because we want a stack trace */
