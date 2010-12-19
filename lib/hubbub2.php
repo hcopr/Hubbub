@@ -107,14 +107,17 @@ function h2_make_excerpt($text, $length = 64)
 
 function h2_statlog($type, $call)
 {
-  foreach(array(gmdate('Y-m'), gmdate('Y-m-d')) as $interval)
+  $logTypes = array(
+    array('st_type' => $type, 'st_call' => $call, 'st_interval' => gmdate('Y-m-d')),
+    );
+  if($_SERVER['REMOTE_ADDR'] != '')
+    $logTypes[] = array('st_type' => 'ip', 'st_call' => getDefault($_SERVER['REMOTE_ADDR'], 'internal').':'.getDefault($_REQUEST['controller'], 'endpoint'), 'st_interval' => gmdate('Y-m-d'));
+  foreach($logTypes as $lds)
   {
-    $ds = DB_GetDatasetMatch('usagestats', array(
-      'st_type' => $type,
-      'st_call' => $call,
-      'st_interval' => $interval,
-      ));
+    $ds = DB_GetDatasetMatch('usagestats', $lds);
     $ds['st_count']++;
+    $ds['st_msec_total'] += profiler_microtime_diff(microtime(), $GLOBALS['profiler_start']);
+    $ds['st_msec_avg'] = number_format($ds['st_msec_total']/$ds['st_count'], 2);
     DB_UpdateDataset('usagestats', $ds);
   }
 }
@@ -175,7 +178,6 @@ function h2_invokeAction(&$controller, $action)
 /* invoke a controller's view */
 function h2_invokeView(&$controller, $action)
 {
-  h2_statlog('mvc', $controller->name.'.'.$action);
 	return($controller->invokeView($action));
 }
 

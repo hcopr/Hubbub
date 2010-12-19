@@ -12,6 +12,7 @@ class EndpointController extends HubbubController
   {
   	$this->msg = new HubbubMessage();
     $result = $this->msg->receive($_REQUEST['hubbub_msg'], $_REQUEST['hubbub_sig']);
+    $GLOBALS['stats']['msgtype'] = $this->msg->type;
 		if($result === false)
       $response = array('result' => 'fail', 'reason' => 'invalid message type', 'op' => $this->msg->type);
 		else
@@ -20,6 +21,7 @@ class EndpointController extends HubbubController
 		  $this->msg->data['from']['server'].':'.$this->msg->data['from']['user'].'>'.$this->msg->data['to']['user'].' '.$this->msg->usedSig, 
 			'SENT', $response['result'], $response['reason']);*/
     print(json_encode($response));
+    $GLOBALS['stats']['response'] = $response['result'];
   }
   
   function cron()

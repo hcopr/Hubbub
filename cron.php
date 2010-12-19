@@ -13,5 +13,7 @@
 	$baseCtr = h2_getController('endpoint');
 	h2_invokeAction($baseCtr, 'cron');
 	print(h2_invokeView($baseCtr, 'cron'));
+	
+  h2_statlog('cron', 'cron');  
 		
 ?>

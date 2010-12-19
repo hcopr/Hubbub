@@ -19,7 +19,8 @@
   profile_point('environment ready');
 
   // instantiate controller, invoke action, render view	
-	$baseCtr = h2_getController(getDefault($_REQUEST['controller'], cfg('service.defaultcontroller')));
+  $_REQUEST['controller'] = getDefault($_REQUEST['controller'], cfg('service.defaultcontroller'));
+	$baseCtr = h2_getController($_REQUEST['controller']);
   profile_point('controller invoked');
 	h2_invokeAction($baseCtr, $_REQUEST['action']);
   profile_point('action executed');
@@ -41,6 +42,9 @@
 		}
 	}
 
-  
+  if($_REQUEST['controller'] != 'endpoint')
+    h2_statlog('web', $_REQUEST['controller'].'.'.$_REQUEST['action']);  
+  else
+    h2_statlog('srv', $_REQUEST['action'].'.'.$GLOBALS['stats']['msgtype'].'.'.$GLOBALS['stats']['response']);  
 		
 ?>
