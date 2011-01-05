@@ -15,8 +15,10 @@ cron tab (see below).
 A word about "pretty" URLs:
 We are using the standard URL rewrite rule that Wordpress uses (RewriteRule . index.php [L]),
 this maps an arbitrary URL and hands it over to index.php. 
+
 On Apache, the necessary .htaccess file is created automatically by the installer, please 
 make sure mod_rewrite is enabled in your config.
+
 On NGINX, you can simply insert or modify the try_files directive in your nginx.conf to
 include index.php (plus the path to your installation if needed):
   try_files $uri $uri/ index.php;
@@ -27,9 +29,13 @@ This is important: to poll messages from other servers, you need to create an en
 server's crontab that executes the polling mechanism in regular intervals. This is not done
 by the installer since this task is reserved for the root user only on most Unix/Linux systems.
 Open your crontab file from the command line (goes something like this)
+
   > sudo nano /etc/crontab
+  
 after which an editor will open. Add the following line to the file:
+
   */5 * * * * root php -f <yourPath>/cron.php > /dev/null 2>&1
+  
 where <yourPath> is the path to your cron.php file. This setting will execute the cron poller
 every 5 minutes. This doesn't mean Hubbub will poll every server every 5 minutes, however.
 Instead, the polling interval per server is located in the config option server.poll_interval
