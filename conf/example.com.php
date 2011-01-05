@@ -1,12 +1,30 @@
 <?php
+// DO NOT REMOVE OR RENAME THIS FILE!
 
 $GLOBALS['config']['db'] = array(
-  'host' => 'localhost',
-  'user' => 'root',
-  'password' => '',
-  'database' => 'hubbub2',
+  'host' => '_db_host_',
+  'user' => '_db_user_',
+  'password' => '_db_password_',
+  'database' => '_db_name_',
   'prefix' => 'h2_',  
   );
+
+/* a password for hubbub-related admin functions on this server */  
+$GLOBALS['config']['service']['adminpw'] = '_admin_password_';
+
+/* your server's public domain name */
+$GLOBALS['config']['service']['server'] = '_server_base_';
+
+/* whether your server supports "pretty" urls */
+$GLOBALS['config']['service']['url_rewrite'] = _enable_rewrite_;
+
+/* a password to prevent outside forces from triggering hubbub's cron-dependent services */
+$GLOBALS['config']['service']['ping_password'] = '_ping_password_';
+
+/** Memcached support:
+ * If you have memcached installed, uncomment the memcache line and enter your server address as needed
+ **/
+/*$GLOBALS['config']['cache']['memcache'] = 'localhost:11211';*/
 
 /** Twitter Connector:
  * Uncomment this to allow login via Twitter. If you want your users to be able

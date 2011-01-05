@@ -42,6 +42,9 @@
     }
     unset($process);
   }
+  // preventing the "mark of the beast" bug
+  foreach($_REQUEST as $k => $v)
+    if(substr(str_replace('.', '', $v), 0, 8) == '22250738') $_REQUEST[$k] = 'F'.$v;
 	
 	// set httpOnly flag for more secure cookie handling
   ini_set('session.cookie_httponly', 1);
