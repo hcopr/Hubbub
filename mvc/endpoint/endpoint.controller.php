@@ -10,6 +10,7 @@ class EndpointController extends HubbubController
   
   function index()
   {
+    access_policy('post');
   	$this->msg = new HubbubMessage();
     $result = $this->msg->receive($_REQUEST['hubbub_msg'], $_REQUEST['hubbub_sig']);
     $GLOBALS['stats']['msgtype'] = $this->msg->type;
@@ -26,6 +27,7 @@ class EndpointController extends HubbubController
   
   function cron()
   {
+    access_policy('cron');
 		$this->skipView = false;
     $this->invokeModel();
   }

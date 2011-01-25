@@ -13,6 +13,8 @@
   $erec2 = array('server' => $_SERVER['HTTP_HOST'], 'user' => $u2name, 'url' => $_SERVER['HTTP_HOST'].'/'.$u2name);
   $ne2 = new HubbubEntity();
   $ne2->create($erec2, true);
+  $ne1key = $ne1->ds['_key'];
+  $ne2key = $ne2->ds['_key'];
   tlog($ne1->ds['_key'] > 0, 'HubbubEntity::create('.$u1name.')', 'OK', 'failed, no key assigned'); 
   tlog($ne2->ds['_key'] > 0, 'HubbubEntity::create('.$u2name.')', 'OK', 'failed, no key assigned'); 
 
@@ -122,10 +124,15 @@
   $fpost->owner($ne2->ds);
   $fpost->data['text'] = 'This is a text post on someone else\'s profile. Umlauts like üöä should be preserved.';
   $fpost->save();
+
   $fpost->sendToUrl($fpost->ownerEntity->ds['server']);
-  tlog($fpost->responseData['data']['result'] == 'OK', 'foreign_post sentToUrl('.$fpost->ownerEntity->ds['url'].')', 'OK', 'fail ('.$fpost->responseData['data']['reason'].')');
+  // see if the message was accepted on the "other" end
+  tlog($fpost->responseData['data']['result'] == 'OK', 'foreign_post sentToUrl('.$fpost->ownerEntity->ds['url'].')', 'OK ('.$fpost->data['msgid'].')', 'fail ('.$fpost->responseData['data']['reason'].')');
+  // this tests whether the message was instantly published (a post record was returned)
   tlog(sizeof($fpost->responseData['data']['post']) > 0, 'foreign_post auto_publish on receive', 'OK ('.$fpost->responseData['data']['post']['msgid'].')', 'fail');
+  // is the message text uncorrupted?
   tlog($fpost->responseData['data']['post']['text'] == $fpost->data['text'], 'foreign_post text unicode', 'OK', 'fail');
+  tlog($fpost->responseData['data']['post']['msgid'] != $fpost->data['msgid'], 'foreign_post-to-post ID change', 'OK', 'fail');
   // now, this activity should appear on $ne2's profile stream
 	$wallPosts1 = $this->profile->getPostList($ne2->key());
 	foreach($wallPosts1['list'] as $pds)
@@ -141,7 +148,7 @@
   $post->data['text'] = 'This is a realtime message. Umlauts like üöä should be preserved.';
   // if we're the owner, we can send a realtime update
   $post->sendToUrl($ne1->ds['server']);
-  tlog($post->responseData['data']['result'] == 'OK', 'post sentToUrl('.$post->authorEntity->ds['url'].')', 'OK', 'fail ('.$post->responseData['data']['reason'].')');
+  tlog($post->responseData['data']['result'] == 'OK', 'post sentToUrl('.$post->authorEntity->ds['url'].')', 'OK', 'fail ('.$post->responseData['data']['result'].':'.$post->responseData['data']['reason'].')');
   // if the message was accepted, we should find it on the owner's profile stream (since the servers are identical)
 	$wallPosts1 = $this->profile->getPostList($ne1->key());
 	foreach($wallPosts1['list'] as $pds)

@@ -19,8 +19,10 @@ function foreign_post_receive(&$data, &$msg)
     // let's just create a post out of this
     WriteToFile('log/activity.log', $data['msgid'].' foreign_post received, accepted'.chr(10));
     $post = new HubbubMessage('post');
+    $npid = $post->data['msgid'];
     $post->data = $msg->data;
     $post->data['type'] = 'post';
+    $post->data['msgid'] = $npid;
     $post->author($msg->authorEntity->ds);
     $post->owner($msg->ownerEntity->ds);
     $post->data['changed'] = time();

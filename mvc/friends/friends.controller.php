@@ -4,7 +4,7 @@ class FriendsController extends HubbubController
 {
 	function __init()
 	{
-    access_authenticated_only();
+    access_policy('auth');
 		foreach(DB_GetList('SELECT c_status,COUNT(*) as count FROM '.getTableName('connections').'
 		  WHERE c_from = ?
 			GROUP BY c_status', array($this->user->entity)) as $item)
@@ -38,18 +38,21 @@ class FriendsController extends HubbubController
 	
 	function ajax_ignore()
   {
+    access_policy('write');
     $this->skipView = false;
     $this->model->ignore(new HubbubConnection($this->user->entity, $_REQUEST['key']));
   }
 	
   function ajax_accept()
   {
+    access_policy('write');
     $this->skipView = false;
     $this->result = $this->model->accept(new HubbubConnection($this->user->entity, $_REQUEST['key']));
   }
   
   function ajax_remove()
   {
+    access_policy('write');
     $this->result = $this->model->remove(new HubbubConnection($this->user->entity, $_REQUEST['key']));
   }
   

@@ -4,7 +4,7 @@ class SettingsController extends HubbubController
 {
 	function __init()
 	{
-    access_authenticated_only();
+    access_policy('auth');
 		$this->menu = $this->makeMenu('index,auth,url');
 		$this->invokeModel();
     include_once('lib/cq-forms.php');
@@ -38,6 +38,7 @@ class SettingsController extends HubbubController
 	
 	function ajax_changeurl()
 	{
+	  access_policy('write');
     $this->skipView = false;
 		$this->myEntityRecord = $this->user->selfEntity();
     unset($this->myEntityRecord['url']);
@@ -48,6 +49,7 @@ class SettingsController extends HubbubController
 	
 	function ajax_commiturl()
 	{
+	  access_policy('write');
     $this->skipView = false;
 		if($_REQUEST['newurl'])
       $this->changeResult = $this->model->changeMyUrl($_REQUEST['newurl']);

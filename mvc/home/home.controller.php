@@ -4,7 +4,7 @@ class HomeController extends HubbubController
 {
 	function __init()
 	{
-    access_authenticated_only();
+    access_policy('auth');
 		$this->invokeModel('profile');
     $this->menu = $this->makeMenu('index');
 	}

@@ -2,6 +2,7 @@ This is the Hubbub2 repository. For more information on this project, please ref
 http://hubbub.at or email me if you got questions and comments: udo.schroeter@gmail.com
 
 Prototype:
+---------------------------------------------------------------------------------------------
 The source code for the protoype is no longer available, let's pretend it never existed. 
 It was horrible, and hence true to its purpose, which it served well. Please don't install 
 this version, yet. It doesn't work. When it starts working, this message will change. 
@@ -17,10 +18,13 @@ We are using the standard URL rewrite rule that Wordpress uses (RewriteRule . in
 this maps an arbitrary URL and hands it over to index.php. 
 
 On Apache, the necessary .htaccess file is created automatically by the installer, please 
-make sure mod_rewrite is enabled in your config.
+make sure mod_rewrite is enabled in your config. Consult the mod_rewrite manual if you 
+encounter any problems. Take care of the RewriteBase parameter if you installed Hubbub in
+a sub directory.
 
 On NGINX, you can simply insert or modify the try_files directive in your nginx.conf to
 include index.php (plus the path to your installation if needed):
+
   try_files $uri $uri/ index.php;
 
 Installing Cron Poller

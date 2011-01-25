@@ -4,7 +4,7 @@ class ProfileController extends HubbubController
 {
 	function __init()
 	{
-    access_authenticated_only();
+    access_policy('auth');
 		$this->menu = $this->makeMenu('index,user');
 		$this->invokeModel();
     include_once('templates/postlist.php');
@@ -12,6 +12,7 @@ class ProfileController extends HubbubController
 	
 	function index()
 	{
+
 	}
 	
 	function user()
@@ -48,6 +49,7 @@ class ProfileController extends HubbubController
 	
 	function ajax_comment()
 	{
+	  access_policy('write');
     if(trim($_REQUEST['text']) != '' && $_REQUEST['pid'] > 0)
     {
     	$parentMessage = DB_GetDataset('messages', $_REQUEST['pid']);
@@ -72,6 +74,7 @@ class ProfileController extends HubbubController
 
   function ajax_post()
 	{
+	  access_policy('write');
 		if(trim($_REQUEST['text']) != '')
 		{
 			$ds = $this->model->post(array(
@@ -90,6 +93,7 @@ class ProfileController extends HubbubController
 	
 	function ajax_vote()
 	{
+	  access_policy('write');
     if(substr($_REQUEST['text'], 0, 1) != '#') $_REQUEST['text'] = '#'.$_REQUEST['text'];
 		$this->ajax_comment();
 	}

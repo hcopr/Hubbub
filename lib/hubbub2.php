@@ -193,11 +193,44 @@ function h2_invokeView(&$controller, $action)
 	return($controller->invokeView($action));
 }
 
-/* allow only sessions with a valid uid, if not present redirect to signin page */
-function access_authenticated_only()
+/* require enhanced security for calls that modify data */
+function access_policy($types = 'auth')
+{  
+  foreach(explode(',', str_replace('write', 'origin,post', $types)) as $type)
+    switch(trim($type))
+    {
+      case('auth'): {
+        /* allow only sessions with a valid uid, if not present redirect to signin page */
+        if($_SESSION['uid']+0 == 0)
+      		redirect(actionUrl('index', 'signin'));
+        break; 
+      }
+      case('origin'): {
+        // require the origin to be the same server
+        $ref = parse_url($_SERVER['HTTP_REFERER']);
+        if(!is_this_host($ref['host'])) die('Error: Hubbub access policy violation (origin)');
+        break; 
+      }
+      case('post'): {
+        // require the POST HTTP method
+        if($_SERVER['REQUEST_METHOD'] != 'POST') die('Error: Hubbub access policy violation (POST required)');
+        break; 
+      }
+      case('admin'): {
+        die('Error: admin access required'); 
+        break; 
+      }
+    }
+}
+
+function is_this_host($hostName)
 {
-  if($_SESSION['uid']+0 == 0)
-		redirect(actionUrl('index', 'signin'));
+  return(true);
+  $hostName = strtolower($hostName);  
+  return($hostName == strtolower(cfg('service.server')) || 
+    $hostName == strtolower($_SERVER['SERVER_ADDR']) ||
+    $hostName == strtolower($_SERVER['SERVER_NAME']) ||
+    $hostName == strtolower($_SERVER['HTTP_HOST']));
 }
 
 /* class for the currently signed-in user */
