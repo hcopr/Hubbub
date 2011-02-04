@@ -3,16 +3,16 @@
     $myOldUsername = $this->user->getUsername();
     
     $ctr = 1;
-		// let's get the attributes exported to us from other services
-    $twitterInfo = h2_nv_retrieve('twitterinfo/%');
-		$fbInfo = h2_nv_retrieve('fb.basic/%');
-		$openInfo = h2_nv_retrieve('openid/%');
+	  // let's get the attributes exported to us from other services
+    $twitterInfo = h2_nv_retrieve('twitterinfo');
+  	$fbInfo = h2_nv_retrieve('fb.basic');
+  	$openInfo = h2_nv_retrieve('openid');
 		
+		// let's try to determine sensible user data from the login services
 		$defaultEmail = getFirst($openInfo['contact/email'], $fbInfo['email'], $this->user->ds['u_email']);
-		
 		// determining a default username idea
 		$emlName = trim(substr($defaultEmail, 0, strpos($defaultEmail, '@')));
-    $defaultUsername = safename(getFirst($twitterInfo['screen_name'], $fbInfo['first_name'], $emlName, $openInfo['namePerson/friendly']));
+    $defaultUsername = safename(getFirst($twitterInfo['screen_name'], $fbInfo['first_name'], $emlName, $openInfo['namePerson/friendly']));   
     if($defaultUsername != '' && !HubbubEntity::isNameAvailable($defaultUsername)) 
 		{
       do {
@@ -21,8 +21,7 @@
 			$defaultUsername = $defaultUsername2;
 		}
 		// other default data
-    $defaultName = getFirst($openInfo['namePerson/first'].' '.$openInfo['namePerson/last'], $fbInfo['name'], $twitterInfo['name'], $openInfo['namePerson/friendly']);
-		
+    $defaultName = getFirst($openInfo['namePerson/first'].' '.$openInfo['namePerson/last'], $fbInfo['name'], $twitterInfo['name'], $openInfo['namePerson/friendly']);		
 		$gravatarImg = 'http://www.gravatar.com/avatar/'.md5(strtolower(trim($defaultEmail))).'&s=48';
 		$defaultPic = getFirst($fbInfo['picture'], $twitterInfo['profile_image_url'], $gravatarImg);
 		

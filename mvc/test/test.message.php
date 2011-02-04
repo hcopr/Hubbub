@@ -118,6 +118,7 @@
   
   tsection('Foreign Posts');
 
+  // if I'm only the author, I send this content in the form of a foreign_post to the owner (who will hopefully accept it into their stream)
   $fpost = new HubbubMessage('foreign_post');
 	$fpost->localUserEntity = $ne1->key();
   $fpost->author($ne1->ds);
@@ -141,6 +142,7 @@
 
   tsection('Realtime Updates');
 
+  // if I am the owner of the message, I send it out to my closest friends as a realtime notification!
   $post = new HubbubMessage('post');
 	$post->localUserEntity = $ne1->key();
   $post->author($ne2->ds);

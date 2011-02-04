@@ -37,15 +37,16 @@ $cookie = get_facebook_cookie(cfg('facebook.app_id'), cfg('facebook.app_secret')
 
 if($cookie['access_token'])
 {
-  $userdata = json_decode(file_get_contents('https://graph.facebook.com/me?fields=picture&access_token='.$cookie['access_token']), true);
+  $userdata = json_decode(file_get_fromurl('https://graph.facebook.com/me?fields=picture&access_token='.$cookie['access_token']), true);
   $ads = $this->model->getAccount('fb', $userdata['id']);
 	$ads['ia_comments'] = $userdata['name'].' (#'.$userdata['id'].')';
   $this->model->newAccount($ads);
   h2_nv_store('fb.basic/'.$ads['ia_key'], $userdata);
+  h2_nv_store('fb.basic', $userdata);
   $this->user->login();
   ?><script>
   document.location.href = '<?= actionUrl('index', 'home') ?>'; 
-    </script><?
+  </script><?
 }
 
 ?>

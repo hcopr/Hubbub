@@ -74,12 +74,12 @@ class ProfileModel extends HubbubModel
 		if($p['author']['_key'] == $p['owner']['_key'])
 		{
 			$msg = $this->makePostMessage('post', $p);
-			
+			$msg->sendNotifications();
 		}
 		else
 		{
       $msg = $this->makePostMessage('foreign_post', $p);
-			
+      $msg->sendToOwner();
 		}
 		return($msg->ds);
 	}

@@ -94,6 +94,7 @@ function dyn_type_post(&$data, &$ds)
 	  SQLCoolTime($ds['m_created']), 
 	  '<a onclick="springComment('.$ds['m_key'].')">Comment</a>', 
 		'<a onclick="springVote('.$ds['m_key'].')">Vote</a>');
+  if(object('user')->isAdmin()) $metaElements[] = '<a target="_blank" href="'.actionUrl('inspect', 'test', array('id' => $ds['m_key'])).'">Inspect</a>';
 	if(object('user')->entity == $ds['m_owner'] || object('user')->entity == $ds['m_author']) $metaElements[] = '<a onclick="deletePost('.$ds['m_key'].')">Delete</a>';
   ?><div class="post" id="post_<?= $ds['m_key'] ?>">
   	<div class="postimg"><img src="img/anonymous.png" width="64"/></div>

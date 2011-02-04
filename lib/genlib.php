@@ -288,6 +288,12 @@ function dumpArray(&$array)
   return (str_replace("\n", "\r\n", ob_get_clean()));
 }
 
+function file_get_fromurl($url, $post = array(), $timeout = 2)
+{
+  $fle = cqrequest($url, $post, $timeout);
+  return($fle['body']);	
+}
+
 /* makes a GET or POST request to an URL */
 function cqrequest($url, $post = array(), $timeout = 2, $headerMode = true, $onlyHeaders = false)
 {

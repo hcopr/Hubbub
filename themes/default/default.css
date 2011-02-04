@@ -332,4 +332,12 @@ h1 span {
 .red {
   color: red;
 }
-
+.masbox {
+  margin: 4px;
+  float: left;
+  border: 1px solid gray;
+  padding: 4px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  background: #ccc;
+}

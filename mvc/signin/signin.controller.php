@@ -12,7 +12,7 @@ class SigninController extends HubbubController
 	}
 	
 	function Index()
-	{
+	{ 
 		// this is for the Twitter sign in option
 		if(isset($_REQUEST['oauth_token']))
 		{

@@ -252,12 +252,16 @@ class HubbubUser
 		}
     if($_SESSION['uid'] > 0)
 		{
-      if(!is_array($GLOBALS['userds'])) $GLOBALS['userds'] = DB_GetDataset('users', $_SESSION['uid']);
-      $this->ds = &$GLOBALS['userds'];
+      if(!is_array($GLOBALS['userds'])) 
+      {
+        // the first user object to be initialized is the current user
+        $GLOBALS['userds'] = DB_GetDataset('users', $_SESSION['uid']);
+        $this->ds = &$GLOBALS['userds'];
+      }
 			$this->settings = unserialize($this->ds['u_settings']);
 			$this->lang = getDefault($this->ds['u_l10n'], 'en');
-			$this->id = $GLOBALS['userds']['u_key'];
-			$this->entity = $GLOBALS['userds']['u_entity'];
+			$this->id = $this->ds['u_key'];
+			$this->entity = $this->ds['u_entity'];
 			if(!is_array($this->settings)) $this->settings = array();
 			if((trim($this->ds['u_name']) == '' || $this->ds['u_entity'] == 0)
 			  && $_REQUEST['controller'] != 'profile' && $_REQUEST['controller'] != 'signin' && $_REQUEST['action'] != 'user')
@@ -266,6 +270,11 @@ class HubbubUser
 			}
 		}
 	}
+		
+	function isAdmin()
+	{
+	  return($this->ds['u_type'] == 'A');
+  }
 		
 	function key()
 	{
@@ -507,6 +516,10 @@ function result_ok($preArray = array())
 
 /**
  * Generic Hubbub2 message class
+ * Though it _does_ contain a lot of methods, the goal here is to provide basic functionality agnostic regarding
+ * the message type. Message type-specific code is supposed to be confined to the type-specific event handlers
+ * in msg/ (see there). In retrospect, this class should probably have been split into at least two separate 
+ * layers - one for local storage and one for network transmission - but it's quite convenient as it is right now.
  */
 class HubbubMessage
 {
@@ -694,26 +707,9 @@ class HubbubMessage
 		return(false);
 	}
 	
-	/**
-	 * Fill the index entries for this message so connected entities and servers can see it
-	 * @param array $ds The message dataset 
-	 */
 	function index(&$ds)
 	{
-		/*$optGroup = '';
-    if($ds['m_localgroup'] > 0) $optGroup = 'AND c_group = '.$ds['m_localgroup'];
-    else if($ds['m_localgroup'] < 0) $optGroup = 'AND c_group != '.$ds['m_localgroup'];
-		// assuming all local friends can read this message 
-		DB_Update('REPLACE INTO '.getTableName('index').' (i_entitykey,i_msgkey)
-		  SELECT c_to,"'.$ds['m_key'].'" FROM '.getTableName('connections').' '.
-		  'LEFT JOIN '.getTableName('entities').' ON (c_to = _key) '. 
-		  'WHERE c_from="'.$this->ownerKey.'" AND c_status="friend" AND _local="Y" '.$optGroup);
-		// log the servers of all nonlocal entities who should see the message
-		DB_Update('REPLACE INTO '.getTableName('index_servers').' (si_serverkey,si_msgkey) '.
-		  'SELECT _serverkey,"'.$ds['m_key'].'" FROM '.getTableName('connections').' '.
-		  'LEFT JOIN '.getTableName('entities').' ON (c_to = _key) '. 
-		  'WHERE c_from="'.$this->ownerKey.'" AND c_status="friend" '.$optGroup.' '.
-		  'GROUP BY _serverkey');*/
+    // obsolete
 	}
 	
 	function unpackData($dataset)
@@ -722,7 +718,7 @@ class HubbubMessage
 	}
 	
 	/**
-	 * receive a message packet
+	 * receive a message packet, check for sanity, pass on to type-specific event handler "receive"
 	 * @param array $msgData
 	 * @return 
 	 */
@@ -738,6 +734,12 @@ class HubbubMessage
 		return($this->executeHandler('receive'));
 	}
 	
+	/**
+	 * receive message as part of a stream, check for sanity, pass on to type-specific event handler "receive_single"
+	 * (the stream itself is supposed to be properly authenticated and checked beforehand)
+	 * @param array $msgData
+	 * @return 
+	 */
 	function receive_single(&$dataArray)
 	{
     $this->data = $dataArray;
@@ -751,8 +753,11 @@ class HubbubMessage
   function initEntities()
   {
 		$this->type = &$this->data['type'];
-    $this->authorEntity = new HubbubEntity($this->data['author']);
     $this->ownerEntity = new HubbubEntity($this->data['owner']);
+		if(sizeof($this->data['author']) > 0)
+      $this->authorEntity = new HubbubEntity($this->data['author']);
+    else
+      $this->authorEntity = $this->ownerEntity;
     $this->authorKey = $this->authorEntity->key();
     $this->ownerKey = $this->ownerEntity->key();
     $this->doPublish = getDefault($this->ds['m_publish'], 'N');
@@ -764,6 +769,7 @@ class HubbubMessage
 	{
 		$this->data['author'] = HubbubEntity::ds2arrayShort($this->authorEntity->ds);
     $this->data['owner'] = HubbubEntity::ds2arrayShort($this->ownerEntity->ds);
+    if(json_encode($this->data['author']) == json_encode($this->data['owner'])) unset($this->data['author']);
     $this->data['created'] = getDefault($this->data['created'], time());
     $this->data['changed'] = getDefault($this->data['changed'], $this->data['created']);
     $this->data['msgid'] = getDefault($this->data['msgid'], $this->newMsgId());
@@ -776,6 +782,19 @@ class HubbubMessage
     $this->sanitizeFields();
     $this->payload = json_encode($this->data);
 	}
+	
+	/* send this message to the owner's server */
+	function sendToOwner()
+	{
+    $ownerServer = $msg->ownerEntity->ds['server'];
+    return($this->sendToUrl($ownerServer));
+  }
+  
+  /* send notifications out to anyone whom it might concern (actual implementation solely in the type-specific event handler) */
+  function sendNotifications()
+  {
+    return($this->executeHandler('send_notifications', array('url' => $url, 'result' => $result)));
+  }
 	
 	/**
 	 * sends the current message to a server URL

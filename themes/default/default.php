@@ -74,7 +74,7 @@
       </tr>
       <tr>
         <td colspan="3">
-          <div class="foottext smalltext">You are using the <b><?= $_SERVER['SERVER_NAME'] ?></b> server, which is part of the
+          <div class="foottext smalltext">You are using the <b><?= $_SERVER['HTTP_HOST'] ?></b> server, which is part of the
 			      <a href="http://hubbub.at" target="_blank">Hubbub</a>
 			      federated social network 
 			      | <a href="http://hubbub.at/faq" target="_blank">FAQ</a>
