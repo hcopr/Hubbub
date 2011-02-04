@@ -52,5 +52,12 @@ $GLOBALS['config']['service']['ping_password'] = '_ping_password_';
   'app_id' => '', 
   'app_secret' => '',
   );*/
+
+/** Event hooks for plugins
+ * This is a selection of plugins that are active in a new install.
+ */  
+$GLOBALS['config']['plugins'] = array(
+  'user.new' => array('friendlyui:user_new'),
+  );
  
 ?>

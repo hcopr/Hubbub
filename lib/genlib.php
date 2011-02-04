@@ -94,11 +94,9 @@ function logToFile($filename, $content, $clearfile = false)
 	$uri = $_SERVER['REQUEST_URI'];
 	if(stristr($uri, 'password') != '') $uri = '***';
   WriteToFile($filename,
-    '<log client="'.
-    $_SERVER['REMOTE_ADDR'].'" server="'.$_SERVER['SERVER_NAME'].'" uri="'.$uri.'" user="'.$_SESSION[$config['user.sessionid']].
-    '" session="'.session_id().'" timestamp="'.date('Y-m-d H:i:s').'" exec="'.profiler_microtime_diff(microtime(), $profiler_time_start).'">'."\n".
-    '  '.trim($content)."\r\n".
-    "</log>\r\n\r\n");
+    $_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_HOST'].' '.$uri.' '.$_SESSION['uid'].
+    ' '.session_id().' '.date('Y-m-d H:i:s').' '.profiler_microtime_diff(microtime(), $GLOBALS['profiler_start']).
+    '  '.trim($content)."\r\n");
 }	
 
 /* takes a query string or request_uri and parses it for parameters */
@@ -120,9 +118,9 @@ function logError($logfile, $msg, $level = 0)
   $trace = $msg;
   ob_start();
 	debug_print_backtrace();
-	$trace .= "\r\n\r\n".ob_get_clean();
+	$trace .= "\r\n<<<\r\n".ob_get_clean().">>>\r\n";
 
-  logToFile('log/'.$logfile.'.'.$_ENV['models']['user']->id.'.log', $trace);
+  logToFile('log/error.log', $trace);
   
 	if($level >= 10 || $logfile == 'display')
 	{

@@ -233,6 +233,19 @@ function is_this_host($hostName)
     $hostName == strtolower($_SERVER['HTTP_HOST']));
 }
 
+function h2_execute_event($eventname, &$data)
+{
+  $handlers = $GLOBALS['config']['plugins'][$eventname];
+  if(isset($handlers)) foreach($handlers as $handler)
+  {
+    $plugin_name = CutSegment(':', $handler);
+    $functionName = $plugin_name.'_'.$handler;
+    if(!is_callable($functionName)) include_once('plugins/'.$plugin_name.'/events.php');
+    if(is_callable($functionName)) return($functionName($data));
+    else logError('plugins', 'invalid plugin event call: '.$functionName.'() not found');
+  }
+}
+
 /* class for the currently signed-in user */
 class HubbubUser
 {
