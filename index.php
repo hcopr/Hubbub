@@ -43,9 +43,11 @@
 		}
 	}
 
+/* temporarily disabled (fixme)
   if($_REQUEST['controller'] != 'endpoint')
     h2_statlog('web', $_REQUEST['controller'].'.'.$_REQUEST['action']);  
   else
     h2_statlog('ept', $GLOBALS['stats']['msgtype'].'('.$GLOBALS['stats']['response'].')');  
-		
+*/
+	
 ?>

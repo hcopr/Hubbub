@@ -104,6 +104,7 @@ function interpretQueryString($qs)
 {
   $qs = getDefault($_SERVER['QUERY_STRING'], substr($_SERVER['REQUEST_URI'], 1));
   while($qs[0] == '?' || $qs[0] == '/') $qs = substr($qs, 1);
+  if(!array_search($qs, array('robots.txt', 'favicon.ico')) === false) return;
   $call = explode('-', CutSegment('?', $qs));
   if(stristr($call[0], '/') != '') CutSegment('/', $call[0]);
   parse_str($qs, $rq);

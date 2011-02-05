@@ -11,7 +11,7 @@ class ProfileModel extends HubbubModel
 		  'current_entity' => $owner,
 		  'list' =>
 			  DB_GetList('SELECT * FROM '.getTableName('messages').'
-	      WHERE ((m_owner = ? AND m_parent = 0) OR (m_author = ? AND m_owner != ?)) AND m_deleted = "N" AND m_type="post" '.$match.'
+	      WHERE ((m_owner = ? AND m_parent = 0) OR (m_author = ? AND m_owner != ?)) AND m_deleted = "N" AND m_type != "system" '.$match.'
 	      ORDER BY m_created DESC', array($owner, $owner, $owner))));
   }
   
@@ -22,7 +22,7 @@ class ProfileModel extends HubbubModel
 			'list' => 
 			  DB_GetList('SELECT * FROM '.getTableName('messages').' 
   			  LEFT JOIN '.getTableName('connections').' ON (c_to = m_owner AND (c_from = ? OR m_owner = ?))
-  	      WHERE m_parent = 0 AND m_deleted = "N" AND m_type="post" AND (c_from != 0 OR m_owner = ?)
+  	      WHERE m_parent = 0 AND m_deleted = "N" AND (m_type != "system") AND (c_from != 0 OR m_owner = ?)
   	      GROUP BY m_key
   	      ORDER BY m_created DESC', array($ownerKey, $ownerKey, $ownerKey))));
   }

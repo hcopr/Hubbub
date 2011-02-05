@@ -15,7 +15,13 @@ function tmpl_postlist($list, $withContainer = false)
 		$typeFunction = 'dyn_type_'.$ds['m_type'];
 		if(!is_callable($typeFunction)) $typeFunction = 'tmpl_type_notsupported';
 		if($list['blurp_entity'] && $ds['m_owner'] != $list['blurp_entity']) $typeFunction = 'dyn_foreign_post_blurp';
-    $typeFunction($data, $ds);
+    if(!is_callable($typeFunction)) 
+    {
+      if(isset($GLOBALS['config']['plugins']['display_'.$ds['m_type']]))
+        h2_execute_event('display_'.$ds['m_type'], $ds, $data);
+      else print('<div class="banner">Cannot display message type: '.$ds['m_type'].'</div>');
+    }
+    else $typeFunction($data, $ds);
 	}
 
   if($withContainer) { ?></div><? }

@@ -233,16 +233,16 @@ function is_this_host($hostName)
     $hostName == strtolower($_SERVER['HTTP_HOST']));
 }
 
-function h2_execute_event($eventname, &$data)
+function h2_execute_event($event_name, &$data, &$d2 = array(), &$d3 = array())
 {
-  $handlers = $GLOBALS['config']['plugins'][$eventname];
-  if(isset($handlers)) foreach($handlers as $handler)
+  $event_name = str_replace('.', '_', $event_name);
+  $handlers = $GLOBALS['config']['plugins'][$event_name];
+  if(isset($handlers)) foreach($handlers as $plugin_name)
   {
-    $plugin_name = CutSegment(':', $handler);
-    $functionName = $plugin_name.'_'.$handler;
-    if(!is_callable($functionName)) include_once('plugins/'.$plugin_name.'/events.php');
-    if(is_callable($functionName)) return($functionName($data));
-    else logError('plugins', 'invalid plugin event call: '.$functionName.'() not found');
+    $func_name = $plugin_name.'_'.$event_name;
+    if(!is_callable($func_name)) include_once('plugins/'.$plugin_name.'/events.php');
+    if(is_callable($func_name)) return($func_name($data, $d2, $d3));
+    else logError('plugins', 'invalid plugin event call: '.$func_name.'() not found');
   }
 }
 
@@ -276,6 +276,7 @@ class HubbubUser
 			$this->id = $this->ds['u_key'];
 			$this->entity = $this->ds['u_entity'];
 			if(!is_array($this->settings)) $this->settings = array();
+			// if essential user data is missing, redirect to the page where they can be filled in
 			if((trim($this->ds['u_name']) == '' || $this->ds['u_entity'] == 0)
 			  && $_REQUEST['controller'] != 'profile' && $_REQUEST['controller'] != 'signin' && $_REQUEST['action'] != 'user')
 			{
@@ -322,10 +323,12 @@ class HubbubUser
       setcookie('session-key', $this->ds['u_sessionkey'], time()+3600*24*30*3);
     }
     $this->save();
+    h2_execute_event('user_login', $this->entityDS, $this->ds);
 	}
 	
 	function logout()
 	{
+	  h2_execute_event('user_logout', $this->entityDS, $this->ds);
 		$_SESSION = array();
 		foreach($_COOKIE as $k => $v)
 			setcookie($k, '', time()-3600);
@@ -337,9 +340,10 @@ class HubbubUser
     $this->loadEntity();
     $this->entityDS['name'] = $this->ds['u_name'];
 		if($this->entityDS['_local'] == 'Y') $this->entityDS['server'] = cfg('service.server');
-		if($this->entityDS['user'] != '')  $this->entityDS['_key'] = DB_UpdateDataset('entities', $this->entityDS);
+		h2_execute_event('user_save', $this->entityDS, $this->ds);
+		if(trim($this->entityDS['user']) != '')  $this->entityDS['_key'] = DB_UpdateDataset('entities', $this->entityDS);
 		$this->ds['u_settings'] = serialize($this->settings);
-		DB_UpdateDataset('users', $this->ds);
+		if(trim($this->ds['u_settings']) != '') DB_UpdateDataset('users', $this->ds);
 	}
 	
 	function selfEntity()
@@ -362,6 +366,7 @@ class HubbubUser
 	
 	function setUsername($username)
 	{
+	  $this->isNewUser = $this->ds['u_key'] > 0;
 	  $this->server = new HubbubServer(cfg('service.server'), true);
 		$this->loadEntity();
 		$this->entityDS['user'] = safename($username);
@@ -369,9 +374,10 @@ class HubbubUser
 		$this->entityDS['_local'] = 'Y';
 		$this->entityDS['_serverkey'] = $this->server->ds['s_key'];
 		$this->entityDS['server'] = cfg('service.server');
-		$ekey = DB_UpdateDataset('entities', $this->entityDS);
+		if(trim($this->entityDS['user']) != '') $ekey = DB_UpdateDataset('entities', $this->entityDS);
 		$this->ds['u_entity'] = $ekey;
-		DB_UpdateDataset('users', $this->ds);
+		if(trim($this->ds['u_name']) != '') DB_UpdateDataset('users', $this->ds);
+    if($this->isNewUser) h2_execute_event('user_new', $this->entityDS, $this->ds);
 	}
 	
 	function getUrl()
@@ -590,8 +596,10 @@ class HubbubMessage
     $result = false;
 		$handlerFile = 'msg/'.$this->type.'.php';
     $handlerFunc = $this->type.'_'.$event;
+    h2_execute_event($this->type.'_'.$event.'_init', $this->data, $this, $result);
     if(!is_callable($handlerFunc) && file_exists($handlerFile)) include_once($handlerFile);
     if(is_callable($handlerFunc)) $result = $handlerFunc($this->data, $this, $opt); 
+    h2_execute_event($this->type.'_'.$event.'_done', $this->data, $this, $result);
 		return($result);
 	}
 	
@@ -902,7 +910,7 @@ class HubbubEntity
 					'name' => $record['name'],
 					'_serverkey' => $this->server->ds['s_key'],
 					);
-			  $this->ds['_key'] = DB_UpdateDataset('entities', $this->ds);
+			  if(trim($this->ds['user']) != '') $this->ds['_key'] = DB_UpdateDataset('entities', $this->ds);
 			}
 		}
   }
@@ -921,7 +929,7 @@ class HubbubEntity
         '_serverkey' => $this->server->ds['s_key'],
         );
       if($isLocal) $this->ds['_local'] = 'Y'; else $this->ds['_local'] = 'N';
-      $this->ds['_key'] = DB_UpdateDataset('entities', $this->ds);
+      if(trim($this->ds['user']) != '') $this->ds['_key'] = DB_UpdateDataset('entities', $this->ds);
 		}
 		return($this->ds);
 	}
