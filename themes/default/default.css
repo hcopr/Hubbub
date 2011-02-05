@@ -341,3 +341,24 @@ h1 span {
   border-radius: 8px;
   background: #ccc;
 }
+.notice_me {
+  border: 1px solid #ccc;
+  padding: 6px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;   
+  background: #efe; 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

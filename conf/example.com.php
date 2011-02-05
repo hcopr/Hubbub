@@ -58,6 +58,7 @@ $GLOBALS['config']['service']['ping_password'] = '_ping_password_';
  */  
 $GLOBALS['config']['plugins'] = array(
   'user_new' => array('friendlyui'),
+  'show_notice' => array('friendlyui'),
   );
  
 ?>
