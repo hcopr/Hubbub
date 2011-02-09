@@ -1,0 +1,86 @@
+Plugin Architecture Documentation
+===========================================
+
+Hubbub plugins are very simple in that the platform offers a series of events for which developers can 
+write handler functions. Convention dictates that each plugin have a separate folder inside the 
+plugins/ directory. Inside that folder must be a file called manifest.txt which contains configuration
+options for the plugin. An entry called "events" must be present that announces which events the plugin
+hooks into. For example:
+
+  events=user_new,display_post
+
+In this example, the plugin offers integration for the "new user" event and a display handler for
+messages with the type "post". Each plugin must also have a file called events.php that has the actual
+event handling functions. The functions must be named according to the following convention:
+
+  $PluginName$_$FunctionName$
+
+where $PluginName$ is the name of the plugin directory and $FunctionName$ is the name of the event
+the function is supposed to handle. For example, the handler function for user_new inside a plugin
+called "friendlyui" would look like this:
+
+  function friendlyui_user_new(&$entityDS, &$userDS) {...}
+
+As a general rule, plugin event handlers should not disrupt the normal program flow. For example, they
+should not cancel or modify user actions. With the exception of display handlers, they should also not
+print any output on the screen.
+
+Supported Events
+=============================================
+
+USER EVENTS:
+- user_new(&$entityDS, &$userDS)
+  gets called every time a new user is created
+- user_save(&$entityDS, &$userDS)
+  when user data is committed to local storage
+- user_logout(&$entityDS, &$userDS)
+  when a user logs off from Hubbub
+- user_login(&$entityDS, &$userDS)
+  shortly after a user logs into the server
+
+MESSAGE EVENTS:
+The general naming format of the message events is "msg_$type$_$event$_$time$" where $type$ is the message
+type and $event$ is the message event. $time$ is either "init" or "done" depending on whether the handler
+should be called before the base system performs its inbuilt handlers or after. Please note that "done" 
+events do not necessarily mean that data has been committed to DB or the network. The following message 
+events are generally supported for all messages:
+- create(&$data, &$msgObject)
+  shortly after a new message object is initiated
+- load(&$data, &$msgObject)
+  after a message is loaded from DB
+- save(&$data, &$msgObject)
+  before a message is saved to disk
+- receive(&$data, &$msgObject)
+  when a message is received (from a remote endpoint)
+- receive_single(&$data, &$msgObject)
+  when a message is received as part of a stream
+- send_notifications(&$data, &$msgObject)
+  when direct message notifications are sent
+- before_sendtourl(&$data, &$msgObject)
+  after_sendtourl(&$data, &$msgObject)
+  server one-on-one message calls
+
+CUSTOM MESSAGE DISPLAY:
+Message types that are not handled by internal templates can be hooked up to the following event:
+- show_$messagetype$(&$data, &$ds)
+  where $messagetype$ is the type of message to be displayed
+  
+Hubbub handles the display of the standard message types internally. However, plugins can modify
+message data or inject additional code via the 
+- display_$messagetype$(&$data, &$ds, &$flags) event.
+
+The $flags array offers a mechanism to inject additional information into a message. Supported are
+- $flags['cmd'] = array('<a href="bla">my link</a>')  
+  to add one or more command links or short infos to a message
+- $flags['infoblock'] = 'some text'
+  adds an arbitrary HTML segment below the message text
+  
+
+  
+  
+  
+  
+  
+
+
+
