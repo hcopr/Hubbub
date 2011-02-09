@@ -171,6 +171,12 @@ function h2_getController($controllerName)
 	  	$_REQUEST['action'] = 'index';
 	  	$controllerFile = 'mvc/'.strtolower($controllerName).'/'.strtolower($controllerName).'.controller.php';
 	  }
+	  else
+	  {
+	    header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
+	    header('Status: 404 Not Found');	
+	    die('File not found: '.$_SERVER['REQUEST_URI']);     
+    }
 	}
 	require_once($controllerFile);
   $controllerClassName = $controllerName.'Controller';
