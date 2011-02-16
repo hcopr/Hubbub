@@ -6,6 +6,8 @@ class MsgController extends HubbubController
 	{
     access_policy('auth');
 	  $this->invokeModel();
+	  $GLOBAL['log.end'] = true;
+	  WriteToFile('log/activity.log', 'msg.'.$_REQUEST['action'].'()'."\n");
 	}
 	
 	function index()

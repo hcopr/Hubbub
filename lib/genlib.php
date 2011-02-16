@@ -297,8 +297,6 @@ function bin2hexex($bin)
 /* get a dump string of an array, for debugging purposes only! */
 function dumpArray($array)
 {
-  if(isset($array['m_data'])) $array['m_data'] = bin2hex($array['m_data']);
-  if(isset($array['list'][0]['m_data'])) $array['list'][0]['m_data'] = bin2hexex($array['list'][0]['m_data']);
   ob_start();
   print_r($array);
   return (str_replace("\n", "\r\n", ob_get_clean()));

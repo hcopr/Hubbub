@@ -19,6 +19,8 @@
   ob_start("ob_gzhandler");
   profile_point('environment ready');
 
+  WriteToFile('log/activity.log', 'call '.$_REQUEST['controller'].'-'.$_REQUEST['action']."\n");
+
   // instantiate controller, invoke action, render view	
   $_REQUEST['controller'] = getDefault($_REQUEST['controller'], cfg('service.defaultcontroller'));
 	$baseCtr = h2_getController($_REQUEST['controller']);
@@ -27,7 +29,7 @@
   profile_point('action executed');
 	$GLOBALS['content']['main'] = h2_invokeView($baseCtr, $_REQUEST['action']);
   profile_point('view executed');
-			
+  
 	// output through page template
 	$templateName = cfg('page.template', 'default');
 	switch($templateName)

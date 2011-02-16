@@ -12,6 +12,7 @@ class EndpointController extends HubbubController
   {
     access_policy('post');
   	$this->msg = new HubbubMessage();
+    WriteToFile('log/activity.log', 'endpoint.receive '.$_REQUEST['hubbub_sig']."\n");
     $result = $this->msg->receive($_REQUEST['hubbub_msg'], $_REQUEST['hubbub_sig']);
     $GLOBALS['stats']['msgtype'] = $this->msg->type;
 		if($result === false)
@@ -23,6 +24,7 @@ class EndpointController extends HubbubController
 			'SENT', $response['result'], $response['reason']);*/
     print(json_encode($response));
     $GLOBALS['stats']['response'] = $response['result'];
+    WriteToFile('log/activity.log', 'endpoint.response '.dumpArray($response['result']));
   }
   
   function cron()

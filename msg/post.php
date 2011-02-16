@@ -6,7 +6,7 @@ function post_notify(&$data, &$msg)
   if($msg->ownerEntity == $msg->localUserEntity)
   {
     // if the sending user is the owner, we can send an update straight out to all connections
-    WriteToFile('log/activity.log', $data['msgid'].' sending out notifications'.chr(10));
+    WriteToFile('log/activity.log', $data['msgid'].' sending out notifications [NOT IMPLEMENTED]'.chr(10));
   }
   else if($msg->authorEntity == $msg->localUserEntity)
   {
@@ -21,7 +21,7 @@ function post_notify(&$data, &$msg)
 /* event handler before a message is saved to local DB */
 function post_save(&$data, &$msg)
 {
-  WriteToFile('log/activity.log', $data['msgid'].' save'.chr(10));
+  WriteToFile('log/activity.log', $data['msgid'].' save (deleted='.$data['deleted'].','.$msg->ds['m_deleted'].')'.chr(10));
   if($msg->ownerEntity->ds['_local'] == 'Y')
 	{
     WriteToFile('log/activity.log', $data['msgid'].' declared public'.chr(10));
@@ -97,7 +97,8 @@ function post_delete(&$data, &$msg)
     unset($msg->data['attachments']); 
     $msg->isDeleted = true;
     $msg->data['deleted'] = 'yes';
-    WriteToFile('log/activity.log', $data['msgid'].' local message, deleted'.chr(10));
+    $msg->markChanged();
+    WriteToFile('log/activity.log', $data['msgid'].' local message (user==owner), deleted'.chr(10));
   }
   if($msg->localUserEntity == $msg->ownerKey) 
   {
@@ -125,6 +126,8 @@ function post_delete(&$data, &$msg)
       // remote delete didn't work out
       WriteToFile('log/activity.log', $data['msgid'].' remote delete failed: '.$msg->response['data']['reason'].chr(10));
       $msg->fail('remote delete failed: '.$msg->response['data']['reason']);
+      /* we'll save it regardless, because the other server might pick it up again later through the feed */
+      $msg->save();
       return(false);
     }
   }

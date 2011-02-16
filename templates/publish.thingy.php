@@ -39,17 +39,23 @@
 			  if(data.result != 'OK')
 			  {
 			    if(!data.reason) data.reason = '';
-			    alert('There was a problem publishing your post. '+data.reason);
+			      alert('There was a problem publishing your post. '+data.reason);
 			  }
 			  else
 			  {
   			  $('#publish_text').val('');
   			  $('#postlist').prepend(data.post);
-  	      $('#status_indicator').html('&nbsp;');
+		      $('#status_indicator').html('&nbsp;'); 
         }
 		  }, 'json')
 		  .error(function(e, xhr, settings, exception) {  })
-		  .complete(function() { $('#publisher').fadeTo('normal', 1); });
+		  .complete(function(e) { 
+		    $('#publisher').fadeTo('normal', 1);
+		    if($('#status_indicator').html() != '&nbsp;')
+  		    $('#status_indicator').html('<br/>Ooops, something went wrong..<a title="'+e.responseText+'">!</a>'); 
+		    else
+  		    $('#status_indicator').html('&nbsp;'); 
+		  });
 	}
 	
 </script><div id="log"></div>

@@ -668,13 +668,20 @@ class HubbubMessage
     return($fails);
   }
 
+  function markChanged()
+  {
+    $this->data['changed'] = time(); 
+  }
+
   /**
    * issues a direct notification to closest connections
    */
   function notify()
   {
+    WriteToFile('log/activity.log', $this->data['msgid'].' notify'."\n");
 		$this->sanitizeDataset();
 		$this->executeHandler('notify');
+    WriteToFile('log/activity.log', $this->data['msgid'].' notify end'."\n");
   }
 	
 	/**
@@ -683,10 +690,11 @@ class HubbubMessage
 	 */
 	function save()
 	{
+    WriteToFile('log/activity.log', $this->data['msgid'].' save start'."\n");
 		$this->sanitizeDataset();
 		if($this->isInDB())
 		{
-		  // if this message already exists in the database, we need to verify that it hasn't changed
+		  // if this message already exists in the database, we need to verify that the user hasn't changed
 		  // any of the immutable fields: author, owner, parent, created
 		  $compareFails = $this->compareWithDS($this->existingDS, array('author', 'owner', 'parent', 'created'));
 		  if(sizeof($compareFails) > 0)
@@ -703,6 +711,7 @@ class HubbubMessage
       $this->parentDS = DB_GetDataset('messages', $this->data['parent'], 'm_id');
       $this->parentKey = getDefault($this->parentDS['m_key'], '-1');
     }
+    WriteToFile('log/activity.log', $this->data['msgid'].' save handler start'."\n");
 		$this->executeHandler('save');
 		if($this->doSave)
 		{
@@ -721,8 +730,9 @@ class HubbubMessage
         'm_parent' => $this->parentKey,
 				'm_publish' => $this->doPublish,
 				'm_tag' => $this->vTag,
-				'm_deleted' => ($this->isDeleted) ? 'Y' : 'N',
+				'm_deleted' => ($this->data['deleted'] == 'yes') ? 'Y' : 'N',
 				);
+      WriteToFile('log/activity.log', $this->data['msgid'].' saved (deleted='.$this->ds['m_deleted'].')'."\n");
 			if($this->existingDS['m_key'] > 0)
 			{
         $this->ds['m_key'] = $this->existingDS['m_key'];
@@ -833,7 +843,8 @@ class HubbubMessage
 	function sendToUrl($url, $forceKey = null)
 	{			
 	  $this->sanitizeDataset();
-	  $this->toServer = new HubbubServer($url);
+	  $this->toServer = new HubbubServer($url, true);
+	  
     $this->executeHandler('before_sendtourl', array('url' => $url));
     $this->payload = json_encode($this->data);
 		if($this->toServer->outboundKey() != '' || $forceKey != null) $this->signForServer($this->toServer, $forceKey);
