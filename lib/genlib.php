@@ -7,6 +7,7 @@
 
 /* inits the profiler that allows performance measurement */
 $GLOBALS['profiler_last'] = getDefault($GLOBALS['profiler_start'], microtime());
+define('URL_CA_SEPARATOR', '-');
 
 /* makes a commented profiler entry */ 
 function profile_point($text)
@@ -105,7 +106,7 @@ function interpretQueryString($qs)
   $qs = getDefault($_SERVER['QUERY_STRING'], substr($_SERVER['REQUEST_URI'], 1));
   while($qs[0] == '?' || $qs[0] == '/') $qs = substr($qs, 1);
   if(!array_search($qs, array('robots.txt', 'favicon.ico')) === false) return;
-  $call = explode('-', CutSegment('?', $qs));
+  $call = explode(URL_CA_SEPARATOR, CutSegment('?', $qs));
   if(stristr($call[0], '/') != '') CutSegment('/', $call[0]);
   parse_str($qs, $rq);
   foreach($rq as $k => $v) $_REQUEST[$k] = $v;    
@@ -143,14 +144,15 @@ function actionUrl($action = '', $controller = '', $params = array())
   if (!is_array($params)) $params = stringParamsToArray($params);
   $controller = getDefault($controller, $_REQUEST['controller']);
   $action = getDefault($action, $_REQUEST['action']);
-  if(sizeof($params) > 0) $p = '?'.http_build_query($params);  
+  if(sizeof($params) > 0) $p = '?'.http_build_query($params);
+  $url = $controller.($action == 'index' ? '' : URL_CA_SEPARATOR.$action).$p;  
   if($GLOBALS['config']['service']['url_rewrite'])
   {
-    return(cfg('service.base').$controller.'-'.$action.$p);
+    return(cfg('service.base').$url);
   }
   else 
   {
-    return(cfg('service.base').'?'.$controller.'-'.$action.$p);
+    return(cfg('service.base').'?'.$url);
   }  
 }
 
