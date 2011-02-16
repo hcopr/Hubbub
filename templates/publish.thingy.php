@@ -35,8 +35,7 @@
 		$('#publisher').fadeTo('normal', 0.5);
 		$('#status_indicator').html('<img src="themes/default/ajax-loader.gif"/>');
 		$.post('<?= actionUrl('ajax_post', 'profile') ?>', 
-		  {'text' : $('#publish_text').val()<? if($this->viewEntity) print(", 'to' : ".$this->viewEntity) ?> }, 
-			function(data) {
+		  {'text' : $('#publish_text').val()<? if($this->viewEntity) print(", 'to' : ".$this->viewEntity) ?> }, function(data) {
 			  if(data.result != 'OK')
 			  {
 			    if(!data.reason) data.reason = '';
@@ -46,10 +45,11 @@
 			  {
   			  $('#publish_text').val('');
   			  $('#postlist').prepend(data.post);
-  	      $('#publisher').fadeTo('normal', 1);
   	      $('#status_indicator').html('&nbsp;');
         }
-		  }, 'json');
+		  }, 'json')
+		  .error(function(e, xhr, settings, exception) {  })
+		  .complete(function() { $('#publisher').fadeTo('normal', 1); });
 	}
 	
 </script><div id="log"></div>

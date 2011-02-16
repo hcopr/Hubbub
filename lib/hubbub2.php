@@ -223,7 +223,7 @@ function access_policy($types = 'auth')
         break; 
       }
       case('admin'): {
-        die('Error: admin access required'); 
+        if(!object('user')->isAdmin()) die('Error: admin access required'); 
         break; 
       }
     }
@@ -293,7 +293,7 @@ class HubbubUser
 		
 	function isAdmin()
 	{
-	  return($this->ds['u_type'] == 'A');
+	  return($this->ds['u_type'] == 'A' || $this->ds['u_key'] == 1);
   }
 		
 	function key()

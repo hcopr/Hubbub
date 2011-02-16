@@ -7,7 +7,7 @@ class TestController extends HubbubController
 {
 	function __init()
 	{
-    access_policy('auth');
+    access_policy('auth,admin');
     $this->menu = $this->makeMenu('index,message,vis,code');
 		$this->invokeModel('friends');
 		$this->invokeModel('profile');

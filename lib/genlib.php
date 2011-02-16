@@ -354,6 +354,12 @@ function SqlCoolTime($raw)
   return(ageToString(timestampToDate($raw)));
 }
 
+/* cool date */
+function CoolDate($unixDate)
+{
+  return(ageToString($unixDate)); 
+}
+
 /* convert SQL timestamp into GMT Unix timestamp */
 function timestampToDate($raw)
 {
