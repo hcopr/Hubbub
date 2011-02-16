@@ -107,6 +107,7 @@ function h2_make_excerpt($text, $length = 64)
 
 function h2_statlog($type, $call)
 {
+  return; 
   if(!cfg('service.statlog')) return;
   $itvl = gmdate('Ymd');
   $logTypes = array(
@@ -564,6 +565,7 @@ class HubbubMessage
 	function fail($reason)
 	{
 		$this->response = result_fail($reason, $this->response);
+		logError('notrace', '[IN] msg fail, type "'.$this->data['type'].'": '.$reason.' / ID:'.$this->data['msgid']);
 		return(true);
 	}
 
@@ -796,7 +798,7 @@ class HubbubMessage
 	{
 		$this->data['author'] = HubbubEntity::ds2arrayShort($this->authorEntity->ds);
     $this->data['owner'] = HubbubEntity::ds2arrayShort($this->ownerEntity->ds);
-    if(json_encode($this->data['author']) == json_encode($this->data['owner'])) unset($this->data['author']);
+    #if(json_encode($this->data['author']) == json_encode($this->data['owner'])) unset($this->data['owner']);
     $this->data['created'] = getDefault($this->data['created'], time());
     $this->data['changed'] = getDefault($this->data['changed'], $this->data['created']);
     $this->data['msgid'] = getDefault($this->data['msgid'], $this->newMsgId());
@@ -834,7 +836,7 @@ class HubbubMessage
 	  $this->toServer = new HubbubServer($url);
     $this->executeHandler('before_sendtourl', array('url' => $url));
     $this->payload = json_encode($this->data);
-		if($this->toServer->isTrusted() || $forceKey != null) $this->signForServer($this->toServer, $forceKey);
+		if($this->toServer->outboundKey() != '' || $forceKey != null) $this->signForServer($this->toServer, $forceKey);
 	  WriteToFile('log/activity.log', $this->data['msgid'].' signed send '.$this->signature.chr(10));
 	  $result = HubbubEndpoint::request($url, array('hubbub_msg' => $this->payload, 'hubbub_sig' => $this->signature));
 		//h2_audit_log('msg.send:'.$this->data['type'], $this->signature.': '.$this->payload);
@@ -1129,12 +1131,12 @@ class HubbubServer
 	}
 	
 	/**
-	 * If the server has an outbound key associated with it, it's "trusted"
+	 * If the server has an outbound and inbound key associated with it, it's "trusted"
 	 * @return 
 	 */
 	function isTrusted()
 	{
-		return(trim($this->ds['s_key_out']) != '');
+		return(trim($this->ds['s_key_out']) != '' && trim($this->ds['s_key_in']) != '');
 	}
 	
 	function msg_trust_sendkey1()
@@ -1161,7 +1163,7 @@ class HubbubServer
 		{
       $this->ds['s_status'] = 'fail';
 			$this->ds['s_key_in'] = '';
-			dumpArray($response);
+			logError('notrace', '[OUT] trust_sendkey1 failed, server '.$this->ds['s_url'].' says: '.getDefault($responseData['reason'], $responseData['result']));
 			$ret = result_fail('trust_sendkey1 failed: '.getDefault($responseData['reason'], $responseData['result']));
 		}
 		return($ret);

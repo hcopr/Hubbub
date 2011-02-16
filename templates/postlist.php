@@ -105,16 +105,21 @@ function dyn_foreign_post_blurp(&$data, &$ds)
  */
 function dyn_type_post(&$data, &$ds, &$flags)
 {
-	$comments = ProfileModel::getComments($ds['m_key']);
+  /* are there any comments? */
+	$comments = MsgModel::getComments($ds['m_key']);
+	/* define the standard actions for this post */
 	$metaElements = array(
 	  CoolDate($ds['m_created']), 
 	  '<a onclick="springComment('.$ds['m_key'].')">Comment</a>', 
 		'<a onclick="springVote('.$ds['m_key'].')">Vote</a>');
-		
+	/* insert entries from the cmd array in $flags (these come from plugins) */
 	if(is_array($flags['cmd'])) foreach($flags['cmd'] as $cmd) $metaElements[] = $cmd;
+	/* admin users get to see an "inspect" button */
   if(object('user')->isAdmin()) $metaElements[] = '<a target="_blank" href="'.actionUrl('inspect', 'test', array('id' => $ds['m_key'])).'">Inspect</a>';
+  /* if user is either the owner or the author, she gets to see the delete button */
 	if(object('user')->entity == $ds['m_owner'] || object('user')->entity == $ds['m_author']) $metaElements[] = '<a onclick="deletePost('.$ds['m_key'].')">Delete</a>';
   
+  /* onward to the actual display of the message: */
   ?><div class="post" id="post_<?= $ds['m_key'] ?>">
   	<div class="postimg"><img src="img/anonymous.png" width="64"/></div>
 		<div class="postcontent">

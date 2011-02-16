@@ -20,7 +20,7 @@
   
   function hasMessageInStream($ctx, $eid, $mkey)
   {
-  	$streamPosts1 = $ctx->profile->getStream($eid);
+  	$streamPosts1 = $ctx->msg->getStream($eid);
     foreach($streamPosts1['list'] as $pds)
       if($pds['m_key'] == $mkey) return(true);     
     return(false);
@@ -79,7 +79,7 @@
 <div style="height: 200px"></div>
 <pre><?
 
-#print_r($this->profile->getStream($u[4]['id']));
+#print_r($this->msg->getStream($u[4]['id']));
 
 ?></pre>
 

@@ -117,11 +117,14 @@ function interpretQueryString($qs)
 /* logs an error, duh */
 function logError($logfile, $msg, $level = 0)
 {
-  $trace = $msg;
-  ob_start();
-	debug_print_backtrace();
-	$trace .= "\r\n<<<\r\n".ob_get_clean().">>>\r\n";
-
+  if($GLOBALS['nolog']) return;
+  $trace = $msg."\r\n";
+  if($logfile != 'notrace')
+  {
+    ob_start();
+  	debug_print_backtrace();
+  	$trace .= "<<<\r\n".ob_get_clean().">>>\r\n";
+  }
   logToFile('log/error.log', $trace);
   
 	if($level >= 10 || $logfile == 'display')
@@ -279,11 +282,23 @@ function redirect($tourl)
 {
 	header('location: '.$tourl);
 	die();
+} 
+
+function bin2hexex($bin)
+{
+  $tmp = bin2hex($bin);
+  $rlen = strlen($tmp);
+  $result = '';
+  for($a = 0; $a < $rlen; $a += 2)
+    $result .= substr($tmp, $a, 2).' ';
+  return($result);
 }
 
 /* get a dump string of an array, for debugging purposes only! */
-function dumpArray(&$array)
+function dumpArray($array)
 {
+  if(isset($array['m_data'])) $array['m_data'] = bin2hex($array['m_data']);
+  if(isset($array['list'][0]['m_data'])) $array['list'][0]['m_data'] = bin2hexex($array['list'][0]['m_data']);
   ob_start();
   print_r($array);
   return (str_replace("\n", "\r\n", ob_get_clean()));

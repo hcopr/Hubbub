@@ -13,15 +13,20 @@
  */
 function trust_sendkey1_receive(&$data, &$msg)
 {
-	if($data['author']['server'] == '')
+  $data['mykey'] = trim($data['mykey']);
+  $serverUrl = getDefault($data['author']['server']);
+  if($serverUrl == '')
 	  $msg->fail('invalid server field in "author" array');
+  if($data['mykey'] == '')
+	  $msg->fail('"mykey" field missing');
 	else
 	{
 		// accept the new key (it's not confirmed yet)
-		$server = new HubbubServer($data['author']['server'], true);
+		$server = new HubbubServer($serverUrl, true);
 		$server->ds['s_newkey_out'] = $data['mykey'];
 		$server->ds['s_key_in'] = getDefault($server->ds['s_key_in'], md5(time().rand(1, 100000)));
     DB_UpdateField('servers', $server->ds['s_key'], 's_key_in', $server->ds['s_key_in']);
+    logError('notrace', 'received temp outbound key: '.$data['mykey'].' /// '.dumpArray($server->ds));
 		// now, get origin confirmation
 		$confirmMsg = new HubbubMessage('trust_sendkey2');
 		$confirmMsg->author($server->localEntity());
@@ -31,6 +36,8 @@ function trust_sendkey1_receive(&$data, &$msg)
 		$responseData = $response['data'];
 		if($responseData['result'] == 'OK')
 		{
+		  /* we need to reload, because the server record might have changed in the meantime */
+		  $server = new HubbubServer($serverUrl, true);
 			// okay, the remote server really sent the original message
 			$server->ds['s_key_out'] = $server->ds['s_newkey_out'];
 			$server->ds['s_status'] = 'OK';

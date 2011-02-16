@@ -10,7 +10,7 @@ class TestController extends HubbubController
     access_policy('auth,admin');
     $this->menu = $this->makeMenu('index,message,vis,code');
 		$this->invokeModel('friends');
-		$this->invokeModel('profile');
+		$this->invokeModel('msg');
 		$this->invokeModel('endpoint');
 	}
 	

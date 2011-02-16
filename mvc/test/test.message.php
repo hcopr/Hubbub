@@ -28,7 +28,7 @@
   tsection('Message Basic');
 
   $p = new HubbubMessage('friend_request');  
-  tlog($p->data['msgid'] != '', 'HubbubMessage::create(friend_request)', 'OK', 'msgid failure');
+  tlog($p->data['msgid'] != '', 'HubbubMessage::create(friend_request '.$p->data['msgid'].')', 'OK', 'msgid failure');
   $p->author($ne1->ds);
   $p->owner($ne2->ds);
   $p->sanitizeDataset();
@@ -48,7 +48,9 @@
   tlog($p->signature == md5($toServer->outboundKey().$p->payload), 'HubbubMessage::signForServer('.$p->ownerEntity->ds['server'].')', 'OK ('.$p->signature.')', 'invalid signature');
   tlog($p->validateSignature(), 'HubbubMessage->validateSignature(valid)', 'OK', 'failure');
 	$p->signature = md5($p->signature);
+	$GLOBALS['nolog'] = true; // disable logging, because we'll trigger an error here
 	tlog(!$p->validateSignature(), 'HubbubMessage->validateSignature(invalid)', 'OK', 'failure');
+  $GLOBALS['nolog'] = false;
   $p->signForServer($toServer);
   $r = new HubbubMessage();
 	$r->receive($p->payload, $p->signature);
@@ -62,7 +64,7 @@
   tlog(!(sizeof($er) == 0 || $er['user'] == '' || $er['server'] == ''), 'hubbub2_loadurl('.$url.')', 'OK', 'failure');
   $res = $p->sendToUrl($er['server']);  
   tlog($res['headers']['response'] == 200, 'HubbubMessage->sendToUrl('.$url.') HTTP Code', 'OK', 'fail ('.$res['headers']['response'].')');
-  tlog($res['data']['result'] == 'OK', 'HubbubMessage->sendToUrl('.$url.') Result', 'OK', 'fail ('.$res['data']['reason'].')');
+  tlog($res['data']['result'] == 'OK', 'HubbubMessage->sendToUrl('.$url.') Result', 'OK ('.$res['data']['reason'].')', 'fail ('.$res['data']['reason'].')');
   $con1 = new HubbubConnection($p->authorEntity->key(), $p->ownerEntity->key());
   $con2 = new HubbubConnection($p->ownerEntity->key(), $p->authorEntity->key());
   tlog($con1->ds['c_status'] == 'req.sent', 'HubbubConnection status '.$u1name.':'.$con1->ds['c_from'].' to '.$u2name.' == req.sent', 'OK', 'fail ('.$con1->ds['c_status'].')');
@@ -77,7 +79,8 @@
   $fp = new HubbubMessage('friend_request');  
   $fp->author($ne2->ds);
   $fp->owner($r->authorEntity->ds);
-	$fp->sendToUrl($r->authorEntity->ds['server']);
+	$res = $fp->sendToUrl($r->authorEntity->ds['server']);
+  tlog($res['data']['result'] == 'OK', 'friend_request confirm ('.$url.') Result', 'OK ('.$res['data']['reason'].')', 'fail ('.$res['data']['reason'].')');
   $con1 = new HubbubConnection($fp->authorEntity->key(), $fp->ownerEntity->key());
   $con2 = new HubbubConnection($fp->ownerEntity->key(), $fp->authorEntity->key());
   tlog($con1->ds['c_status'] == 'friend', 'HubbubConnection status '.$u2name.':'.$con1->ds['c_from'].' to '.$u1name.' == friend', 'OK', 'fail ('.$con1->ds['c_status'].')');
@@ -95,13 +98,13 @@
   tlog($post->ds['m_publish'] == 'Y', 'HubbubMessage post m_publish==Y', 'OK', 'fail (localUserEntity='.$post->localUserEntity.')');
   
   // now, this post should be on $ne1's wall
-	$wallPosts1 = $this->profile->getPostList($ne1->key());
+	$wallPosts1 = $this->msg->getPostList($ne1->key());
 	foreach($wallPosts1['list'] as $pds)
 	  if($pds['m_key'] == $post->ds['m_key']) $postFound1 = true; 
-	tlog($postFound1, 'profile->getPostList(for '.$u1name.':e'.$ne1->key().') post found', 'OK', 'fail '.dumpArray($wallPosts1));
+	tlog($postFound1, 'msg->getPostList(for '.$u1name.':e'.$ne1->key().') post found', 'OK', 'fail '.dumpArray($wallPosts1));
 	
 	// the post should also appear in $ne2's stream
-	$streamPosts1 = $this->profile->getStream($ne2->key());
+	$streamPosts1 = $this->msg->getStream($ne2->key());
   foreach($streamPosts1['list'] as $pds)
     if($pds['m_key'] == $post->ds['m_key']) $postFound2 = true; 
   tlog($postFound2, 'getStream->getStream(for '.$u2name.':u'.$u2['u_key'].'-e'.$ne2->key().') post found', 'OK', 'fail '.dumpArray($streamPosts1));
@@ -126,7 +129,7 @@
   $fpost->data['text'] = 'This is a text post on someone else\'s profile. Umlauts like üöä should be preserved.';
   $fpost->save();
 
-  $fpost->sendToUrl($fpost->ownerEntity->ds['server']);
+  $res = $fpost->sendToUrl($fpost->ownerEntity->ds['server']);
   // see if the message was accepted on the "other" end
   tlog($fpost->responseData['data']['result'] == 'OK', 'foreign_post sentToUrl('.$fpost->ownerEntity->ds['url'].')', 'OK ('.$fpost->data['msgid'].')', 'fail ('.$fpost->responseData['data']['reason'].')');
   // this tests whether the message was instantly published (a post record was returned)
@@ -135,7 +138,7 @@
   tlog($fpost->responseData['data']['post']['text'] == $fpost->data['text'], 'foreign_post text unicode', 'OK', 'fail');
   tlog($fpost->responseData['data']['post']['msgid'] != $fpost->data['msgid'], 'foreign_post-to-post ID change', 'OK', 'fail');
   // now, this activity should appear on $ne2's profile stream
-	$wallPosts1 = $this->profile->getPostList($ne2->key());
+	$wallPosts1 = $this->msg->getPostList($ne2->key());
 	foreach($wallPosts1['list'] as $pds)
 	  if($pds['m_id'] == $fpost->responseData['data']['post']['msgid']) $postFound4 = true; 
 	tlog($postFound4, 'post found on '.$u2name.'\'s profile', 'OK', 'fail '.dumpArray($wallPosts1));
@@ -152,12 +155,12 @@
   $post->sendToUrl($ne1->ds['server']);
   tlog($post->responseData['data']['result'] == 'OK', 'post sentToUrl('.$post->authorEntity->ds['url'].')', 'OK', 'fail ('.$post->responseData['data']['result'].':'.$post->responseData['data']['reason'].')');
   // if the message was accepted, we should find it on the owner's profile stream (since the servers are identical)
-	$wallPosts1 = $this->profile->getPostList($ne1->key());
+	$wallPosts1 = $this->msg->getPostList($ne1->key());
 	foreach($wallPosts1['list'] as $pds)
 	  if($pds['m_id'] == $post->data['msgid']) $postFound5 = true; 
   tlog($postFound5, 'Update found on owner\'s profile', 'OK', 'fail');
   // also, it should appear on the other guy's stream since they're friends
-	$streamPosts1 = $this->profile->getStream($ne2->key());
+	$streamPosts1 = $this->msg->getStream($ne2->key());
   foreach($streamPosts1['list'] as $pds)
     if($pds['m_id'] == $post->data['msgid']) $postFound6 = true; 
   tlog($postFound6, 'Update found on friend\'s stream', 'OK', 'fail');
@@ -167,7 +170,7 @@
   $post->data['changed'] = time()+1;
   $post->sendToUrl($ne1->ds['server']);
   tlog($post->responseData['data']['result'] == 'OK', 'updated post sentToUrl('.$post->authorEntity->ds['url'].')', 'OK', 'fail ('.$post->responseData['data']['reason'].')');
-	$wallPosts1 = $this->profile->getPostList($ne1->key());
+	$wallPosts1 = $this->msg->getPostList($ne1->key());
 	foreach($wallPosts1['list'] as $pds)
 	  if($pds['m_id'] == $post->data['msgid']) 
 	  {
@@ -191,8 +194,8 @@
   tlog($post->data['deleted'] == 'yes', '"deleted" property set', 'OK', 'fail');  
   $mds = DB_GetDataset('messages', $post->ds['m_key']);
   tlog($mds['m_deleted'] == 'Y', 'm_deleted in DB', 'OK (#'.$mds['m_key'].')', 'fail');  
-	$streamPosts1 = $this->profile->getStream($ne2->key());
-	$wallPosts1 = $this->profile->getPostList($ne1->key());
+	$streamPosts1 = $this->msg->getStream($ne2->key());
+	$wallPosts1 = $this->msg->getPostList($ne1->key());
   $postFound9 = -1; $postFound10 = -1;
   foreach($streamPosts1['list'] as $pds)
     if($pds['m_id'] == $post->data['msgid']) $postFound9 = $pds['m_id']; 
@@ -201,16 +204,13 @@
 	  if($pds['m_id'] == $post->data['msgid']) $postFound10 = $pds['m_id']; 
 	tlog($postFound10 == -1, 'Message gone from owner profile', 'OK', 'fail ('.$postFound10.')');  
 
-  // WHY ARE THERE DUPLICATES?
-  // WHY ARE EMPTY ENTITIES BEING CREATED?
-
   $post->localUserEntity = $ne2->key();
   $post->executeHandler('delete');
   tlog($post->response['result'] == 'OK', 'Author deletes message', 'OK', 'fail ('.$post->response['reason'].')');
   tlog($post->data['deleted'] == 'yes', '"deleted" property set', 'OK', 'fail');  
   tlog($post->isDeleted, '"deleted" internal property set', 'OK', 'fail');  
-	$streamPosts1 = $this->profile->getStream($ne2->key());
-	$wallPosts1 = $this->profile->getPostList($ne1->key());
+	$streamPosts1 = $this->msg->getStream($ne2->key());
+	$wallPosts1 = $this->msg->getPostList($ne1->key());
   $postFound9 = -1; $postFound10 = -1;
   foreach($streamPosts1['list'] as $pds)
     if($pds['m_id'] == $post->data['msgid']) $postFound9 = $pds['m_id']; 
@@ -224,7 +224,6 @@
   $post->author($ne1->ds);
   $post->sendToUrl($ne1->ds['server']);
   tlog($post->responseData['data']['result'] != 'OK', 'Rejection policy', 'OK ('.$post->responseData['data']['reason'].')', 'fail');
-
   
 
 

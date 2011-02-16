@@ -12,7 +12,8 @@
  */
 function trust_sendkey2_receive(&$data, &$msg)
 {
-  if($data['author']['server'] == '')
+  $serverUrl = getDefault($data['author']['server']);
+  if($serverUrl == '')
     $msg->fail('invalid server field in "from" array');
   else
   {

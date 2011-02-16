@@ -34,7 +34,7 @@
 	{
 		$('#publisher').fadeTo('normal', 0.5);
 		$('#status_indicator').html('<img src="themes/default/ajax-loader.gif"/>');
-		$.post('<?= actionUrl('ajax_post', 'profile') ?>', 
+		$.post('<?= actionUrl('ajax_post', 'msg') ?>', 
 		  {'text' : $('#publish_text').val()<? if($this->viewEntity) print(", 'to' : ".$this->viewEntity) ?> }, function(data) {
 			  if(data.result != 'OK')
 			  {
