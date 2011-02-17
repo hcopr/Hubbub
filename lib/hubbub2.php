@@ -56,9 +56,33 @@ function h2_init_hubbub_environment()
 	}
 }
 
-function l10n($s)
+function l10n($s, $silent = false)
 {
-  if(is_object(object('controller'))) return(object('controller')->l10n($s));
+  $lout = $GLOBALS['l10n'][$s];
+  if(isset($lout)) 
+    return($lout);
+  else if($silent === true)
+    return('');
+  else
+    return('['.$s.']');
+}
+
+function l10n_load($filename_base)
+{
+  $lang_try = array();
+  $usr = object('user');
+  if($usr != null) $lang = $usr->lang; 
+  if($lang != '') $lang_try[] = $lang;
+  $lang_try[] = 'en';
+  foreach($lang_try as $ls)
+  {
+    $lang_file = $filename_base.'.'.$ls.'.cfg';
+    if(file_exists($lang_file))
+    {
+	    foreach(stringsToStringlist(file($lang_file)) as $k => $v) 
+	      $GLOBALS['l10n'][$k] = $v;
+    }
+  }
 }
 
 /* retrieve a config value (don't use $GLOBALS['config'] directly if possible) */
@@ -405,33 +429,19 @@ class HubbubController
 		$GLOBALS['currentcontroller'] = &$this;
 	}		
 	
-	function l10n($key, $key2 = '', $silent = false)
+	function l10n($key)
 	{
-		$lang = getDefault($this->user->lang, 'en');
-		if(!isset($this->l10n))
-		{
-			// if no language file has been loaded yet, we need to do so now:
-			$this->l10n = array();
-			$langFile = 'mvc/'.$this->name.'/l10n.'.$lang.'.cfg';
-			if(file_exists($langFile)) $this->l10n = stringsToStringlist(file($langFile));
-			if(is_array($GLOBALS['l10n'])) foreach($GLOBALS['l10n'] as $k => $v) $this->l10n[$k] = $v;
-		}
-		// if the key is valid
-		if(isset($this->l10n[$key])) $result = $this->l10n[$key]; else 
-		{
-			if($silent) $result = $key;
-			else 
-			  $result = getDefault($this->l10n[$key2], '['.$key.' '.$lang.']');
-		}
-		if(substr($result, 0, 1) == '>') 
-		  $result = getDefault($this->l10n[substr($result, 1)], '['.substr($result, 1).' '.$lang.']');
-		return($result);
-	}
+		$this->loadL10n();
+    return(l10n($key));	  
+  }
 	
-	function loadl10n($file)
+	function loadL10n()
 	{
-		$fle = stringsToStringlist(file($file.'.'.getDefault($this->user->lang, 'en').'.cfg'));
-		foreach($fle as $k => $v) $this->l10n[$k] = $v;
+	  if(!isset($this->l10n_loaded))
+	  {
+	    $this->l10n_loaded = true;
+			l10n_load('mvc/'.$this->name.'/l10n');
+    }
 	}
 	
 	function redirect($action, $controller = null, $params = array())

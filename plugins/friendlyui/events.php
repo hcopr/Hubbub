@@ -11,9 +11,10 @@ function friendlyui_user_new(&$entityDS, &$userDS)
 
 function friendlyui_show_notice(&$data, &$ds)
 {
-  $text = file_get_contents('plugins/friendlyui/msg.'.$data['notice_type'].'.txt');
+  l10n_load('plugins/friendlyui/l10n');
+  
   ?><div class="notice_me">
-    <?= $text ?>
+    <? include('plugins/friendlyui/msg.'.$data['notice_type'].'.php'); ?>
   </div><?
 }
 

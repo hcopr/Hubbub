@@ -1,6 +1,6 @@
 <?
 
-  $this->loadl10n('templates/emaillogin');
+  l10n_load('templates/emaillogin');
   include_once('lib/cq-forms.php');
 
 ?>

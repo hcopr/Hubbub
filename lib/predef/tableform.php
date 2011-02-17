@@ -224,7 +224,7 @@ function tableform_hidden($p, &$form)
 
 function tableform_html($p, &$form)
 {
-  ?><tr><td colspan="2"><?php echo $p['caption'] ?></td></tr><?php
+  ?><tr><td colspan="2"><?php echo $p['name'] ?></td></tr><?php
 }
 
 function tableform_section($p, &$form)

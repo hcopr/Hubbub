@@ -14,7 +14,6 @@ class CQForm
     $this->elements = array();
     $this->presentationDir = $GLOBALS['app.basepath'].'lib/predef/';
     $this->presentationName = getDefault($config['site.formlayout'], 'tableform');
-    $this->l10nBundle = $config['defaultl10n'];
     $this->add('start', $name, $name, array());
     $this->params = array();
     $this->params['checksum'] = md5(time());
@@ -67,17 +66,13 @@ class CQForm
           case('notempty'): {
             if (trim($value) == '') 
 						{
-							if(is_object($GLOBALS['currentcontroller'])) 
-                $this->errors[$e['name']] = $GLOBALS['currentcontroller']->l10n('field.cannotbeempty'); 
-							else
-                $this->errors[$e['name']] = 'this field cannot be empty';
+              $this->errors[$e['name']] = l10n('field.cannotbeempty'); 
 						}
             break;
           }
           case('email'): {
             if (!eregi("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$", 
-              $value)) $this->errors[$e['name']] = 
-                $controller->l10n('field.invalidemail', $this->l10nBundle); 
+              $value)) $this->errors[$e['name']] = l10n('field.invalidemail'); 
             break;
           }
         }
@@ -93,8 +88,8 @@ class CQForm
       $properties = $caption;
       $caption = ''; 
     }
-    if(is_object($GLOBALS['currentcontroller'])) $l10nCaption = $GLOBALS['currentcontroller']->l10n($name, '', true);
-    $properties['caption'] = getDefault($caption, $l10nCaption);
+    if($properties['caption'] == '') $properties['caption'] = l10n($name, true);
+    if($properties['caption'] == '') $properties['caption'] = '['.trim($name).']';
     $properties['name'] = $name;
     $properties['type'] = getDefault($type, 'string');
     $elname = md5($name); $ectr = 1;

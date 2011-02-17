@@ -1,5 +1,5 @@
 <?php
-    $this->loadl10n('templates/openidlogin');
+    l10n_load('templates/openidlogin');
 
     $openidProviders = array(
       'google' => array('icon' => 'google.png', 'url' => 'https://www.google.com/accounts/o8/id', 'caption' => 'Google'),
