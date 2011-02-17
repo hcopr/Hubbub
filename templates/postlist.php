@@ -132,7 +132,8 @@ function dyn_type_post(&$data, &$ds, &$flags)
 			<? if(isset($flags['infoblock'])) print('<div>'.$flags['infoblock'].'</div>'); ?>
 			<div class="postmeta"><?= implode(' · ', $metaElements) ?></div>
       <div id="post_<?= $ds['m_key'] ?>_votething" style="display:none" class="comment_item">
-        &nbsp;✓&nbsp; I am: <input type="text" id="vote_<?= $ds['m_key'] ?>_text" value="liking it" style="width: 100px" onkeypress="if(event.keyCode == 13) postVote(<?= $ds['m_key'] ?>); else if(event.keyCode == 27) cancelVote(<?= $ds['m_key'] ?>);"/>
+        &nbsp;✓&nbsp; I am: <input type="text" id="vote_<?= $ds['m_key'] ?>_text" value="liking it" style="width: 100px" 
+        onkeypress="if(event.keyCode == 13) postVote(<?= $ds['m_key'] ?>); else if(event.keyCode == 27) cancelVote(<?= $ds['m_key'] ?>);"/>
 				<input class="smallbtn" type="button" value="Vote" onclick="postVote(<?= $ds['m_key'] ?>)"/><input class="smallbtn" type="button" value="Cancel" onclick="cancelVote(<?= $ds['m_key'] ?>)"/>
       </div>
 			<? tmpl_commentlist($ds, $comments, true) ?>

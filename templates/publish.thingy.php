@@ -1,16 +1,41 @@
+<?
+
+$attachment_types = array();
+h2_execute_event('publish_attachments_register', $attachment_types);
+
+?>
 <div id="publisher">
 	
 	<table width="100%">
 		<tr>
-      <td valign="top">
-        <textarea style="width: 600px;" id="publish_text"></textarea>      	
+      <td rowspan="2" valign="top" width="500">
+        <textarea style="width: 500px;" id="publish_text"></textarea>      	
       </td>
-      <td valign="top" width="230">
-      	<input type="button" value="Share" onclick="do_publish();"/>
-				<span id="status_indicator"></span>
-      </td>
+      <td valign="top" width="*" colspan="2">
+      <? if(sizeof($attachment_types) > 0) { ?>
+        <select style="padding: 4px;" onchange="loadAttachmentEditor($(this).val());">
+          <option value="">▼ Attachment</option>
+          <?
+          foreach($attachment_types as $att)
+          {
+            ?><option value="<?= md5($att['editor']) ?>"><?= htmlspecialchars($att['caption']) ?></option><? 
+          }          
+          ?>
+        </select>
+      <? } ?></td>
 		</tr>
+		<tr>
+      <td valign="middle">
+        <input type="button" value="Share" onclick="do_publish();"/>
+      </td><td valign="middle">
+        <span id="status_indicator">&nbsp;</span>
+      </td>
+    </tr>
 	</table>
+	
+	<div id="publisher_attackments" style="padding-left: 4px">
+    &nbsp;
+  </div>
 	
 </div>
 <script>
@@ -26,12 +51,26 @@
 	    },
 	    // Quite slow animation:
 	    animateDuration : 300,
-	    // More extra space:
+	    // More extra space: 
 	    extraSpace : 10
 	});
 	
+	function loadAttachmentEditor(editorId)
+	{
+	  if(editorId == '') 
+	    $('#publisher_attackments').html('&nbsp;');
+	  else
+	  {
+	    $('#publisher_attackments').html('<span style="color: gray"><img src="themes/default/ajax-loader.gif" align="absmiddle"> loading...</span>');
+      $.post('<?= actionUrl('ajax_loadeditor', 'ui') ?>', {'id' : editorId}, function(data) {
+        $('#publisher_attackments').html(data);
+        });
+    }
+  }
+	
 	function do_publish()
 	{
+	  if($('#publish_text').val() == '') return;
 		$('#publisher').fadeTo('normal', 0.5);
 		$('#status_indicator').html('<img src="themes/default/ajax-loader.gif"/>');
 		$.post('<?= actionUrl('ajax_post', 'msg') ?>', 
