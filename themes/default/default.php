@@ -9,80 +9,62 @@
     <base href="<?php echo cfg('page.base') ?>"> 
   </head>
   <body>
-    <? if($GLOBALS['content']['pane'])
-      {
-        ?><div class="springpane_back"></div><?
-      } ?>
+    <? if($GLOBALS['content']['pane']) { ?><div class="springpane_back"></div><? } ?>
   	<noscript><div></div><p>Attention: Javascript is disabled on your browser. Hubbub does not work without Javascript. Please enable it before you proceed.</p></noscript>
-    <div id="bgbar"></div>
-    <table width="1024" cellspacing="0" cellpadding="0" align="center">
-      <tr>
-        <td colspan="3">
+    <div id="bgbar">
+
           <?
           if($_SESSION['uid'] > 0)
           {
           	?><div id="mainmenu"><?
-            $menu['home'] = $GLOBALS['l10n']['stream'];
-            $menu['profile'] = $GLOBALS['l10n']['profile'];
-            $menu['friends'] = $GLOBALS['l10n']['friends'];
-            $menu['settings'] = $GLOBALS['l10n']['settings'];
-						foreach($menu as $url => $caption)
-						{
+          	foreach(explode(',', 'home,profile,friends,mail,app') as $url)
+          	{
+          	  $caption = l10n($url);
+          	  if($url == 'profile') $caption = h2_make_excerpt(object('user')->ds['u_name'], 16);
+          	  else if($url == 'home') $caption = '<span class="hubbub_logo">hubbub<sup>v2</sup></span> '.$caption;
 							$class = ''; if(object('controller')->name == $url) $class = 'active';
 		          ?><a class="<?= $class ?>" href="<?= actionUrl('index', $url) ?>"><?= $caption ?></a><?
             }
-	          ?><a href="<?= actionUrl('logout', 'signin') ?>"><img src="img/endturn.png" align="absmiddle" title="<?= $GLOBALS['l10n']['logout'] ?>"/></a>
+	          ?><a style="float: right;" href="<?= actionUrl('logout', 'signin') ?>"><img src="img/endturn.png" align="absmiddle" title="<?= $GLOBALS['l10n']['logout'] ?>"/></a>
 	          </div><?
           }
           ?>
-          <h1><a href="<?= actionUrl('index', 'home') ?>">hubbub<sup>v2</sup></a>
-					  · <span><?= object('user')->ds['u_name'] ?></span>
-					</h1>
-				</td>
-      </tr>
-			<?
-			if($GLOBALS['content']['pane'])
-			{
-				?><tr><td colspan="10"><div class="springpane"><?= $GLOBALS['content']['pane'] ?></div></td></tr><?
-			}
-			?>
-      <tr>
-      	<?
-				if(sizeof($GLOBALS['submenu']) > 0)
-				{
-				?>
-        <td width="160" valign="top">
-        <div id="submenu"><?
-        foreach($GLOBALS['submenu'] as $item)
-        {
-        	$class = ''; if ($item['action'] == object('controller')->lastAction) $class = 'active';
-          ?><div class="<?= $class ?>"><a href="<?= $item['url'] ?>"><?= htmlspecialchars($item['caption']) ?></a></div><?
-        }
-        ?><div class="submenushadow"></div></div>
-        </td>
-        <?
-				}
-				?><td width="*" valign="top">
-          <div id="content"><?php echo $GLOBALS['content.startuperrors'].$GLOBALS['content']['main'] ?></div>
-        </td>
-        <!--<td width="200" valign="top">
-          <span style="color:gray"><?php
-            $ctxFile = 'mvc/'.$_REQUEST['controller'].'/contextbar.'.$_REQUEST['action'].'.php';
-            if(file_exists($ctxFile)) include($ctxFile);
-          ?></span>
-        </td>-->
-      </tr>
-      <tr>
-        <td colspan="3">
-          <div class="foottext smalltext">You are using the <b><?= $_SERVER['HTTP_HOST'] ?></b> server, which is part of the
-			      <a href="http://hubbub.at" target="_blank">Hubbub</a>
-			      federated social network 
-			      | <a href="http://hubbub.at/faq" target="_blank">FAQ</a>
-			      | <a href="http://hubbub.at/about" target="_blank">Project Info</a>
-          </div>
-        </td>
-      </tr>
-    </table>
+              
+    </div>
+			
+  	<? if(sizeof($GLOBALS['submenu']) > 0) { ?>
+      <div id="submenu"><?
+      foreach($GLOBALS['submenu'] as $item)
+      {
+      	$class = ''; if ($item['action'] == object('controller')->lastAction) $class = 'active';
+        ?><div class="<?= $class ?>"><a href="<?= $item['url'] ?>"><?= htmlspecialchars($item['caption']) ?></a></div><?
+      }
+    ?><div class="submenushadow"></div><?
+    if(sizeof($GLOBALS['subcat']))
+    {
+      ?><div class="subcat"><?
+      print(implode(' ', $GLOBALS['subcat']));
+      ?></div><?
+    }    
+    ?></div><? } ?>
+
+		<? if($GLOBALS['content']['pane']) {
+			?><div class="springpane"><?= $GLOBALS['content']['pane'] ?></div><?
+		} ?>
+			        
+    <div id="content_outer">
+      <div id="content"><?php echo $GLOBALS['content.startuperrors'].$GLOBALS['content']['main'] ?></div>
+    </div>
+
+    <div class="footer">
+      <div class="foottext smalltext">You are using the <b><?= $_SERVER['HTTP_HOST'] ?></b> server, which is part of the
+	      <a href="http://hubbub.at" target="_blank">Hubbub</a>
+	      federated social network 
+	      | <a href="http://hubbub.at/faq" target="_blank">FAQ</a>
+	      | <a href="http://hubbub.at/about" target="_blank">Project Info</a>
+      </div>
+    </div>
+
     <script>
       $("button, input:submit, input:button, a.btn").button();
     </script>

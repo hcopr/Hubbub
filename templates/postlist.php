@@ -7,7 +7,10 @@
  */
 function tmpl_postlist($list, $withContainer = false)
 {
-  if($withContainer) { ?><div id="postlist"><? }
+  if($withContainer) { ?><div id="postlist"><? 
+    #$GLOBALS['subcat']['view.opt'][] = array('caption' => l10n('post.pile-up'), 'url' => actionUrl($_REQUEST['action'], $_REQUEST['controller'], array('view' => 'pileup'))); 
+    #$GLOBALS['subcat']['view.opt'][] = array('caption' => l10n('post.list'), 'url' => actionUrl($_REQUEST['action'], $_REQUEST['controller'], array('view' => 'list'))); 
+  }
 
   if(sizeof($list['list'])>0) foreach($list['list'] as $ds)
 	{
@@ -15,6 +18,7 @@ function tmpl_postlist($list, $withContainer = false)
 		$typeFunction = 'dyn_type_'.$ds['m_type'];
 		if(!is_callable($typeFunction)) $typeFunction = 'tmpl_type_notsupported';
 		if($list['blurp_entity'] && $ds['m_owner'] != $list['blurp_entity']) $typeFunction = 'dyn_foreign_post_blurp';
+		?><div class="dynamic_box post_item post_type_<?= $ds['m_type'] ?>"><?
     if(!is_callable($typeFunction)) 
     {
       if(isset($GLOBALS['config']['plugins']['show_'.$ds['m_type']]))
@@ -32,9 +36,28 @@ function tmpl_postlist($list, $withContainer = false)
         h2_execute_event('display_'.$ds['m_type'], $data, $ds, $flags);
       $typeFunction($data, $ds, $flags);
     }
+    ?></div><?
 	}
 
-  if($withContainer) { ?></div><? }
+  if($withContainer) { ?></div><script>
+    $(window).load(function(){
+      $('#postlist').masonry({
+        columnWidth: 220, 
+        animate: true,
+      });
+    });
+    
+    function post_reflow()
+    {
+      $('#postlist').masonry({
+        columnWidth: 220, 
+        animate: true,
+      }).masonry({
+        columnWidth: 220, 
+        animate: true,
+      });
+    }
+  </script><? }
 }
 
 /*
@@ -99,6 +122,19 @@ function dyn_foreign_post_blurp(&$data, &$ds)
   </div><?
 }
 
+function h2_post_excerpt($raw, $id)
+{
+  $max_excerpt_length = 200;
+  
+  if(strlen($raw) > $max_excerpt_length) 
+    $text = '<span id="post_more_'.$id.'">'.nl2br(htmlspecialchars(h2_make_excerpt($raw, round($max_excerpt_length*0.7)))).
+    '<a onclick="$(\'#post_more_'.$id.'\').html($(\'#post_morecont_'.$id.'\').html()); post_reflow();"> more</a></span>'.
+    '<span style="display:none" id="post_morecont_'.$id.'">'.nl2br(htmlspecialchars($raw)).'</span>'; 
+  else
+    $text = nl2br(htmlspecialchars($raw));
+  
+  return($text);
+}
 
 /*
  * Single post display handler: for standard posts
@@ -118,7 +154,7 @@ function dyn_type_post(&$data, &$ds, &$flags)
   if(object('user')->isAdmin()) $metaElements[] = '<a target="_blank" href="'.actionUrl('inspect', 'test', array('id' => $ds['m_key'])).'">Inspect</a>';
   /* if user is either the owner or the author, she gets to see the delete button */
 	if(object('user')->entity == $ds['m_owner'] || object('user')->entity == $ds['m_author']) $metaElements[] = '<a onclick="deletePost('.$ds['m_key'].')">Delete</a>';
-  
+  $text = h2_post_excerpt($data['text'], $ds['m_key']);
   /* onward to the actual display of the message: */
   ?><div class="post" id="post_<?= $ds['m_key'] ?>">
   	<div class="postimg"><img src="img/anonymous.png" width="64"/></div>
@@ -128,7 +164,7 @@ function dyn_type_post(&$data, &$ds, &$flags)
 			if($ds['m_author'] != $ds['m_owner']) print(HubbubEntity::linkFromId($ds['m_author']).' ► ');
 			?>
 			<?= HubbubEntity::linkFromId($ds['m_owner']) ?>
-			<?= nl2br(htmlspecialchars($data['text'])) ?></div>
+			<?= $text ?></div>
 			<? if(isset($flags['infoblock'])) print('<div>'.$flags['infoblock'].'</div>'); ?>
 			<div class="postmeta"><?= implode(' · ', $metaElements) ?></div>
       <div id="post_<?= $ds['m_key'] ?>_votething" style="display:none" class="comment_item">

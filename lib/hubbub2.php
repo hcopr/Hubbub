@@ -16,7 +16,7 @@ function h2_init_hubbub_environment()
 	{
     case('en'): {
       $GLOBALS['l10n'] = array(
-        'stream' => 'Stream',
+        'home' => 'Home',
         'profile' => 'Profile',
         'friends' => 'Friends',
 				'settings' => 'Settings',
@@ -31,7 +31,7 @@ function h2_init_hubbub_environment()
     }
     case('de'): {
       $GLOBALS['l10n'] = array(
-        'stream' => 'Neuigkeiten',
+        'home' => 'Neuigkeiten',
         'profile' => 'Profil',
         'friends' => 'Freunde',
 				'settings' => 'Optionen',

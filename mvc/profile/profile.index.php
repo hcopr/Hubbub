@@ -3,9 +3,8 @@
 include('templates/publish.thingy.php');
 
 tmpl_postlist($this->msg->getPostList($this->user->entity), true);
-
-?><div id="board_wrapper">
-  <?
+/*
+?><div id="board_wrapper"><?
   srand(0);
   for($a = 0; $a < 30; $a++)
   {
@@ -15,12 +14,12 @@ tmpl_postlist($this->msg->getPostList($this->user->entity), true);
   }  
   ?>
 </div>
-
+<? */ ?>
 <script>
-$(window).load(function(){
+/*$(window).load(function(){
   $('#board_wrapper').masonry({
     columnWidth: 120, 
     itemSelector: '.masbox' 
   });
-});
+});*/
 </script>

@@ -83,7 +83,7 @@ h2_execute_event('publish_attachments_register', $attachment_types);
 			  else
 			  {
   			  $('#publish_text').val('');
-  			  $('#postlist').prepend(data.post);
+  			  $('#postlist').prepend(data.post).masonry();
 		      $('#status_indicator').html('&nbsp;'); 
         }
 		  }, 'json')
