@@ -27,6 +27,7 @@
   ini_set('display_errors', 'on');
   
   define('CSS_COL_QUANTUM', 205);
+  define('POST_MAX_WORDSIZE', 30);
 
 	 // forcing magic quotes off for legacy environments
   if (get_magic_quotes_gpc()) {

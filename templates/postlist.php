@@ -90,7 +90,7 @@ function tmpl_commentlist($postDS, &$comments, $withContainer = false)
 		?><div id="comment_item_<?= $comment['m_key'] ?>" class="comment_item comment_entry">
 				<div class="comment_img"><img src="img/anonymous.png" width="32"/></div>
 				<div class="comment_text"><?= HubbubEntity::linkFromId($comment['m_author']) ?>
-				  <?= nl2br(htmlspecialchars($data['text'])) ?>	
+				  <?= h2_post_excerpt($data['text'], $comment['m_key']) ?>	
 				  <div class="comment_meta"><?= implode(' · ', $metaElements) ?></div></div>
 		</div><?
 	}
@@ -119,16 +119,45 @@ function dyn_foreign_post_blurp(&$data, &$ds)
   </div><?
 }
 
+function h2_post_process($raw)
+{
+  $lines = array();
+  foreach(explode(chr(10), str_replace(chr(13), chr(10), $raw)) as $line)
+  {
+    $words = array();
+    foreach(explode(' ', trim($line)) as $word)
+    {
+      $wlen = strlen($word);
+      if($wlen > POST_MAX_WORDSIZE)
+      {
+        $wordbreak = '';
+        for($a = 0; $a < $wlen; $a++)
+        {
+          $wordbreak .= substr($word, $a, 1);
+          if($a % POST_MAX_WORDSIZE == 0) $wordbreak .= ' ';
+        }
+        $word = $wordbreak;
+      }
+      if($word != '') $words[] = $word; 
+    }
+    if(sizeof($words) > 0)
+      $lines[] = implode(' ', $words);
+  }  
+  return(nl2br(htmlspecialchars(implode(chr(10), $lines))));
+}
+
 function h2_post_excerpt($raw, $id)
 {
+  $raw = trim($raw);
   $max_excerpt_length = 200;
+  $br_count = substr_count(nl2br($raw), '<br');
   
-  if(strlen($raw) > $max_excerpt_length) 
-    $text = '<span id="post_more_'.$id.'">'.nl2br(htmlspecialchars(h2_make_excerpt($raw, round($max_excerpt_length*0.7)))).
-    '<a onclick="$(\'#post_more_'.$id.'\').html($(\'#post_morecont_'.$id.'\').html()); post_reflow();"> more</a></span>'.
-    '<span style="display:none" id="post_morecont_'.$id.'">'.nl2br(htmlspecialchars($raw)).'</span>'; 
+  if(strlen($raw) > $max_excerpt_length || $br_count >2) 
+    $text = '<span id="post_more_'.$id.'">'.h2_post_process(h2_make_excerpt((str_replace(array(chr(10),chr(13)), ' ', $raw)), round($max_excerpt_length*0.7))).
+    '<a title="'.str_word_count($raw, 0).' words" onclick="$(\'#post_more_'.$id.'\').html($(\'#post_morecont_'.$id.'\').html()); post_reflow();"> &lt;&middot;&gt;</a></span>'.
+    '<span style="display:none" id="post_morecont_'.$id.'">'.h2_post_process($raw).'</span>'; 
   else
-    $text = nl2br(htmlspecialchars($raw));
+    $text = h2_post_process($raw);
   
   return($text);
 }
