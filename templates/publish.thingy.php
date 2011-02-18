@@ -12,7 +12,8 @@ h2_execute_event('publish_attachments_register', $attachment_types);
         <textarea style="width: 500px;" id="publish_text"></textarea>      	
       </td>
       <td valign="top" width="*" colspan="2">
-      <? if(sizeof($attachment_types) > 0) { ?>
+        <input type="button" value="Share" onclick="do_publish();"/>
+        <? if(sizeof($attachment_types) > 0) { ?>
         <select style="padding: 4px;" onchange="loadAttachmentEditor($(this).val());">
           <option value="">▼ Attachment</option>
           <?
@@ -22,12 +23,11 @@ h2_execute_event('publish_attachments_register', $attachment_types);
           }          
           ?>
         </select>
-      <? } ?></td>
+        <? } ?>
+      </td>
 		</tr>
 		<tr>
-      <td valign="middle">
-        <input type="button" value="Share" onclick="do_publish();"/>
-      </td><td valign="middle">
+      <td valign="middle" colspan="2">
         <span id="status_indicator">&nbsp;</span>
       </td>
     </tr>

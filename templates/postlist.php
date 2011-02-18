@@ -42,7 +42,6 @@ function tmpl_postlist($list, $withContainer = false)
   if($withContainer) { ?></div><script>
     $(window).load(function(){
       $('#postlist').masonry({
-        columnWidth: 220, 
         animate: true,
       });
     });
@@ -50,10 +49,8 @@ function tmpl_postlist($list, $withContainer = false)
     function post_reflow()
     {
       $('#postlist').masonry({
-        columnWidth: 220, 
         animate: true,
       }).masonry({
-        columnWidth: 220, 
         animate: true,
       });
     }

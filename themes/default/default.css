@@ -415,18 +415,17 @@ h1 span {
   border: 1px solid #ccc;
 }
 #publisher {
-  width: 660px;
+  width: <?= CSS_COL_QUANTUM*4 ?>px;
 }
 .dynamic_box {
   margin: 5px;
   float: left;
-  padding: 5px;
 }
 .post_item {
-  width: 420px; 
+  width: <?= CSS_COL_QUANTUM*2-10 ?>px; 
 }
 .post_type_notice {
-  width: 860px; 
+  width: <?= CSS_COL_QUANTUM*4-10  ?>px; 
 }
 
 

@@ -26,6 +26,8 @@
   ini_set('log_errors', true);
   ini_set('display_errors', 'on');
   
+  define('CSS_COL_QUANTUM', 205);
+
 	 // forcing magic quotes off for legacy environments
   if (get_magic_quotes_gpc()) {
     $process = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST);
@@ -84,4 +86,5 @@
     include('themes/default/default.php');
     die();
   }
+
 ?>
