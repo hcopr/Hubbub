@@ -23,6 +23,8 @@ switch($_REQUEST['part'])
     foreach($c as $k => $v) if(!is_array($v)) $cv[$k] = $v;
     $cv['enable_rewrite'] = ($c['enable_rewrite'] ? 'true' : 'false');
     $cv['ping_password'] = md5($c['server_base'].time());
+    $myUserName = trim(shell_exec('whoami'));
+    $myUserName = getDefault($myUserName, 'root');
     $tmplFile = file_get_contents('ext/installer/example.com.php');
     foreach($cv as $k => $v) $tmplFile = str_replace('_'.$k.'_', $v, $tmplFile);    
 
@@ -34,6 +36,12 @@ switch($_REQUEST['part'])
       $cfgWritable = trim(file_get_contents($cfgFileName)) == trim($tmplFile);
       if($cfgWritable)
         $msg .= '<div class="green">✔ &nbsp; Config file written</div>
+          <br/>
+          '.l10n('cron.setup').'
+          <pre>* * * * * '.$myUserName.' php -f '.$GLOBALS['APP.BASEDIR'].'/cron.php > /dev/null 2>&1</pre>
+          <a href="ext/installer/cronhelp.php" target="_blank">&gt; More information / help</a><br/>
+          <br/>
+          <br/>
           <input type="button" value="Access your Hubbub instance" onclick="document.location.href=\'/\';"/>';
       else
         $msg .= '<div class="red">✘ &nbsp; Error: could not write configuration file</div>
@@ -42,6 +50,7 @@ switch($_REQUEST['part'])
     else
     {
       $msg .= '<div class="red">✘ &nbsp; Configuration file already exists</div>
+        <br/>
         <input type="button" value="Access your Hubbub instance" onclick="document.location.href=\'/\';"/>';
     }
     break;

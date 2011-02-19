@@ -1,10 +1,11 @@
 <?php
 
   $GLOBALS['profiler_start'] = microtime();
+  $GLOBALS['APP.BASEDIR'] = dirname(__FILE__);
 
   // init environment
   ob_start();
-  chdir(dirname(__FILE__));
+  chdir($GLOBALS['APP.BASEDIR']);
   require('lib/genlib.php');
   require('lib/hubbub2.php');
   profile_point('classes ready');
