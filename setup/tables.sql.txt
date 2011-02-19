@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 05, 2011 at 12:43 PM
+-- Generation Time: Feb 19, 2011 at 03:43 PM
 -- Server version: 5.1.47
 -- PHP Version: 5.3.3
 
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `h2_connections` (
   KEY `c_serverkey` (`c_toserverkey`),
   KEY `c_count_sent` (`c_count_sent`),
   KEY `c_count_rcvd` (`c_count_rcvd`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=51 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS `h2_entities` (
   KEY `_local` (`_local`),
   KEY `url` (`url`),
   KEY `server` (`server`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2345 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `h2_messages` (
   KEY `m_votehash` (`m_votehash`),
   KEY `m_publish` (`m_publish`),
   KEY `m_tag` (`m_tag`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=56 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=60 ;
 
 -- --------------------------------------------------------
 
@@ -200,7 +200,7 @@ CREATE TABLE IF NOT EXISTS `h2_usagestats` (
   KEY `st_type` (`st_type`),
   KEY `st_call` (`st_call`),
   KEY `st_interval` (`st_interval`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=294 ;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -217,10 +217,11 @@ CREATE TABLE IF NOT EXISTS `h2_users` (
   `u_settings` longtext NOT NULL,
   `u_sessionkey` varchar(32) NOT NULL,
   `u_entity` int(11) NOT NULL,
+  `u_type` varchar(1) NOT NULL,
   PRIMARY KEY (`u_key`),
   KEY `u_entity` (`u_entity`),
   KEY `u_sessionkey` (`u_sessionkey`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=28 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
