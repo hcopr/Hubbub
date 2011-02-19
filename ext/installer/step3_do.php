@@ -20,6 +20,8 @@ switch($_REQUEST['part'])
   case(1): {
     $cv = array();
     foreach($c['database'] as $k => $v) $cv['db_'.$k] = $v;
+    $cv['db_name'] = $c['database']['database'];
+    #print_r($c);
     foreach($c as $k => $v) if(!is_array($v)) $cv[$k] = $v;
     $cv['enable_rewrite'] = ($c['enable_rewrite'] ? 'true' : 'false');
     $cv['ping_password'] = md5($c['server_base'].time());
