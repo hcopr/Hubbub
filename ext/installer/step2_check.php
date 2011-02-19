@@ -20,12 +20,14 @@ $prettyUrls = $capData['controller'] == 'checkenv1';
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule . index.php [L]
-</IfModule>');
+</IfModule>
+
+AddHandler php5-script .php');
 
 $_SESSION['installer']['server_base'] = $_REQUEST['serverurl'];
 $_SESSION['installer']['admin_password'] = $_REQUEST['apwd'];
 
-@chmod('conf', 0760);
+@chmod('conf', 0775);
 @unlink('conf/probe');
 @WriteToFile('conf/probe', 'test');
 $cfgWritable = trim(implode('', file('conf/probe'))) == 'test';
@@ -51,10 +53,10 @@ else
 if(!$cfgWritable)
   $msg .= '<div class="red">✘ &nbsp; must have write access to conf/ directory</div>';
 
-if(!file_exists('static') && !mkdir('static', 0660, true))
+if(!file_exists('static') && !mkdir('static', 0775, true))
   $msg .= '<div class="red">✘ &nbsp; Could not create the static/ directory (insufficient rights)</div>';
 
-if(!file_exists('log') && !mkdir('log', 0660, true))
+if(!file_exists('log') && !mkdir('log', 0775, true))
   $msg .= '<div class="red">✘ &nbsp; Could not create the log/ directory (insufficient rights)</div>';
 
 if($prettyUrls) {

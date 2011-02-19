@@ -18,9 +18,9 @@ if($link && $_REQUEST['cmd'] == 'installtables')
   }
   if($msg != '')
   {
-    $msg .= '<br/>There were some errors installing the tables.<br/>
-      <input type="button" value="Retry" onclick="checkDBFields(\'installtables\');"/>
-      <input type="button" value="Ignore and Continue &gt;" onclick="document.location.href=\'?p=step2\';"/>';
+    $msg .= '<br/>'.l10n('error.installingtables').'<br/>
+      <input type="button" value="'.l10n('retry').'" onclick="checkDBFields(\'installtables\');"/>
+      <input type="button" value="'.l10n('ignore.continue').' &gt;" onclick="document.location.href=\'?p=step2\';"/>';
     $icon = 'error';
   }
   else
@@ -37,13 +37,13 @@ else if($link && $_REQUEST['cmd'] == 'createdb')
   if($created)
   {
     $msg = '<b style="color: green;">Database created!</b><br/>
-      <input type="button" value="Continue with Step 2 &gt;" onclick="checkDBFields(\'installtables\');"/>';
+      <input type="button" value="'.l10n('continue.step2').' &gt;" onclick="checkDBFields(\'installtables\');"/>';
     $icon = 'database';
   }
   else
   {
-    $msg = 'Could not create "'.htmlspecialchars($_REQUEST['database']).'", please check whether you have sufficient rights. Alternatively, you can also create this database with PhpMyAdmin or from the management console of your webserver.
-      <input type="button" value="Retry Creating '.htmlspecialchars($_REQUEST['database']).'" onclick="checkDBFields(\'createdb\');"/>';
+    $msg = l10n('db.couldnotcreate').' "'.htmlspecialchars($_REQUEST['database']).'", '.l10n('error.dbcheck').'
+      <input type="button" value="'.l10n('retry.creating').' '.htmlspecialchars($_REQUEST['database']).'" onclick="checkDBFields(\'createdb\');"/>';
     $icon = 'error';    
   }
 }
@@ -52,28 +52,28 @@ else switch(mysql_errno())
   case('2003'): 
   case('2005'): 
   {
-    $msg = 'No active MySQL server found at address "'.htmlspecialchars($_REQUEST['host']).'"';
+    $msg = l10n('error.noserver').' "'.htmlspecialchars($_REQUEST['host']).'"';
     $icon = 'daemons';
     break;
   }
   case('1045'): 
   case('1044'): 
   {
-    $msg = 'Please enter the correct username and/or password';
+    $msg = l10n('error.username.password');
     $icon = 'error';
     break;
   }
   case('1049'): 
   {
-    $msg = '<b style="color: green;">Connection established</b>!<br/> This database does not exist yet. Do you want to create it? <br/>
-      <input type="button" value="Create '.htmlspecialchars($_REQUEST['database']).'" onclick="checkDBFields(\'createdb\');"/>';
+    $msg = '<b style="color: green;">'.l10n('connection.established').'</b>!<br/> '.l10n('db.new').' <br/>
+      <input type="button" value="'.l10n('create').' '.htmlspecialchars($_REQUEST['database']).'" onclick="checkDBFields(\'createdb\');"/>';
     $icon = 'kexi';
     break;
   }
   case('0'): 
   {
-    $msg = '<b style="color: green;">Ready to install!</b><br/>
-      <input type="button" value="Continue with Step 2 &gt;" onclick="checkDBFields(\'installtables\');"/>';
+    $msg = '<b style="color: green;">'.l10n('ready').'</b><br/>
+      <input type="button" value="'.l10n('continue.step2').' &gt;" onclick="checkDBFields(\'installtables\');"/>';
     $icon = 'database';
     break; 
   }

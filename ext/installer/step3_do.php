@@ -23,15 +23,15 @@ switch($_REQUEST['part'])
     foreach($c as $k => $v) if(!is_array($v)) $cv[$k] = $v;
     $cv['enable_rewrite'] = ($c['enable_rewrite'] ? 'true' : 'false');
     $cv['ping_password'] = md5($c['server_base'].time());
-    $tmplFile = file_get_contents('conf/example.com.php');
-    foreach($cv as $k => $v) $tmplFile = str_replace('_'.$k.'_', $v);    
+    $tmplFile = file_get_contents('ext/installer/example.com.php');
+    foreach($cv as $k => $v) $tmplFile = str_replace('_'.$k.'_', $v, $tmplFile);    
 
     $cfgFileName = 'conf/default.php';
     if(!file_exists($cfgFileName))
     {      
-      @chmod('conf', 0760);
-      @WriteToFile($cfgFileName, $tmplFile);
-      $cfgWritable = trim(file_get_contents($cfgFileName)) == trim($tmpFile);
+      @chmod('conf', 0777);
+      WriteToFile($cfgFileName, $tmplFile);
+      $cfgWritable = trim(file_get_contents($cfgFileName)) == trim($tmplFile);
       if($cfgWritable)
         $msg .= '<div class="green">✔ &nbsp; Config file written</div>
           <input type="button" value="Access your Hubbub instance" onclick="document.location.href=\'/\';"/>';

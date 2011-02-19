@@ -5,7 +5,6 @@
     <script type="text/javascript" src="lib/all.js.php"></script>   
     <link type="text/css" rel="stylesheet" href="themes/default/all.css.php"/> 
 		<link rel="icon" type="image/png" href="img/hubbub-logofarb32.png"/>
-    <base href="<?php echo cfg('page.base') ?>"> 
   </head>
   <body>
     <? if($GLOBALS['content']['pane']) { ?><div class="springpane_back"></div><? } ?>
@@ -27,6 +26,8 @@
 	          ?><a style="float: right;" href="<?= actionUrl('logout', 'signin') ?>"><img src="img/endturn.png" align="absmiddle" title="<?= $GLOBALS['l10n']['logout'] ?>"/></a>
 	          </div><?
           }
+
+          if(isset($GLOBALS['page.h1'])) print('<div id="mainmenu"><a>'.$GLOBALS['page.h1'].'</a></div>');
           ?>
               
     </div>

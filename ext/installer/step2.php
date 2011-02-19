@@ -28,7 +28,7 @@ $form->add('string', 'hosturl', 'Server URL', array('default' => $sbase, 'onchan
 $form->add('string', 'adminpw', 'Admin password', array('default' => substr(base64_encode(md5(time())), 0, 8), 'onchange' => $onChange, 
   'infomarker' => '^ Please make a note of your admin password'));
 
-$form->add('button', 'btn', 'Check', array('onclick' => $onChange));
+$form->add('button', 'btn.check', 'Check', array('onclick' => $onChange));
 
 $form->display();
 

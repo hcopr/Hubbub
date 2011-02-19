@@ -427,7 +427,10 @@ h1 span {
 .post_type_notice {
   width: <?= CSS_COL_QUANTUM*4-10  ?>px; 
 }
-
+.installer {
+  margin-right: 170px;
+  margin-top: 12px; 
+}
 
 
 
