@@ -62,7 +62,7 @@ class SigninController extends HubbubController
 	
 	function google()
   {
-  	$this->openIdSignin('http://www.google.com/accounts/o8/id');
+  	$this->openIdSignin('https://www.google.com/accounts/o8/id');
   }
 	
 	function yahoo()

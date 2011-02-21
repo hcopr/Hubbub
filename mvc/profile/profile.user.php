@@ -44,7 +44,7 @@ print($this->l10n('user.balloon'));
       $this->form->add('readonly', 'username', $this->l10n('username'));
     $this->form->add('string', 'u_name', $this->l10n('u_name'), array('default' => $defaultName, 'validate' => 'notempty'));
 		$this->form->add('dropdown', 'u_l10n', $this->l10n('u_l10n'), array('options' => array('en' => 'English', 'de' => 'Deutsch')));
-    $this->form->add('submit', $this->l10n('saveprofile'));
+    $this->form->add('submit', 'saveprofile');
 		
 		if($this->form->submitted)
 		{
