@@ -66,7 +66,7 @@ function l10n($s, $silent = false)
     return('');
   else
   {
-    if(cfg('l10ndebug') == true)
+    if(cfg('l10ndebug') == true && $GLOBALS['l10n_files_last'] != '')
     {
       WriteToFile($GLOBALS['l10n_files_last'], $s.'=['.$s.']'."\n");
     }
@@ -141,32 +141,7 @@ function h2_make_excerpt($text, $length = 64)
 
 function h2_statlog($type, $call)
 {
-  return; 
-  if(!cfg('service.statlog')) return;
-  $itvl = gmdate('Ymd');
-  $logTypes = array(
-    array('st_type' => $type, 'st_call' => $call, 'st_interval' => $itvl),
-    );
-  $ctr = getDefault($_REQUEST['controller'], 'endpoint');
-  if($ctr == 'endpoint') $ctr = $GLOBALS['stats']['msgtype'].'('.$GLOBALS['stats']['response'].')';
-  if($_SERVER['REMOTE_ADDR'] != '')
-  {
-    $logTypes[] = array('st_type' => 'ip', 'st_call' => 'req '.getDefault($_SERVER['REMOTE_ADDR'], 'internal').' '.$ctr, 'st_interval' => $itvl);
-    $logTypes[] = array('st_type' => 'ip', 'st_call' => 'all '.getDefault($_SERVER['REMOTE_ADDR'], 'internal').' ', 'st_interval' => $itvl);
-  }
-  foreach($logTypes as $lds)
-  {
-    $ds = DB_GetDatasetMatch('usagestats', $lds);
-    $ds['st_count']++;
-    $ds['st_msec_total'] += profiler_microtime_diff(microtime(), $GLOBALS['profiler_start']);
-    $ds['st_msec_avg'] = number_format($ds['st_msec_total']/$ds['st_count'], 2);
-    $ds['st_mem_total'] += number_format(memory_get_peak_usage(true) / (1024*1024), 3);
-    $ds['st_mem_avg'] = number_format($ds['st_mem_total'] / $ds['st_count'], 1);
-    DB_UpdateDataset('usagestats', $ds);
-  }
-  // delete stats after ten days
-  if(rand(0, 100) == 1) 
-    DB_Update('DELETE DELAYED FROM '.getTableName('usagestats').' WHERE st_interval < '.gmdate('Ymd', time()-60*60*24*10));
+
 }
 
 function h2_exceptionhandler($exception)
@@ -196,16 +171,16 @@ function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
   $bt = debug_backtrace();
   ?><div class="errormsg" style="border: 1px solid red; padding: 8px; font-size: 8pt; font-family: consolas; background: #ffffe0;">
     <b>Hubbub Runtime Error: <br/><span style="color: red"><?php echo $errstr ?></span></b><br/>
-    File: <?php echo $errfile ?><br/><?php 
+    File: <?php echo $errfile ?><pre><?php 
     unset($bt[0]);
     foreach($bt as $trace)
     {
-      print('^ &nbsp;'.$trace['function'].'(');
+      print('^ '.$trace['function'].'(');
       if(cfg('debug.showparams') && is_array($trace['args'])) print(implode(', ', $trace['args']));
-      print(') in '.$trace['file'].' | Line '.$trace['line'].'<br/>');
+      print(') in '.$trace['file'].' | Line '.$trace['line']."\n\r");
     }
-  ?></div><?php
-  $report = 'Error: '.$errstr.' in '.$errfile.':'.$errline;
+  ?></pre></div><?php
+  $report = 'Error: '.$errstr.' in '.$errfile.':'.$errline."\r\n";
   if(cfg('debug.verboselog')) logError('log/error.log', $report);
   return(true);
 }
