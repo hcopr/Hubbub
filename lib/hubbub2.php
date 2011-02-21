@@ -333,7 +333,7 @@ class HubbubUser
 			$this->entity = $this->ds['u_entity'];
 			if(!is_array($this->settings)) $this->settings = array();
 			// if essential user data is missing, redirect to the page where they can be filled in
-			if((trim($this->ds['u_name']) == '' || $this->ds['u_entity'] == 0)
+			if(($this->ds['u_entity'] == 0)
 			  && $_REQUEST['controller'] != 'profile' && $_REQUEST['controller'] != 'signin' && $_REQUEST['action'] != 'user')
 			{
 				redirect(actionUrl('user', 'profile'));
