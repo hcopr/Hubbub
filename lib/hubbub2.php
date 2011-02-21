@@ -301,6 +301,7 @@ class HubbubUser
 			{
 				$_SESSION['uid'] = $cds['u_key'];
         $GLOBALS['userds'] = $cds;
+        redirect(actionUrl($_REQUEST['action'], $_REQUEST['controller'], $_REQUEST));
 			}
 		}
     if($_SESSION['uid'] > 0)
