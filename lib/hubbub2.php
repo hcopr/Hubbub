@@ -65,11 +65,18 @@ function l10n($s, $silent = false)
   else if($silent === true)
     return('');
   else
+  {
+    if(cfg('l10ndebug') == true)
+    {
+      WriteToFile($GLOBALS['l10n_files_last'], $s.'=['.$s.']'."\n");
+    }
     return('['.$s.']');
+  }
 }
 
 function l10n_load($filename_base)
 {
+  if(isset($GLOBALS['l10n_files'][$filename_base])) return;
   $lang_try = array();
   $usr = object('user');
   if($usr != null) $lang = $usr->lang; 
@@ -82,6 +89,8 @@ function l10n_load($filename_base)
     {
 	    foreach(stringsToStringlist(file($lang_file)) as $k => $v) 
 	      $GLOBALS['l10n'][$k] = $v;
+	    $GLOBALS['l10n_files'][$filename_base] = $lang_file;
+	    if(cfg('l10ndebug') == true) $GLOBALS['l10n_files_last'] = $lang_file;
     }
   }
 }
