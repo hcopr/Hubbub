@@ -103,13 +103,18 @@ function logToFile($filename, $content, $clearfile = false)
 /* takes a query string or request_uri and parses it for parameters */
 function interpretQueryString($qs)
 {
-  $qs = getDefault($_SERVER['QUERY_STRING'], substr($_SERVER['REQUEST_URI'], 1));
-  while($qs[0] == '?' || $qs[0] == '/') $qs = substr($qs, 1);
-  if(!array_search($qs, array('robots.txt', 'favicon.ico')) === false) return;
-  $call = explode(URL_CA_SEPARATOR, CutSegment('?', $qs));
-  if(stristr($call[0], '/') != '') CutSegment('/', $call[0]);
-  parse_str($qs, $rq);
-  foreach($rq as $k => $v) $_REQUEST[$k] = $v;    
+  $uri = parse_url('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+  
+  if($uri['query'] != '') 
+  {
+    parse_str($uri['query'], $_REQUEST_new);
+    $_REQUEST = array_merge($_REQUEST, $_REQUEST_new);
+  }
+  
+  $path = substr($uri['path'], 1);  
+  $call = explode(URL_CA_SEPARATOR, $path);
+  if(!array_search($path, array('robots.txt', 'favicon.ico')) === false) return;
+
   $_REQUEST['controller'] = getDefault($call[0], cfg('service.defaultcontroller'));
   $_REQUEST['action'] = getDefault($call[1], cfg('service.defaultaction'));
 }

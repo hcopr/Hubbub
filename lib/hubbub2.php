@@ -9,7 +9,8 @@
 function h2_init_hubbub_environment()
 {
   if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/')
-    interpretQueryString($_SERVER['REQUEST_URI']);    
+    interpretQueryString($_SERVER['REQUEST_URI']);  
+      
 	$GLOBALS['obj']['user'] = new HubbubUser();
 	
 	switch(object('user')->lang)
@@ -159,6 +160,26 @@ function h2_statlog($type, $call)
     DB_Update('DELETE DELAYED FROM '.getTableName('usagestats').' WHERE st_interval < '.gmdate('Ymd', time()-60*60*24*10));
 }
 
+function h2_exceptionhandler($exception)
+{
+  if($GLOBALS['errorhandler_ignore']) return;
+  $bt = debug_backtrace();
+  ?><div class="errormsg" style="border: 1px solid red; padding: 8px; font-size: 8pt; font-family: consolas; background: #ffffe0;">
+    <b>Hubbub Runtime Exception: <br/><span style="color: red"><?php echo $exception->getMessage() ?></span></b><br/>
+    File: <?php echo $exception->getFile().':'.$exception->getLine() ?><br/><?php 
+    unset($bt[0]);
+    foreach($bt as $trace)
+    {
+      print('^ &nbsp;'.$trace['function'].'(');
+      if(cfg('debug.showparams') && is_array($trace['args'])) print(implode(', ', $trace['args']));
+      print(') in '.$trace['file'].' | Line '.$trace['line'].'<br/>');
+    }
+  ?></div><?php
+  $report = 'Exception: '.$exception->getMessage().' in '.$exception->getFile().':'.$exception->getLine();
+  if(cfg('debug.verboselog')) logError('log/error.php.log', $report);
+  return(true);
+}
+
 /* replaces the standard PHP error handler, mainly because we want a stack trace */
 function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
 {
@@ -175,7 +196,8 @@ function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
       print(') in '.$trace['file'].' | Line '.$trace['line'].'<br/>');
     }
   ?></div><?php
-  if(cfg('debug.verboselog')) logToFile('log/error.php.log', $report);
+  $report = 'Error: '.$errstr.' in '.$errfile.':'.$errline;
+  if(cfg('debug.verboselog')) logError('log/error.php.log', $report);
   return(true);
 }
 	
@@ -200,7 +222,10 @@ function h2_getController($controllerName)
 	  {
 	    header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
 	    header('Status: 404 Not Found');	
-	    die('File not found: '.$_SERVER['REQUEST_URI']);     
+      /*print('<pre>');
+      print_r($_SERVER);
+      print('</pre>');*/
+	    die('File not found: '.$_SERVER['REQUEST_URI'].'<br/>'.$controllerName);     
     }
 	}
 	require_once($controllerFile);

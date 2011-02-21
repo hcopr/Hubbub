@@ -9,14 +9,6 @@ class SigninModel extends HubbubModel
     require('ext/oauth/epi_twitter.php');
 	}
 	
- function initOpenId($identity)
-  {
-    require('ext/lightopenid/openid.php');
-    $this->openid = new LightOpenID;
-    $this->openid->identity = $identity;
-		$this->openid->required = array('namePerson/friendly', 'contact/email', 'namePerson/first', 'namePerson/last', 'birthDate', 'person/gender', 'contact/country/home', 'pref/language', 'pref/timezone');
-  }
-	
 	function oAuthSignin()
 	{
     $this->initOAuth();    
@@ -60,6 +52,8 @@ class SigninModel extends HubbubModel
 	
 	function completeOAuth($token)
   {
+	  // there are some bugs in lightopenid that make this necessary
+	  ob_start();
     $result = '';
     $this->initOAuth();
     $twitterObj = new EpiTwitter(cfg('twitter.consumer_key'), cfg('twitter.consumer_secret'));
@@ -74,6 +68,30 @@ class SigninModel extends HubbubModel
 		$this->newAccount($ads);
     h2_nv_store('twitterinfo/'.$ads['ia_key'], $twitterInfo->response);
     h2_nv_store('twitterinfo', $twitterInfo->response);
+    $this->openid_error = ob_get_clean();
+    return($url);
+  }
+	
+ function initOpenId($identity)
+  {
+    require('ext/lightopenid/openid.php');
+    $this->openid = new LightOpenID;
+    $this->openid->identity = $identity;
+		$this->openid->required = array('namePerson/friendly', 'contact/email', 'namePerson/first', 'namePerson/last', 'birthDate', 'person/gender', 'contact/country/home', 'pref/language', 'pref/timezone');
+  }
+	
+	function openIdAuthUrl()
+	{
+	  // there are some bugs in lightopenid that make this necessary
+	  ob_start();
+	  try
+	  {
+      $url = $this->openid->authUrl();
+    } catch (Exception $e) { 
+      logError('', $e->getMessage());
+    }
+    $this->openid_error = ob_get_clean();
+    return($url);
   }
 	
   function completeOpenID(&$openid)

@@ -7,6 +7,7 @@
 
   error_reporting(E_ALL ^ E_NOTICE);
   set_error_handler('h2_errorhandler', E_ALL ^ E_NOTICE);
+  set_exception_handler('h2_exceptionhandler');
 
   // this is the kind of boilerplate code PHP would have been fine without necessitating
   if(strpos(PHP_OS, "WIN") !== false) $config['os.path.separator'] = ';'; else $config['os.path.separator'] = ':';

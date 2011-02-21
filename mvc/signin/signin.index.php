@@ -35,6 +35,9 @@ if($_SESSION['msg'])
 
 ?>
 <div id="more">
+  <? 
+  if($_REQUEST['msg'] != '') print('<div class="banner">'.$_REQUEST['msg'].'</div>');  
+  ?>
 	<div class="pretentious_citation">
 		<em><a href="http://en.wikipedia.org/wiki/Social_network">so·cial net·work</a>:</em>
 		a social structure made up of individuals (or organizations) called "nodes", which are tied (connected) by one or more specific types of interdependency, such as friendship, kinship, common interest, financial exchange, dislike, sexual relationships, or relationships of beliefs, knowledge or prestige.
