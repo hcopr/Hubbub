@@ -11,7 +11,7 @@
 		$form = new CQForm('addbyurl');
 		
 		$form->add('string', 'friendurl', array('validate' => 'notempty', 'default' => cfg('service.server').'/'));
-		$form->add('submit', 'addbyurl.btn');
+		$form->add('submit', $this->l10n('addbyurl.btn'));
 		$form->ds = $_REQUEST;
 		
     $form->display();   

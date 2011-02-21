@@ -204,6 +204,10 @@ h1 span {
 .action_tile {
   background: #fff; 
 }
+.biggray {
+  font-size: 48px;
+  color: #ccc;
+}
 
 /* ------------------------------------- LAYOUT ------------------------------------ */
 body {
@@ -431,6 +435,9 @@ h1 span {
   margin-right: 170px;
   margin-top: 12px; 
 }
-
+.biggray {
+  text-align: right; 
+  margin: 8px;
+}
 
 

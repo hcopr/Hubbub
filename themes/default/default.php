@@ -66,7 +66,11 @@
     </div>
 
     <script>
-      $("button, input:submit, input:button, a.btn").button();
+      function apply_style()
+      {
+        $("button, input:submit, input:button, a.btn").button();
+      }
+      apply_style();
     </script>
   </body>
   <? profile_point('page template'); ?>

@@ -38,8 +38,8 @@ class FriendsModel extends HubbubModel
 	{
 		$result = array();
 		require_once('lib/hubbub2_loadurl.php');
-    $er = hubbub2_loadurl($url);
-    if(sizeof($er) == 0 || $er['user'] == '' || $er['server'] == '')
+    $result = hubbub2_loadurl($url);
+    if(sizeof($result) == 0 || $result['user'] == '' || $result['server'] == '')
     {
     	$result['result'] = 'fail';
     	$result['reason'] = 'entity_not_found';
@@ -47,7 +47,6 @@ class FriendsModel extends HubbubModel
     else
     {
       $result['result'] = 'OK';
-      $result['entity'] = $er;
     }
     return($result);
 	}

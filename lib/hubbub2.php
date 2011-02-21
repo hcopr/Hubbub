@@ -998,6 +998,15 @@ class HubbubEntity
 
 class HubbubEndpoint
 {
+  function urlUnify($raw)
+  {
+    if(!strStartsWith($raw, 'http')) $raw = 'http://'.$raw;
+    $u = parse_url($raw);
+    $s = strtolower($u['host']).$u['path']; 
+    if($u['query'] != '') $s .= '?'.$u['query'];
+    return($s);
+  }
+  
 	function parseResponse($txt)
 	{
     $result = array();
@@ -1042,10 +1051,11 @@ class HubbubEndpoint
         CURLOPT_HEADER => 1,
         CURLOPT_URL => $url,
         CURLOPT_FRESH_CONNECT => 1,
-				CURLOPT_FOLLOWLOCATION => 1,
+				// sadly this doesn't work on servers with open_basedir, so we need to turn it off
+				#CURLOPT_FOLLOWLOCATION => 1,
 				CURLOPT_RETURNTRANSFER => 1,
         CURLOPT_FORBID_REUSE => 1,
-        CURLOPT_TIMEOUT => 1,
+        CURLOPT_TIMEOUT => 3,
       );	
 		if(sizeof($postData) > 0) $defaults[CURLOPT_POSTFIELDS] = http_build_query($postData);
     $ch = curl_init();
