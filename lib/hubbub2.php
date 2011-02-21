@@ -176,7 +176,7 @@ function h2_exceptionhandler($exception)
     }
   ?></div><?php
   $report = 'Exception: '.$exception->getMessage().' in '.$exception->getFile().':'.$exception->getLine();
-  if(cfg('debug.verboselog')) logError('log/error.php.log', $report);
+  if(cfg('debug.verboselog')) logError('log/error.log', $report);
   return(true);
 }
 
@@ -197,7 +197,7 @@ function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
     }
   ?></div><?php
   $report = 'Error: '.$errstr.' in '.$errfile.':'.$errline;
-  if(cfg('debug.verboselog')) logError('log/error.php.log', $report);
+  if(cfg('debug.verboselog')) logError('log/error.log', $report);
   return(true);
 }
 	
