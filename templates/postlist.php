@@ -43,6 +43,7 @@ function tmpl_postlist($list, $withContainer = false)
     $(window).load(function(){
       $('#postlist').masonry({
         animate: true,
+        columnWidth: <?= CSS_COL_QUANTUM ?>,
       });
     });
     
@@ -52,6 +53,7 @@ function tmpl_postlist($list, $withContainer = false)
         animate: true,
       }).masonry({
         animate: true,
+        columnWidth: <?= CSS_COL_QUANTUM ?>,
       });
     }
   </script><? }

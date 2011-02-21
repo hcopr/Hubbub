@@ -422,10 +422,10 @@ h1 span {
   float: left;
 }
 .post_item {
-  width: <?= CSS_COL_QUANTUM*2-10 ?>px; 
+  width: <?= CSS_COL_QUANTUM*2-12 ?>px; 
 }
 .post_type_notice {
-  width: <?= CSS_COL_QUANTUM*4-10  ?>px; 
+  width: <?= CSS_COL_QUANTUM*4-12  ?>px; 
 }
 .installer {
   margin-right: 170px;
