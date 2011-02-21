@@ -289,16 +289,6 @@ function redirect($tourl)
 	die();
 } 
 
-function bin2hexex($bin)
-{
-  $tmp = bin2hex($bin);
-  $rlen = strlen($tmp);
-  $result = '';
-  for($a = 0; $a < $rlen; $a += 2)
-    $result .= substr($tmp, $a, 2).' ';
-  return($result);
-}
-
 /* get a dump string of an array, for debugging purposes only! */
 function dumpArray($array)
 {

@@ -1,7 +1,7 @@
 <?
 
 /* event handler to notify closest connections when a message changes */
-function post_notify(&$data, &$msg)
+function post_broadcast(&$data, &$msg)
 {
   if($msg->ownerEntity == $msg->localUserEntity)
   {
@@ -14,7 +14,7 @@ function post_notify(&$data, &$msg)
     $msg->type = 'foreign_post';
     $msg->data['type'] = 'foreign_post';
     WriteToFile('log/activity.log', $data['msgid'].' changed type to foreign_post'.chr(10));
-    $msg->notify();
+    $msg->broadcast();
   }
 }
 
@@ -88,8 +88,9 @@ function post_receive_single(&$data, &$msg)
 /* event handler that deletes a message */
 function post_delete(&$data, &$msg)
 {
+  $epfx = $_REQUEST['controller'] == 'endpoint' ? 'remote: ' : 'local: ';
   // in order to delete this message, we need to be either the owner or the author of it
-  WriteToFile('log/activity.log', $data['msgid'].' deletion'.chr(10));
+  WriteToFile('log/activity.log', $epfx.$data['msgid'].' deletion author='.$msg->authorKey.' owner='.$msg->ownerKey.' local='.$msg->localUserEntity.chr(10));
   if($msg->localUserEntity == $msg->ownerKey || $msg->localUserEntity == $msg->authorKey) 
   {
     // easiest case, because the message lives on this server
@@ -98,12 +99,12 @@ function post_delete(&$data, &$msg)
     $msg->isDeleted = true;
     $msg->data['deleted'] = 'yes';
     $msg->markChanged();
-    WriteToFile('log/activity.log', $data['msgid'].' local message (user==owner), deleted'.chr(10));
+    WriteToFile('log/activity.log', $epfx.$data['msgid'].' local message (user==owner), deleted'.chr(10));
   }
   if($msg->localUserEntity == $msg->ownerKey) 
   {
     // if we're the owner, there is nothing left to do here    
-    WriteToFile('log/activity.log', $data['msgid'].' deleted by owner'.chr(10));
+    WriteToFile('log/activity.log', $epfx.$data['msgid'].' deleted by owner'.chr(10));
     $msg->save();
     $msg->ok();
     return(true);
@@ -116,7 +117,7 @@ function post_delete(&$data, &$msg)
     if($msg->response['result'] == 'OK')
     {
       // remote delete confirmed, everything is OK
-      WriteToFile('log/activity.log', $data['msgid'].' deleted remotely'.chr(10));
+      WriteToFile('log/activity.log', $epfx.$data['msgid'].' deleted remotely'.chr(10));
       $msg->ok();
       $msg->save();
       return(true);
@@ -124,7 +125,7 @@ function post_delete(&$data, &$msg)
     else
     {
       // remote delete didn't work out
-      WriteToFile('log/activity.log', $data['msgid'].' remote delete failed: '.$msg->response['data']['reason'].chr(10));
+      WriteToFile('log/activity.log', $epfx.$data['msgid'].' remote delete failed: '.$msg->response['data']['reason'].chr(10));
       $msg->fail('remote delete failed: '.$msg->response['data']['reason']);
       /* we'll save it regardless, because the other server might pick it up again later through the feed */
       $msg->save();

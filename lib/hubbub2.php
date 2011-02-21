@@ -66,10 +66,10 @@ function l10n($s, $silent = false)
     return('');
   else
   {
-    if(cfg('l10ndebug') == true && $GLOBALS['l10n_files_last'] != '')
+    /*if(cfg('l10ndebug') == true && $GLOBALS['l10n_files_last'] != '')
     {
       WriteToFile($GLOBALS['l10n_files_last'], $s.'=['.$s.']'."\n");
-    }
+    }*/
     return('['.$s.']');
   }
 }
@@ -206,9 +206,6 @@ function h2_getController($controllerName)
 	  {
 	    header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
 	    header('Status: 404 Not Found');	
-      /*print('<pre>');
-      print_r($_SERVER);
-      print('</pre>');*/
 	    die('File not found: '.$_SERVER['REQUEST_URI'].'<br/>'.$controllerName);     
     }
 	}
@@ -318,7 +315,7 @@ class HubbubUser
 			$this->entity = $this->ds['u_entity'];
 			if(!is_array($this->settings)) $this->settings = array();
 			// if essential user data is missing, redirect to the page where they can be filled in
-			if(($this->ds['u_entity'] == 0)
+			if(($this->ds['u_entity'] == 0 || trim($this->ds['u_name']) == '')
 			  && $_REQUEST['controller'] != 'profile' && $_REQUEST['controller'] != 'signin' && $_REQUEST['action'] != 'user')
 			{
 				redirect(actionUrl('user', 'profile'));
@@ -405,22 +402,6 @@ class HubbubUser
 		return($this->entityDS['user']);
 	}
 	
-	function setUsername($username)
-	{
-	  $this->isNewUser = $this->ds['u_key'] > 0;
-	  $this->server = new HubbubServer(cfg('service.server'), true);
-		$this->loadEntity();
-		$this->entityDS['user'] = safename($username);
-		$this->entityDS['url'] = getDefault($this->entityDS['url'], cfg('service.server').'/'.(cfg('service.url_rewrite')?'':'?').$username);
-		$this->entityDS['_local'] = 'Y';
-		$this->entityDS['_serverkey'] = $this->server->ds['s_key'];
-		$this->entityDS['server'] = cfg('service.server');
-		if(trim($this->entityDS['user']) != '') $ekey = DB_UpdateDataset('entities', $this->entityDS);
-		$this->ds['u_entity'] = $ekey;
-		if(trim($this->ds['u_name']) != '') DB_UpdateDataset('users', $this->ds);
-    if($this->isNewUser) h2_execute_event('user_new', $this->entityDS, $this->ds);
-	}
-	
 	function getUrl()
 	{
 		$this->loadEntity();
@@ -471,6 +452,9 @@ class HubbubController
 		die();
 	}
 	
+	/*
+	 * creates contextual menu items by letting controllers specify what actions should be menu items
+	 */
 	function makeMenu($str, $add = array(), $params = array())
 	{
 		$result = array();
@@ -508,11 +492,7 @@ class HubbubController
     $this->pageTitle = $this->l10n($action.'.title', $action);
     ob_start();
     $action = getDefault($action, cfg('service.defaultaction'));
-		if($this->skipView)
-		{
-			// do nothing
-		}
-		else
+		if(!$this->skipView)
 		{
       include('mvc/'.strtolower($this->name).'/'.strtolower($this->name).'.'.getDefault($this->viewName, $action).'.php');
 		}
@@ -542,10 +522,7 @@ class HubbubController
 	}
 }
 
-class HubbubModel
-{
-	
-}
+class HubbubModel { }
 
 function result_fail($reason = 'n/a', $preArray = array())
 {
@@ -569,6 +546,17 @@ function result_ok($preArray = array())
  */
 class HubbubMessage
 {
+  // these are just setters or getters, with no deeper program logic (yet)
+  function author($ads) { $this->data['author'] = $ads; }
+  function owner($ads) { $this->data['owner'] = $ads; }
+	function to($ads) { $this->owner($ads); }
+  function from($ads) { $this->author($ads); }
+	function newMsgId() {	return(md5($GLOBALS['config']['service']['server'].time().rand(1, 1000000))); }
+	function getExistingDS()	{ return(DB_GetDataset('messages', $this->data['msgid'], 'm_id')); }
+  function markChanged($time = null) { if($time == null) $time = time(); $this->data['changed'] = $time; }
+	function index(&$ds)	{ /* indexing hook, not used right now */ }
+	function unpackData($dataset)	{	return(json_decode(gzinflate($dataset['m_data']), true)); }
+	
 	function __construct($type = null)
 	{			
 	  if($type != null) $this->create($type);
@@ -585,7 +573,9 @@ class HubbubMessage
 	function fail($reason)
 	{
 		$this->response = result_fail($reason, $this->response);
-		logError('notrace', '[IN] msg fail, type "'.$this->data['type'].'": '.$reason.' / ID:'.$this->data['msgid']);
+    $s = '[IN] msg fail, type "'.$this->data['type'].'": '.$reason.' / ID:'.$this->data['msgid'];
+    WriteToFile('log/activity.log', $s.chr(10));
+		logError('notrace', $s);
 		return(true);
 	}
 
@@ -599,19 +589,6 @@ class HubbubMessage
 	    $this->response = result_ok($this->response);
 		return(true);
 	}
-	
-  function author($ads)
-  {
-    $this->data['author'] = $ads;
-  }
-	
-	function owner($ads)
-  {
-    $this->data['owner'] = $ads;
-  }
-	
-  function to($ads) { $this->owner($ads); }
-  function from($ads) { $this->author($ads); }
 	
   /**
    * Execute message event handler
@@ -627,15 +604,10 @@ class HubbubMessage
     h2_execute_event($this->type.'_'.$event.'_init', $this->data, $this, $result);
     if(!is_callable($handlerFunc) && file_exists($handlerFile)) include_once($handlerFile);
     if(is_callable($handlerFunc)) $result = $handlerFunc($this->data, $this, $opt); 
-    h2_execute_event($this->type.'_'.$event.'_done', $this->data, $this, $result);
+    h2_execute_event($this->type.'_'.$event, $this->data, $this, $result);
 		return($result);
 	}
-	
-	function newMsgId()
-	{
-		return(md5($GLOBALS['config']['service']['server'].time().rand(1, 1000000)));
-	}
-	
+		
 	/**
 	 * create a new message
 	 * @param object $type
@@ -662,11 +634,6 @@ class HubbubMessage
     return(true);		  
   }
 	
-	function isInDB()
-	{
-	  $this->existingDS = DB_GetDataset('messages', $this->data['msgid'], 'm_id');
-	  return(sizeof($this->existingDS) > 0);
-  }
 	
 	function compareWithDS($ds, $fields)
 	{
@@ -688,31 +655,16 @@ class HubbubMessage
     return($fails);
   }
 
-  function markChanged()
-  {
-    $this->data['changed'] = time(); 
-  }
 
-  /**
-   * issues a direct notification to closest connections
-   */
-  function notify()
-  {
-    WriteToFile('log/activity.log', $this->data['msgid'].' notify'."\n");
-		$this->sanitizeDataset();
-		$this->executeHandler('notify');
-    WriteToFile('log/activity.log', $this->data['msgid'].' notify end'."\n");
-  }
-	
 	/**
 	 * saves the message to the database
 	 * @return 
 	 */
 	function save()
 	{
-    WriteToFile('log/activity.log', $this->data['msgid'].' save start'."\n");
 		$this->sanitizeDataset();
-		if($this->isInDB())
+    $this->existingDS = $this->getExistingDS();
+		if(sizeof($this->existingDS) > 0)
 		{
 		  // if this message already exists in the database, we need to verify that the user hasn't changed
 		  // any of the immutable fields: author, owner, parent, created
@@ -731,7 +683,6 @@ class HubbubMessage
       $this->parentDS = DB_GetDataset('messages', $this->data['parent'], 'm_id');
       $this->parentKey = getDefault($this->parentDS['m_key'], '-1');
     }
-    WriteToFile('log/activity.log', $this->data['msgid'].' save handler start'."\n");
 		$this->executeHandler('save');
 		if($this->doSave)
 		{
@@ -752,12 +703,11 @@ class HubbubMessage
 				'm_tag' => $this->vTag,
 				'm_deleted' => ($this->data['deleted'] == 'yes') ? 'Y' : 'N',
 				);
-      WriteToFile('log/activity.log', $this->data['msgid'].' saved (deleted='.$this->ds['m_deleted'].')'."\n");
 			if($this->existingDS['m_key'] > 0)
 			{
         $this->ds['m_key'] = $this->existingDS['m_key'];
 			  // only update an existing message if the "changed" stamp is later than before
-			  if($this->existingDS['m_changed'] > 0 && $this->data['changed'] <= $this->existingDS['m_changed']) return(false);
+			  #if($this->existingDS['m_changed'] > 0 && $this->data['changed'] <= $this->existingDS['m_changed']) return(false);
 			}
 			$this->ds['m_key'] = DB_UpdateDataset('messages', $this->ds);
 			$this->index($this->ds);
@@ -765,17 +715,7 @@ class HubbubMessage
 		}
 		return(false);
 	}
-	
-	function index(&$ds)
-	{
-    // obsolete
-	}
-	
-	function unpackData($dataset)
-	{
-		return(json_decode(gzinflate($dataset['m_data']), true));
-	}
-	
+		
 	/**
 	 * receive a message packet, check for sanity, pass on to type-specific event handler "receive"
 	 * @param array $msgData
@@ -794,7 +734,7 @@ class HubbubMessage
 	}
 	
 	/**
-	 * receive message as part of a stream, check for sanity, pass on to type-specific event handler "receive_single"
+	 * receive one message as part of a stream, check for sanity, pass on to type-specific event handler "receive_single"
 	 * (the stream itself is supposed to be properly authenticated and checked beforehand)
 	 * @param array $msgData
 	 * @return 
@@ -826,9 +766,10 @@ class HubbubMessage
 	/* clean up fields and fill default values where necessary */
 	function sanitizeFields()
 	{
+	  $this->ownerKey = $this->ownerEntity->key();
+	  $this->authorKey = $this->authorEntity->key();
 		$this->data['author'] = HubbubEntity::ds2arrayShort($this->authorEntity->ds);
     $this->data['owner'] = HubbubEntity::ds2arrayShort($this->ownerEntity->ds);
-    #if(json_encode($this->data['author']) == json_encode($this->data['owner'])) unset($this->data['owner']);
     $this->data['created'] = getDefault($this->data['created'], time());
     $this->data['changed'] = getDefault($this->data['changed'], $this->data['created']);
     $this->data['msgid'] = getDefault($this->data['msgid'], $this->newMsgId());
@@ -848,11 +789,14 @@ class HubbubMessage
     $ownerServer = $msg->ownerEntity->ds['server'];
     return($this->sendToUrl($ownerServer));
   }
-  
-  /* send notifications out to anyone whom it might concern (actual implementation solely in the type-specific event handler) */
-  function sendNotifications()
+
+  /**
+   * This sends a blanket DMN to the user's closest connections
+   */
+  function broadcast()
   {
-    return($this->executeHandler('send_notifications', array('url' => $url, 'result' => $result)));
+		$this->sanitizeDataset();
+		$this->executeHandler('broadcast');
   }
 	
 	/**
@@ -868,7 +812,6 @@ class HubbubMessage
     $this->executeHandler('before_sendtourl', array('url' => $url));
     $this->payload = json_encode($this->data);
 		if($this->toServer->outboundKey() != '' || $forceKey != null) $this->signForServer($this->toServer, $forceKey);
-	  WriteToFile('log/activity.log', $this->data['msgid'].' signed send '.$this->signature.chr(10));
 	  $result = HubbubEndpoint::request($url, array('hubbub_msg' => $this->payload, 'hubbub_sig' => $this->signature));
 		//h2_audit_log('msg.send:'.$this->data['type'], $this->signature.': '.$this->payload);
 	  $this->responseData = $result;
@@ -886,7 +829,6 @@ class HubbubMessage
 	{
 		$overrideKey = getDefault($overrideKey, $srvObj->outboundKey());
 		$this->signature = md5($overrideKey.trim($this->payload));
-    WriteToFile('log/activity.log', $this->data['msgid'].' signing payload '.$overrideKey.':'.md5($this->payload).'='.$this->signature.chr(10));
 	}
 			
   /**
@@ -1103,7 +1045,7 @@ class HubbubEndpoint
 				CURLOPT_FOLLOWLOCATION => 1,
 				CURLOPT_RETURNTRANSFER => 1,
         CURLOPT_FORBID_REUSE => 1,
-        CURLOPT_TIMEOUT => 3,
+        CURLOPT_TIMEOUT => 1,
       );	
 		if(sizeof($postData) > 0) $defaults[CURLOPT_POSTFIELDS] = http_build_query($postData);
     $ch = curl_init();
@@ -1240,7 +1182,21 @@ class HubbubConnection
 		 return(getDefault($this->ds['c_status'], 'undefined'));
 	 }
 	 
+	 function increaseCount($fromId, $toId, $type = 'sent')
+	 {
+	   if($fromId == 0 || $toId == 0) return;
+	   $varname = 'c_count_'.$type;
+	   DB_Update('UPDATE '.getTableName('connections').' SET '.$varname.' = '.$varname.'+1 WHERE c_from=? AND c_to = ?', array($fromId, $toId)); 
+   }
 	 
+	 function GetClosestConnections($entityId)
+	 {
+	   return(DB_GetList('SELECT *,SUM(c_count_sent) as sent_count FROM '.getTableName('connections').' 
+	     WHERE c_from = "'.($entityId+0).'" and c_status="friend" and c_count_sent > 0
+	     GROUP BY c_toserverkey
+	     ORDER BY sent_count DESC
+	     LIMIT '.getDefault($GLOBALS['config']['service']['dmn_maxsize'], 10)));
+   }
 	 		
 }
 

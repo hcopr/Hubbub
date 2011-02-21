@@ -53,7 +53,7 @@ class MsgModel extends HubbubModel
 	  $msg = new HubbubMessage('post');
 	  $msg->load(array('id' => $postKey, 'field' => 'm_key'));
 	  $result = $msg->executeHandler('delete');
-    $msg->notify();
+    $msg->broadcast();
 	  $this->msg = $msg;
 	  return($result);
 	}
@@ -63,7 +63,7 @@ class MsgModel extends HubbubModel
 	  // note/todo: if this works correctly, we should see a duplicate message if we're posting on someone else's profile
 		$msg = new HubbubMessage($type);
 		foreach($post as $k => $v) $msg->data[$k] = $v;
-    $msg->notify();
+    $msg->broadcast();
     $msg->save();
 		return($msg);
 	}
@@ -75,7 +75,7 @@ class MsgModel extends HubbubModel
 		if($p['author']['_key'] == $p['owner']['_key'])
 		{
 			$msg = $this->makePostMessage('post', $p);
-			$msg->sendNotifications();
+			$msg->broadcast();
 		}
 		else
 		{

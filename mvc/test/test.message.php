@@ -151,8 +151,9 @@
   $post->author($ne2->ds);
   $post->owner($ne1->ds);
   $post->data['text'] = 'This is a realtime message. Umlauts like üöä should be preserved.';
-  // if we're the owner, we can send a realtime update
-  $post->sendToUrl($ne1->ds['server']);
+  // if we're the owner, we can send a realtime update to ne2
+  $fpost->save();
+  /*
   tlog($post->responseData['data']['result'] == 'OK', 'post sentToUrl('.$post->authorEntity->ds['url'].')', 'OK', 'fail ('.$post->responseData['data']['result'].':'.$post->responseData['data']['reason'].')');
   // if the message was accepted, we should find it on the owner's profile stream (since the servers are identical)
 	$wallPosts1 = $this->msg->getPostList($ne1->key());
@@ -162,12 +163,20 @@
   // also, it should appear on the other guy's stream since they're friends
 	$streamPosts1 = $this->msg->getStream($ne2->key());
   foreach($streamPosts1['list'] as $pds)
-    if($pds['m_id'] == $post->data['msgid']) $postFound6 = true; 
-  tlog($postFound6, 'Update found on friend\'s stream', 'OK', 'fail');
+    if($pds['m_id'] == $post->data['msgid']) $matchDS6 = $pds;
+  tlog(is_array($matchDS6), 'Update found on friend\'s stream', 'OK', 'fail');
+  tlog($post->data['text'] == $matchDS6['text'], 'Update on friend\'s stream is valid', 'OK', 'fail');
+  if($post->data['text'] != $matchDS6['text'])
+  {
+    foreach($post->data as $k => $v)
+    {
+      tlog($v == $matchDS6[$k], 'Post match field '.$k.' = '.$v, 'OK', '"'.$matchDS6[$k].'"'); 
+    }
+  }*/
 
   // now, we'll update an existing message that has already been committed to DB
   $post->data['text'] = 'This message text has changed now';
-  $post->data['changed'] = time()+1;
+  $post->markChanged(time()+$ctr++);
   $post->sendToUrl($ne1->ds['server']);
   tlog($post->responseData['data']['result'] == 'OK', 'updated post sentToUrl('.$post->authorEntity->ds['url'].')', 'OK', 'fail ('.$post->responseData['data']['reason'].')');
 	$wallPosts1 = $this->msg->getPostList($ne1->key());
@@ -186,14 +195,25 @@
   $post->owner($ne1->ds);
   $post->data['text'] = 'This is a message, it will be deleted. Umlauts like üöä should be preserved.';
   $post->save();
-  tlog($post->ds['m_key'] > 0, 'post saved locally', 'OK (#'.$post->ds['m_key'].')', 'fail');  
-  $post->data['changed'] = time()+2;
+
+  tlog($post->ds['m_key'] > 0, 'post saved locally', 'OK (#'.$post->ds['m_id'].')', 'fail');  
+
+	$streamPosts1 = $this->msg->getStream($ne2->key());
+  foreach($streamPosts1['list'] as $pds)
+    if($pds['m_id'] == $post->data['msgid']) $matchDS7 = $pds;
+  tlog(is_array($matchDS7), 'post in stream', 'OK (#'.$post->ds['m_key'].')', 'fail');  
+  $textData = HubbubMessage::unpackData($matchDS);
+  tlog($matchDS7['text'] == $textData['text'], 'post in stream is valid', 'OK (#'.$post->ds['m_key'].')', 'fail');  
+
+  $post->markChanged(time()+$ctr++);
   $post->executeHandler('delete');
-  tlog($post->existingDS['m_key'] == $post->ds['m_key'], 'checking for duplicate DS ('.$post->existingDS['m_key'].':'.$post->ds['m_key'].')', 'OK', 'fail');
-  tlog($post->response['result'] == 'OK', 'Owner deletes message', 'OK ('.$post->ds['m_key'].':'.$post->ds['m_id'].')', 'fail ('.$post->response['reason'].')');
+  
   tlog($post->data['deleted'] == 'yes', '"deleted" property set', 'OK', 'fail');  
   $mds = DB_GetDataset('messages', $post->ds['m_key']);
+  $textData = HubbubMessage::unpackData($mds);
   tlog($mds['m_deleted'] == 'Y', 'm_deleted in DB', 'OK (#'.$mds['m_key'].')', 'fail');  
+  tlog($textData['deleted'] == 'yes', 'deleted in record', 'OK (#'.$mds['m_key'].')', 'fail');  
+  
 	$streamPosts1 = $this->msg->getStream($ne2->key());
 	$wallPosts1 = $this->msg->getPostList($ne1->key());
   $postFound9 = -1; $postFound10 = -1;
@@ -204,10 +224,15 @@
 	  if($pds['m_id'] == $post->data['msgid']) $postFound10 = $pds['m_id']; 
 	tlog($postFound10 == -1, 'Message gone from owner profile', 'OK', 'fail ('.$postFound10.')');  
 
+  $post = new HubbubMessage('post');
   $post->localUserEntity = $ne2->key();
+  $post->author($ne2->ds);
+  $post->owner($ne1->ds);
+  $post->data['text'] = 'This is a message, it will be deleted. Umlauts like üöä should be preserved.';
+  $post->save();
+
   $post->executeHandler('delete');
-  tlog($post->response['result'] == 'OK', 'Author deletes message', 'OK', 'fail ('.$post->response['reason'].')');
-  tlog($post->data['deleted'] == 'yes', '"deleted" property set', 'OK', 'fail');  
+  tlog($post->data['deleted'] == 'yes', 'Author: "deleted" property set', 'OK', 'fail');  
   tlog($post->isDeleted, '"deleted" internal property set', 'OK', 'fail');  
 	$streamPosts1 = $this->msg->getStream($ne2->key());
 	$wallPosts1 = $this->msg->getPostList($ne1->key());
@@ -224,13 +249,9 @@
   $post->author($ne1->ds);
   $post->sendToUrl($ne1->ds['server']);
   tlog($post->responseData['data']['result'] != 'OK', 'Rejection policy', 'OK ('.$post->responseData['data']['reason'].')', 'fail');
-  
-
 
   tsection_end();
 ?>
-<div style="height: 200px"></div>
-
 
 
 

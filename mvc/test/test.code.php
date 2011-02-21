@@ -16,7 +16,8 @@ foreach(json_decode(
   '"get_accountverify_credentials()","getattributes()","ksort()","init()","subscribe()","reload()","file_get_contents()","validate()","attr()","css()","append()","button()","parse_url()","confirm()","new()",'.
   '"senttourl()","elseif()","catch()","getmessage()","typefunction()","loadthread()","deletecomment()","nl2br()","springcomment()","springvote()","postvote()","cancelvote()","closecommentifempty()","postcomment()",'.
   '"autoresize()","fadeto()","alert()","prepend()","rowcallback2()","chdir()","dirname()","fadeout()","callback()","handlerfunc()","mysql_connect()","mysql_errno()","phpversion()","base64_encode()",'.
-  '"controllerclassname()","modelclassname()","memory_get_peak_usage()"]', true)
+  '"controllerclassname()","modelclassname()","memory_get_peak_usage()","array_merge()","bin2hex()","complete()","define()","error()","func_name()","getcwd()","getfile()",'.
+  '"getline()","masonry()","set_exception_hander()","shell_exec()","str_word_count()","substr_count()","sum()","set_exception_handler()"]', true)
   as $b) $builtIn[$b] = true;
   
 foreach(explode(',', 
@@ -39,7 +40,7 @@ foreach(file_list('./', null, true) as $k => $v) if((!strStartsWith($k, './ext')
       if(strStartsWith($word, 'function_')) 
         $parse['func'][substr($word, 9).')'] = $file_id;
       else 
-        $parse['call'][$word.')'] = $file_id;
+        if(substr($word, 0, 1) != '{') $parse['call'][$word.')'] = $file_id;
     }
   }
 }
@@ -62,11 +63,11 @@ tlog(true, 'Other declarations: '.$okCount1, 'OK', 'fail');
 
 tsection('Unused Code');
 ksort($parse['func']);
-foreach($parse['func'] as $function => $decl)
+foreach($parse['func'] as $function => $decl) if(!strStartsWith($parse2['files'][$decl], './plugins/') && !strStartsWith($parse2['files'][$decl], './log/') && !strStartsWith($parse2['files'][$decl], './static/'))
 {
   if(!inStr($parse2['files'][$decl], 'controller') && substr($function, 0, 1) != '_' && 
     substr($function, 0, 1) != '(' && !strStartsWith($parse2['files'][$decl], './msg') && !$ignoreCallCheck[$function] && !strEndsWith($function, 'callback()') &&
-    !strStartsWith($function, 'js_') && !strStartsWith($function, 'dyn_'))
+    !strStartsWith($function, 'js_') && !strStartsWith($function, 'dyn_') && $function != 'h2_exceptionhandler()')
   {
     if(!$parse['call'][$function])
       tlog(false, $function.' in '.$parse2['files'][$decl], 'OK', 'fail');

@@ -56,7 +56,7 @@ print($this->l10n('user.balloon'));
 			  }
 				else
 				{
-					$this->user->setUsername($this->form->ds['username']);
+					$this->model->setUsername($this->form->ds['username']);
 				}
 				if(sizeof($this->form->errors) == 0)
 				{

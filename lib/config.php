@@ -68,6 +68,8 @@
 		'server' => $_SERVER['HTTP_HOST'],
 		// server poll interval in seconds
 		'poll_interval' => 60*10,
+		// size of the DMN list
+		'dmn_maxsize' => 10,
     );
   $GLOBALS['config']['page']['template'] = 'default';
 		

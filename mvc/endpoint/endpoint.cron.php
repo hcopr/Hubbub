@@ -9,7 +9,7 @@ newFile('log/cron.last.log', json_encode(array(
 $srvInterval = cfg('service.poll_interval');
 
 foreach(DB_GetList('SELECT * FROM '.getTableName('servers').'
-  WHERE s_lastpolled < '.(time()-$srvInterval)) as $sds)
+  WHERE s_lastpolled < '.(time()-$srvInterval)) as $sds) if($sds['s_url'] != cfg('service.server'))
 {
   $sds['s_lastpolled'] = time(); 
   WriteToFile('log/cron.message.log', "Polling Server ".$sds['s_key'].' '.$sds['s_url'].chr(10));
