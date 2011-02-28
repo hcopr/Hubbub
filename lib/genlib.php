@@ -41,31 +41,6 @@ function strEndsWith($haystack, $needle)
   return(substr(strtolower($haystack), -strlen($needle)) == strtolower($needle));
 }
 
-/* retrieves a list of files from a directory */
-function file_list($dir, $pattern = null, $recurse = false)
-{
-  $result = array();
-  if(is_dir($dir) && $handle = opendir($dir))
-  {
-    while(($file = readdir($handle)) !== false) 
-      if(substr($file, 0, 1)!='.' && $file != "Thumbs.db")
-      {
-        if(is_dir($dir.$file))
-        {
-          if($recurse === true) foreach(file_list($dir.$file.'/', $pattern, true) as $f => $sf)
-            $result[$f] = $sf;
-        }
-        else
-        {
-          if($pattern == null || instr($file, $pattern))
-            $result[$dir.$file] = $file;
-        }
-      }
-    closedir($handle);
-  }
-  return($result);
-}
-
 /* open new file (overwrite if it already exists) */
 function newFile($filename, $content)
 {
@@ -139,11 +114,6 @@ function logError($logfile, $msg, $level = 0)
 	}
 }
 
-/* templated mail sending func */
-function send_mail($to, $template, $params = array())
-{
-  mail($to, $subject, execTemplate($template, $params), $headers);
-}
 
 /* makes an URL calling a specific controller with a specific action */
 function actionUrl($action = '', $controller = '', $params = array())
@@ -181,15 +151,6 @@ function stringParamsToArray($paramStr)
     $result[$k] = $line;	
   }
   return($result);
-}
-
-/* executes a php page with $params as local variables (be careful!) */
-function execTemplate($templateFileName, $params = array())
-{
-  foreach ($params as $k => $v) $$k = $v;
-  ob_start();
-  include($templateFileName);
-  return(ob_get_clean());
 }
 
 /* returns the first entry of an array (workaround to some PHP array wackyness) */
@@ -251,42 +212,6 @@ function stringListToStrings($stringList)
       $result[] = $k.'='.trim($v);
   }
   return($result);
-}
-
-/* converts a list of config strings into an associative array */
-function stringsToStringlist($stringArray)
-{
-  $result = array();  
-  if (is_array($stringArray))
-    foreach ($stringArray as $line)
-    {
-      $key = CutSegment('=', $line);
-      $result[$key] = trim($line);
-    }
-  return($result);
-}
-
-/* makes a string list from a block of contigious text */
-function textToStringList($text)
-{
-  if (trim($text) == '') return(array());
-  $list = explode("\n", $text);
-  return(stringsToStringlist($list));
-}
-
-/* converts an associative array into a text block */
-function stringlistToText($stringlist)
-{
-  $list = stringlistToStrings($stringlist);
-  return(implode("\n", $list));
-}
-
-/* reads a text file and returns it as an assoc array */
-function readStringListFile($filename)
-{
-  $fileContent = file($filename);
-  if ($fileContent != '')
-    return(stringsToStringlist($fileContent));
 }
 
 /* issues a HTTP redirect immediately */

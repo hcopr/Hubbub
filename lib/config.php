@@ -54,9 +54,8 @@
   ini_set('session.cookie_httponly', 1);
 	
 	// global config array
-  $GLOBALS['config']['service'] = array(
+  $serviceDefaults = array(
     // enable stats
-    'statlog' => true,
     // server's standard date/time format
     'dateformat' => 'H:i d.m.Y',
     'name' => 'Hubbub2',
@@ -71,7 +70,6 @@
 		// size of the DMN list
 		'dmn_maxsize' => 10,
     );
-  $GLOBALS['config']['page']['template'] = 'default';
 		
   // include the server-specific config
   if(file_exists('conf/'.$_SERVER['HTTP_HOST'].'.php'))
@@ -93,5 +91,8 @@
     include('themes/default/default.php');
     die();
   }
+  
+  $svc = &$GLOBALS['config']['service'];
+  foreach($serviceDefaults as $k => $v) if(!isset($svc[$k])) $svc[$k] = $serviceDefaults[$k];
 
 ?>
