@@ -149,10 +149,17 @@ function send_mail($to, $template, $params = array())
 function actionUrl($action = '', $controller = '', $params = array())
 { 
   $p = '';
-  if (!is_array($params)) $params = stringParamsToArray($params);
   $controller = getDefault($controller, $_REQUEST['controller']);
   $action = getDefault($action, $_REQUEST['action']);
-  if(sizeof($params) > 0) $p = '?'.http_build_query($params);
+  if (!is_array($params)) $params = stringParamsToArray($params);
+  if(sizeof($params) > 0) 
+  {
+    // prevent cookies from appearing in the server log by accident
+    foreach(array('session-key', session_id()) as $k) 
+      if(isset($params[$k])) unset($params[$k]);
+    #  
+    $p = '?'.http_build_query($params);
+  }
   $url = $controller.($action == 'index' ? '' : URL_CA_SEPARATOR.$action).$p;  
   if($GLOBALS['config']['service']['url_rewrite'])
   {

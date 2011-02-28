@@ -19,12 +19,25 @@ $GLOBALS['config']['service']['server'] = '_server_base_';
 $GLOBALS['config']['service']['url_rewrite'] = _enable_rewrite_;
 
 /* a password to prevent outside forces from triggering hubbub's cron-dependent services */
-$GLOBALS['config']['service']['ping_password'] = '_ping_password_';
+$GLOBALS['config']['ping'] = array(
+  'ping_password' => '_ping_password_',
+  );
 
+/* Amazon S3 support */
+$GLOBALS['config']['s3'] = array(
+  'enabled' => _enable_s3_,
+  'access' => '_s3_access_key_',
+  'secret' => '_s3_secret_key_',
+  );
+  
 /** Memcached support:
  * If you have memcached installed, uncomment the memcache line and enter your server address as needed
  **/
-/*$GLOBALS['config']['cache']['memcache'] = 'localhost:11211';*/
+ 
+$GLOBALS['config']['memcache'] = array(
+  'enabled' => _enable_memcache_,
+  'server' => '_memcache_server_',
+  );
 
 /** Twitter Connector:
  * Uncomment this to allow login via Twitter. If you want your users to be able
@@ -35,11 +48,12 @@ $GLOBALS['config']['service']['ping_password'] = '_ping_password_';
  * it's not in the root folder, and "/signin-index" must be left intact.
  **/
 
-/*$GLOBALS['config']['twitter'] = array(
-  'api_key' => '', 
-  'consumer_key' => '',
-  'consumer_secret' => '',
-  );*/
+$GLOBALS['config']['twitter'] = array(
+  'enabled' => _enable_twitter_,
+  'api_key' => '_twitter_apikey_', 
+  'consumer_key' => '_twitter_consumer_key',
+  'consumer_secret' => '_twitter_consumer_secret_',
+  );
 
 /** Facebook Connector:
  * Uncomment this to allow login via Facebook. First, go to http://developers.facebook.com/setup/
@@ -48,10 +62,11 @@ $GLOBALS['config']['service']['ping_password'] = '_ping_password_';
  * keys in here:
  */
 
-/*$GLOBALS['config']['facebook'] = array(
-  'app_id' => '', 
-  'app_secret' => '',
-  );*/
+$GLOBALS['config']['facebook'] = array(
+  'enable' => _enable_facebook_,
+  'app_id' => '_fb_app_id_', 
+  'app_secret' => '_fb_app_secret_',
+  );
 
 /** Event hooks for plugins
  * This is a selection of plugins that are active in a new install.
