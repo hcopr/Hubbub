@@ -15,19 +15,6 @@ function execTemplate($templateFileName, $params = array())
   return(ob_get_clean());
 }
 
-/* converts a list of config strings into an associative array */
-function stringsToStringlist($stringArray)
-{
-  $result = array();  
-  if (is_array($stringArray))
-    foreach ($stringArray as $line)
-    {
-      $key = CutSegment('=', $line);
-      $result[$key] = trim($line);
-    }
-  return($result);
-}
-
 /* makes a string list from a block of contigious text */
 function textToStringList($text)
 {

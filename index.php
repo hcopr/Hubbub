@@ -10,11 +10,7 @@
   require('lib/hubbub2.php');
   profile_point('classes ready');
   require('lib/config.php'); 
-  
-  include_once('lib/special-io.php');
-  unlink('conf/default.json.php');
-  WriteToFile('conf/default.json.php', "<".'? $'."GLOBALS['config'] = json_decode('".json_format(json_encode($GLOBALS['config']))."', true); ?".">");
-  
+    
   profile_point('config loaded');
   require('lib/database.php'); 
   h2_init_hubbub_environment();  

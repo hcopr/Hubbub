@@ -25,6 +25,19 @@ function profiler_microtime_diff(&$b, &$a)
   return number_format(1000*($b_sec - $a_sec + $b_dec - $a_dec), 3);
 }
 
+/* converts a list of config strings into an associative array */
+function stringsToStringlist($stringArray)
+{
+  $result = array();  
+  if (is_array($stringArray))
+    foreach ($stringArray as $line)
+    {
+      $key = CutSegment('=', $line);
+      $result[$key] = trim($line);
+    }
+  return($result);
+}
+
 /* this should be part of PHP actually */
 function inStr($haystack, $needle)
 {

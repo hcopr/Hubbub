@@ -74,7 +74,7 @@ if($prettyUrls) {
   
   if(stristr($msg, 'class="red"') == '')
   {
-    ?><input type="button" value="Looks Good, Finish Install &gt;" onclick="document.location.href='?p=step3';"/><? 
+    ?><input type="button" value="Looks Good, Finish Install &gt;" onclick="document.location.href='?p=exec';"/><? 
   }
   
   ?></td>

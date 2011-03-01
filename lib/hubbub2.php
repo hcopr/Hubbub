@@ -150,13 +150,13 @@ function h2_exceptionhandler($exception)
   $bt = debug_backtrace();
   ?><div class="errormsg" style="border: 1px solid red; padding: 8px; font-size: 8pt; font-family: consolas; background: #ffffe0;">
     <b>Hubbub Runtime Exception: <br/><span style="color: red"><?php echo $exception->getMessage() ?></span></b><br/>
-    File: <?php echo $exception->getFile().':'.$exception->getLine() ?><br/><?php 
+    File: <?php echo basename($exception->getFile()).':'.$exception->getLine() ?><br/><?php 
     unset($bt[0]);
     foreach($bt as $trace)
     {
       print('^ &nbsp;'.$trace['function'].'(');
       if(cfg('debug.showparams') && is_array($trace['args'])) print(implode(', ', $trace['args']));
-      print(') in '.$trace['file'].' | Line '.$trace['line'].'<br/>');
+      print(') in '.basename($trace['file']).' | Line '.$trace['line'].'<br/>');
     }
   ?></div><?php
   $report = 'Exception: '.$exception->getMessage().' in '.$exception->getFile().':'.$exception->getLine();
@@ -171,13 +171,13 @@ function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
   $bt = debug_backtrace();
   ?><div class="errormsg" style="border: 1px solid red; padding: 8px; font-size: 8pt; font-family: consolas; background: #ffffe0;">
     <b>Hubbub Runtime Error: <br/><span style="color: red"><?php echo $errstr ?></span></b><br/>
-    File: <?php echo $errfile ?><pre><?php 
+    File: <?php echo basename($errfile) ?><pre style="margin:0;padding:0;"><?php 
     unset($bt[0]);
     foreach($bt as $trace)
     {
       print('^ '.$trace['function'].'(');
       if(cfg('debug.showparams') && is_array($trace['args'])) print(implode(', ', $trace['args']));
-      print(') in '.$trace['file'].' | Line '.$trace['line']."\n\r");
+      print(') in '.basename($trace['file']).' | Line '.$trace['line']."\n");
     }
   ?></pre></div><?php
   $report = 'Error: '.$errstr.' in '.$errfile.':'.$errline."\r\n";
