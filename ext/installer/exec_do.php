@@ -19,29 +19,25 @@ switch($_REQUEST['part'])
   }
   case(1): {
     $cv = array();
-    foreach($c['database'] as $k => $v) $cv['db_'.$k] = $v;
-    $cv['db_name'] = $c['database']['database'];
-    #print_r($c);
-    foreach($c as $k => $v) if(!is_array($v)) $cv[$k] = $v;
-    $cv['enable_rewrite'] = ($c['enable_rewrite'] ? 'true' : 'false');
-    $cv['ping_password'] = md5($c['server_base'].time());
+    include_once('lib/special-io.php');
+    $_SESSION['installer']['cfg']['cron']['password'] = md5(time());
     $myUserName = trim(shell_exec('whoami'));
     $myUserName = getDefault($myUserName, 'root');
-    $tmplFile = file_get_contents('ext/installer/example.com.php');
-    foreach($cv as $k => $v) $tmplFile = str_replace('_'.$k.'_', $v, $tmplFile);    
-
+    
+    $tmplFile = '<? $GLOBALS["config"] = json_decode(\''.json_format(json_encode($_SESSION['installer']['cfg'])).'\', true); ?>';
     $cfgFileName = 'conf/default.php';
     if(!file_exists($cfgFileName))
     {      
       @chmod('conf', 0777);
       WriteToFile($cfgFileName, $tmplFile);
       $cfgWritable = trim(file_get_contents($cfgFileName)) == trim($tmplFile);
+      if(!$_SESSION['installer']['cfg']['cron']['remote_svc']) $cronInfo = l10n('cron.setup').'
+          <pre>* * * * * '.$myUserName.' php -f '.$GLOBALS['APP.BASEDIR'].'/cron.php > /dev/null 2>&1</pre>
+          <a href="ext/installer/cronhelp.php" target="_blank">&gt; More information / help</a><br/>';
       if($cfgWritable)
         $msg .= '<div class="green">✔ &nbsp; Config file written</div>
           <br/>
-          '.l10n('cron.setup').'
-          <pre>* * * * * '.$myUserName.' php -f '.$GLOBALS['APP.BASEDIR'].'/cron.php > /dev/null 2>&1</pre>
-          <a href="ext/installer/cronhelp.php" target="_blank">&gt; More information / help</a><br/>
+          '.$cronInfo.'
           <br/>
           <br/>
           <input type="button" value="Access your Hubbub instance" onclick="document.location.href=\'/\';"/>';

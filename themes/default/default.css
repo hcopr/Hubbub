@@ -208,6 +208,10 @@ h1 span {
   font-size: 48px;
   color: #ccc;
 }
+.infomarker {
+  color: gray;
+  font-style: italic; 
+}
 
 /* ------------------------------------- LAYOUT ------------------------------------ */
 body {

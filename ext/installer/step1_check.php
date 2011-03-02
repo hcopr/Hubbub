@@ -7,6 +7,13 @@ if($link) mysql_select_db($_REQUEST['database']);
 $icon = 'database';
 
 $_SESSION['installer']['database'] = $_REQUEST;
+$_SESSION['installer']['cfg']['db'] = array(
+  'host' => $_REQUEST['host'],
+  'user' => $_REQUEST['user'],
+  'password' => $_REQUEST['password'],
+  'database' => $_REQUEST['database'],
+  'prefix' => 'h2_',
+  );
 unset($_SESSION['install']['cmd']);
 
 if($link && $_REQUEST['cmd'] == 'installtables')

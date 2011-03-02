@@ -107,7 +107,7 @@ function tableform_string($p, &$form)
     <input class="<?php echo $p['class'] ?>" type="text" name="<?php echo $p['name'] ?>" id="fld_<?php echo $p['name'] ?>" 
       onchange="<?php echo $p['onchange'] ?>" placeholder="<?php echo htmlspecialchars($p['placeholder']) ?>"
       value="<?php echo htmlspecialchars(getDefault($p['value'])) ?>"/>
-    <?php echo $p['infomarker'] ?>
+    <div class="infomarker"><?php echo $p['infomarker'] ?></div>
     <?php tableform_handle_error($p, $form); 
 		if ($firstField == null)
     {
@@ -126,7 +126,7 @@ function tableform_file($p, &$form)
   ?><tr><td valign="top" class="form-td-caption"><div class="element-caption"><?php echo $p['caption'] ?></div></td><td>
     <input class="<?php echo $p['class'] ?>" type="file" name="<?php echo $p['name'] ?>" id="<?php echo $p['name'] ?>" 
       onchange="<?php echo $p['onchange'] ?>"/>
-    <?php echo $p['infomarker'] ?>
+    <div class="infomarker"><?php echo $p['infomarker'] ?></div>
     <?php tableform_handle_error($p, $form); ?>
   </td></tr><?php
 }
@@ -137,7 +137,7 @@ function tableform_checkbox($p, &$form)
   ?><tr><td valign="top" class="form-td-caption"><div class="element-caption"><?php echo $p['caption2'] ?></div></td><td>
     <input class="<?php echo $p['class'] ?>" <?php echo $checked ?> type="checkbox" onchange="<?php echo $p['onchange'] ?>" name="<?php echo $p['name'] ?>" id="<?php echo $p['name'] ?>" value="Y"/>
     <label for="<?php echo $p['name'] ?>"><?php echo $p['caption'] ?></label>
-    <?php echo $p['infomarker'] ?>
+    <div class="infomarker"><?php echo $p['infomarker'] ?></div>
     <?php tableform_handle_error($p, $form); ?>
   </td></tr><?php
 }
@@ -155,7 +155,7 @@ function tableform_dropdown($p, &$form)
     }
     ?>  
     </select>
-    <?php echo $p['infomarker'] ?>
+    <div class="infomarker"><?php echo $p['infomarker'] ?></div>
     <?php tableform_handle_error($p, $form); ?>
   </td></tr><?php
 }
@@ -188,7 +188,7 @@ function tableform_radio($p, &$form)
         <input type="text" name="'.$p['name'].':literal" value="'.htmlspecialchars($vle).'"/></td></tr>');
     }
     ?>  
-    </table><?php echo $p['infomarker'] ?>
+    </table><div class="infomarker"><?php echo $p['infomarker'] ?></div>
     <?php tableform_handle_error($p, $form); ?>
   </td></tr><?php
 }
@@ -211,7 +211,7 @@ function tableform_multicheck($p, &$form)
     }
     ?>  
     </table>
-    <?php echo $p['infomarker'] ?>
+    <div class="infomarker"><?php echo $p['infomarker'] ?></div>
     <?php tableform_handle_error($p, $form); ?>
   </td></tr><?php
 }
@@ -260,7 +260,7 @@ function tableform_text($p, &$form)
   ?><tr><td valign="top" class="form-td-caption"><div class="element-caption"><?php echo $p['caption'] ?></div></td><td>
     <textarea class="<?php echo $p['class'] ?>" style="<?php echo $p['style'] ?>" onchange="<?php echo $p['onchange'] ?>" id="fld_<?php echo $p['name'] ?>"
     name="<?php echo $p['name'] ?>"><?php echo htmlspecialchars(getDefault($p['value'])) ?></textarea>
-    <?php echo $p['infomarker'] ?><?php
+    <div class="infomarker"><?php echo $p['infomarker'] ?></div><?php
     tableform_handle_error($p, $form);
     if ($firstField == null && $p['focus'] === true)
     {
@@ -279,7 +279,7 @@ function tableform_password($p, &$form)
   ?><tr><td valign="top" class="form-td-caption"><div class="element-caption"><?php echo $p['caption'] ?></div></td><td>
     <input class="<?php echo $p['class'] ?>" type="password" <?php echo $p['attr'] ?>
       id="fld_<?php echo $p['name'] ?>" name="<?php echo $p['name'] ?>" value="<?php echo htmlspecialchars(getDefault($p['value'])) ?>"/>
-    <?php echo $p['infomarker'] ?><?php tableform_handle_error($p, $form); ?>
+    <div class="infomarker"><?php echo $p['infomarker'] ?></div><?php tableform_handle_error($p, $form); ?>
   </td></tr><?php
 }
 
@@ -293,7 +293,7 @@ function tableform_passworddouble($p, &$form)
       id="fld_<?php echo $p['name'] ?>_2" name="<?php echo $p['name'] ?>_2" value="<?php echo htmlspecialchars(getDefault($p['value'])) ?>"/> 
     <span id="fld_<?php echo $p['name'] ?>_msg">(repeat)</span><br/>
 			
-    <?php echo $p['infomarker'] ?><?php tableform_handle_error($p, $form); ?>
+    <div class="infomarker"><?php echo $p['infomarker'] ?></div><?php tableform_handle_error($p, $form); ?>
   </td></tr><?php
 }
 

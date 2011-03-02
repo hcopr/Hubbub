@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"> 
   <head>
-    <title><?php echo cfg('page.title', 'unnamed').' | '.cfg('service.name', 'unnamed service') ?></title>
+    <title><?php echo cfg('page.title', 'unnamed').' | '.cfg('service.name', 'Hubbub') ?></title>
     <script type="text/javascript" src="lib/all.js.php"></script>   
     <link type="text/css" rel="stylesheet" href="themes/default/all.css.php"/> 
 		<link rel="icon" type="image/png" href="img/hubbub-logofarb32.png"/>

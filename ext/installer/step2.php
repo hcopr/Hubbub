@@ -27,6 +27,8 @@ $form->add('string', 'hosturl', 'Server URL', array('default' => $sbase, 'onchan
   'infomarker' => '^ This address must be publicly available via HTTP'));
 $form->add('string', 'adminpw', 'Admin password', array('default' => substr(base64_encode(md5(time())), 0, 8), 'onchange' => $onChange, 
   'infomarker' => '^ Please make a note of your admin password'));
+$form->add('checkbox', 'pingsvc', array('default' => 'Y', 'onchange' => $onChange, 
+  'caption2' => 'Cron Service'));
 
 $form->add('button', 'btn.check', 'Check', array('onclick' => $onChange));
 
@@ -42,13 +44,13 @@ $form->display();
   function checkFields(parm)
   {
     $('#db_check').html('<img src="themes/default/ajax-loader.gif"/>');
-    $.post('?p=step2_check', {'cmd' : parm, 'apwd' : $('#fld_adminpw').val(), 'serverurl' : $('#fld_hosturl').val(), 'path' : '<?= $surl['path'] ?>'}, function(data)
+    $.post('?p=step2_check', {'cmd' : parm, 'pingsvc' : $('#pingsvc').val(), 'adminpw' : $('#fld_adminpw').val(), 'serverurl' : $('#fld_hosturl').val(), 'path' : '<?= $surl['path'] ?>'}, function(data)
       {
         $('#db_check').html(data);        
       }
     );
   }
   
-  checkFields();
+  //checkFields();
   
 </script>

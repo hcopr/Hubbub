@@ -25,7 +25,12 @@ $prettyUrls = $capData['controller'] == 'checkenv1';
 AddHandler php5-script .php');
 
 $_SESSION['installer']['server_base'] = $_REQUEST['serverurl'];
-$_SESSION['installer']['admin_password'] = $_REQUEST['apwd'];
+$_SESSION['installer']['admin_password'] = $_REQUEST['adminpw'];
+$_SESSION['installer']['remote_cron_svc'] = $_REQUEST['pingsvc'];
+
+$_SESSION['installer']['cfg']['service']['server'] = $_REQUEST['serverurl'];
+$_SESSION['installer']['cfg']['service']['adminpw'] = $_REQUEST['adminpw'];
+$_SESSION['installer']['cfg']['cron']['remote_svc'] = $_REQUEST['pingsvc'] == 'Y';
 
 @chmod('conf', 0775);
 @unlink('conf/probe');
@@ -62,9 +67,12 @@ if(!file_exists('log') && !mkdir('log', 0775, true))
 if($prettyUrls) {
   $msg .= '<div class="green">✔ &nbsp; "Pretty" URLs are supported</div>';
   $_SESSION['installer']['enable_rewrite'] = true;
+  $_SESSION['installer']['cfg']['service']['url_rewrite'] = true;
+
 } else {
   $msg .= '<div class="gray">✘ &nbsp;  "Pretty" URLs not supported</div>';
   $_SESSION['installer']['enable_rewrite'] = false;
+  $_SESSION['installer']['cfg']['service']['url_rewrite'] = false;
 }
 ?>
 <table width="100%"><tr>
