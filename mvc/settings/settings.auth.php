@@ -1,5 +1,5 @@
 <div class="balloonhelp">
-  <?= $this->l10n('auth.balloon') ?>
+  <?= l10n('auth.balloon') ?>
 </div>
 
 <?
@@ -28,8 +28,8 @@ foreach($openIDList as $ida)
 			<div style="float: right"><?
 	      if(sizeof($openIDList) > 1) {
 	      ?><a onclick="
-	        if(confirm('<?= $this->l10n('auth.del.confirm') ?>'))
-	        document.location.href='<?= actionUrl('auth', 'settings', array('del' => $ida['ia_key'])) ?>';" title="<?= $this->l10n('auth.del') ?>" class="btn">x</a><? } ?></div>
+	        if(confirm('<?= l10n('auth.del.confirm') ?>'))
+	        document.location.href='<?= actionUrl('auth', 'settings', array('del' => $ida['ia_key'])) ?>';" title="<?= l10n('auth.del') ?>" class="btn">x</a><? } ?></div>
 			<div class="emphasis"><?= $svcType[0] ?></div>
 			<div class="smalltext"><?= getDefault($ida['ia_comments'], $host) ?></div>
 		</div><br/><?

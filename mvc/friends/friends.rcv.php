@@ -10,7 +10,7 @@ function friends_rcv_rowcallback($ds)
   </div><?
 }
 
-print('<div class="balloonhelp">'.$this->l10n('rcv.balloon').'</div>');
+print('<div class="balloonhelp">'.l10n('rcv.balloon').'</div>');
 
 include_once('templates/friendlist.php');
 tmpl_friendlist($this->model->getFriends('req.rcv'), 'friends_rcv_rowcallback');

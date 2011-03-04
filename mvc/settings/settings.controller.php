@@ -14,16 +14,17 @@ class SettingsController extends HubbubController
 	{
 		$this->form = new CQForm('settings');
 		$this->form->ds = &$this->user->settings;
-    $this->form->add('html', '<div class="balloonhelp">'.$this->l10n('email.address').'</div>');
-		$this->form->add('string', 'email');
-		$this->form->add('html', $this->l10n('email.notify'));
-    $this->form->add('checkbox', 'email_friendrequest');
-    $this->form->add('checkbox', 'email_wallpost');
-    $this->form->add('checkbox', 'email_comment');
-    $this->form->add('checkbox', 'email_response');
-    $this->form->add('checkbox', 'email_message');
-		$this->form->add('html', '<br/>');
-		$this->form->add('submit', $this->l10n('save'));
+    $this->form
+      ->add('html', '<div class="balloonhelp">'.l10n('email.address').'</div>')
+		  ->add('string', 'email')
+		  ->add('html', l10n('email.notify'))
+      ->add('checkbox', 'email_friendrequest')
+      ->add('checkbox', 'email_wallpost')
+      ->add('checkbox', 'email_comment')
+      ->add('checkbox', 'email_response')
+      ->add('checkbox', 'email_message')
+		  ->add('html', '<br/>')
+		  ->add('submit', 'save');
 		if($this->form->submitted)
 		{
 			$this->form->getData();

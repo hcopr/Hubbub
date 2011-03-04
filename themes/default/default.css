@@ -1,14 +1,21 @@
-/* ------------------------------------- DESIGN ------------------------------------ */
+<?
+
+$darkGray = '#555';
+$stdMargin = '8px';
+$bgAttention = '<?= $bgAttention ?>';
+$borderColor = '1px solid #ccc';
+$textColor = '#333';
+$lightText = '#ccc';
+$linkColor = '#04c';
+
+?>/* ------------------------------------- DESIGN ------------------------------------ */
 
 body,textarea,input {
    font-family: Myriad Pro, Trebuchet MS, Tahoma, Arial, Helvetica;
 }
-body {
-  font-size: 11pt;
-}
 td,div,p,body,textarea {
-  font-size: 14px;
-  color: #222;
+  font-size: 11pt;
+  color: <?= $textColor ?>;
 }
 a {
   text-decoration: none;
@@ -25,28 +32,28 @@ h1 {
   font-style: italic;
 }
 a {
-  color: #04c;
+  color: <?= $linkColor ?>;
 }
 .banner {
-  background: #ffc;
+  background: <?= $bgAttention ?>;
   color: red;
 }
-input[type=text] {
-  font-size: 98%;
+input[type=text], input[type=password] {
+  font-size: 98%; 
 }
-input[type=text]:focus {
-  background: #ffc;
+input[type=text]:focus, input[type=password]:focus {
+  background: <?= $bgAttention ?>;
 }
 .smalltext, .smalltext a {
-  color: gray;
+  color: <?= $lightText ?>;
   font-size: 9pt;
 }
 .smalltext a:hover {
-	color: #04c;
+	color: <?= $linkColor ?>;
 }
 #submenu a {
   background: #eee;
-  color: #333;
+  color: <?= $textColor ?>;
   text-decoration: none;
 }
 #submenu a:hover, #mainmenu a:hover {
@@ -54,7 +61,7 @@ input[type=text]:focus {
   color: white;
 }
 #submenu div.active a {
-  color: #04c;
+  color: <?= $linkColor ?>;
   background: #ddd;
 }
 #submenu div.active {
@@ -63,7 +70,7 @@ input[type=text]:focus {
   background-repeat: no-repeat;
 }
 #submenu div.active a:hover {
-  color: #000;
+  color: <?= $textColor ?>;
 }
 .submenushadow {
   background: url(submenuback30.png);
@@ -78,7 +85,7 @@ input[type=text]:focus {
   background: #fb8;
 }
 .element-readonly {
-  color: gray;
+  color: <?= $lightText ?>;
 }
 .balloon, .balloonhelp {
   color: #58a;
@@ -106,9 +113,6 @@ noscript p {
 #bgbar {
   background: url(bgback2.png) #fff;
 }
-h1, h1 a, #mainmenu a {
-  color: #5ae;  
-}
 #mainmenu a:hover {
   color: white;
   text-decoration: none;
@@ -116,33 +120,12 @@ h1, h1 a, #mainmenu a {
 #mainmenu a.active {
   color: #fff;
 }
-.springpane, .springpane a, .springpane .balloonhelp, .springpane h3 {
-  color: #ccc;
-}
-.springpane a {
-  text-decoration: underline;
-}
-.springpane {
-  background: url(springpane-bg1.png) #444;
-}
-.springpane_back {
-  background: url(springpane-bgb.png) #444;
-}
 h1, .pretentious_citation {
   font-family: Times New Roman; 
 }
 .pretentious_citation, .paragraph {
-  font-size: 20px;
-  color: gray;
-}
-.pretentious_citation a, .paragraph a {
-  text-decoration: underline;
-}
-.pretentious_citation {
-  font-style: italic;
-}
-.pretentious_citation em {
-  color: black;
+  font-size: 16px;
+  color: <?= $darkGray ?>;
 }
 .emphasis {
   font-weight: bold;
@@ -156,20 +139,20 @@ h1 span {
 }
 .postmeta, .comment_meta {
   font-size: 9pt;
-  color: gray;
+  color: <?= $lightText ?>;
 }
 .postmeta a {
-  color: gray;
+  color: <?= $lightText ?>;
 }
 .post:hover a {
-  color: #04c;
+  color: <?= $linkColor ?>;
 }
 .post_actions div {
   font-size: 9pt;
 }
 .post_pseudocomment {
-  border: 1px solid #ccc;
-  color: #ccc;
+  border: <?= $borderColor ?>;
+  color: <?= $lightText ?>;
 }
 .blurp_post, .comment_item, .comment_item div {
   font-size: 9pt;
@@ -206,16 +189,24 @@ h1 span {
 }
 .biggray {
   font-size: 48px;
-  color: #ccc;
+  color: <?= $lightText ?>;
 }
 .infomarker {
-  color: gray;
+  color: <?= $lightText ?>;
   font-style: italic; 
 }
+.bubble {
+  background: #def;  
+  width: 250px;
+}
+.clear {
+  background: none; 
+}
+
 
 /* ------------------------------------- LAYOUT ------------------------------------ */
 body {
-  line-height: 150%;
+  line-height: 155%;
   margin: 0px;
   padding: 0px;
   margin-top: 44px;
@@ -223,7 +214,7 @@ body {
 }
 textarea {
   padding: 10px;
-  border: 1px solid #ccc;
+  border: <?= $borderColor ?>;
 }
 img {
   border: 0;
@@ -232,23 +223,27 @@ h1, h2, h3, h4 {
   margin: 0px;
   padding: 0px;
 }
+h2 {
+  margin-bottom: <?= $stdMargin ?>; 
+  color: <?= $darkGray ?>;
+}
 .hubbub_logo {
   font-style: italic; 
 }
 .balloonhelp {
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding-top: <?= $stdMargin ?>;
+  padding-bottom: <?= $stdMargin ?>;
 }
 .banner {
-  border: 1px solid gray;
-  padding: 8px;
-  margin-bottom: 8px;
+  border: <?= $borderColor ?>;
+  padding: <?= $stdMargin ?>;
+  margin-bottom: <?= $stdMargin ?>;
 }
 .form-td-caption {
   width: 140px;
 }
-input[type=text] {
-  border: 1px solid #ccc;
+input[type=text],input[type=password] {
+  border: <?= $borderColor ?>;
   padding: 3px;
   width: 99%;
 }
@@ -266,11 +261,11 @@ input[type=text] {
   width: 160px;
 }
 #submenu a {
-  padding: 8px; 
+  padding: <?= $stdMargin ?>; 
   display: block;
   width: 131px;
   text-decoration: none;
-  border-bottom: 1px solid #ddd;
+  border-bottom: <?= $borderColor ?>;
 }
 .submenushadow {
   height: 16px;
@@ -282,7 +277,7 @@ input[type=text] {
   text-align: left;
 }
 .errormsg {
-  border: 1px solid red;
+  border: <?= $borderColor ?>;
   border-top: 0px;
   padding: 2px;
 }
@@ -316,36 +311,12 @@ noscript p {
   display: inline-block;
   padding: 9px;
 }
-.springpane a {
-  text-decoration: underline;
-}
-.springpane {
-  margin-top: -1px;
-  padding: 8px;
-  height: 256px;  
-}
-.springpane_back {
-  position: absolute;
-  left: 0px;
-  top: 43px;
-  height: 256px;
-  right: 0px;
-  padding: 8px;
-  z-index: -100;
-}
-.pretentious_citation, .paragraph {
-  margin: 16px;
-  line-height: 140%;
-}
-.pretentious_citation a, .paragraph a {
-  text-decoration: underline;
-}
 h1 span {
   vertical-align: text-bottom;
 }
 .post {
   min-height: 74px;
-  margin-bottom: 8px;
+  margin-bottom: <?= $stdMargin ?>;
 }
 .postimg {
   float: left;
@@ -365,7 +336,7 @@ h1 span {
 .post_pseudocomment {
   margin-top: 2px;
   padding: 2px;
-  border: 1px solid #ccc;
+  border: <?= $borderColor ?>;
 }
 .comment_entry {
   min-height: 36px;
@@ -396,31 +367,31 @@ h1 span {
 }
 .result_box {
   padding: 12px;
-  margin-top: 8px;
-  border: 1px solid #ac8;
+  margin-top: <?= $stdMargin ?>;
+  border: <?= $borderColor ?>;
   border-radius: 16px;
   -moz-border-radius: 16px;
 }
 .masbox {
   margin: 4px;
   float: left;
-  border: 1px solid gray;
+  border: <?= $borderColor ?>;
   padding: 4px;
-  -moz-border-radius: 8px;
-  border-radius: 8px;
+  -moz-border-radius: <?= $stdMargin ?>;
+  border-radius: <?= $stdMargin ?>;
 }
 .notice_me {
-  border: 1px solid #ccc;
+  border: <?= $borderColor ?>;
   padding: 6px;
-  -moz-border-radius: 8px;
-  border-radius: 8px;   
+  -moz-border-radius: <?= $stdMargin ?>;
+  border-radius: <?= $stdMargin ?>;   
 }
 .action_tile {
   padding: 4px;
   margin: 4px;
-  -moz-border-radius: 8px;
-  border-radius: 8px;   
-  border: 1px solid #ccc;
+  -moz-border-radius: <?= $stdMargin ?>;
+  border-radius: <?= $stdMargin ?>;   
+  border: <?= $borderColor ?>;
 }
 #publisher {
   width: <?= CSS_COL_QUANTUM*4 ?>px;
@@ -441,7 +412,14 @@ h1 span {
 }
 .biggray {
   text-align: right; 
-  margin: 8px;
+  margin: <?= $stdMargin ?>;
 }
-
-
+.padded_extra {
+  margin: <?= $stdMargin ?>;
+  padding: <?= $stdMargin ?>; 
+}
+.login_pane {
+  margin-right: 60px;
+  margin-top: 12px;
+  margin-left: -110px;
+}

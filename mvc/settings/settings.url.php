@@ -1,9 +1,9 @@
 <div class="balloonhelp">
-  <?= $this->l10n('url.balloon') ?>
+  <?= l10n('url.balloon') ?>
 </div>
 
 <blockquote id="userurlchange"><?= $this->user->getUrl() ?> [<a 
-  onclick="doChangeUrl();"><?= $this->l10n('change') ?></a>]</blockquote>
+  onclick="doChangeUrl();"><?= l10n('change') ?></a>]</blockquote>
 
 <script>
   function doChangeUrl()

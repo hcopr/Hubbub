@@ -338,7 +338,7 @@ function tableform_button($p, &$form)
 
 function tableform_end($p, &$form)
 {
-  foreach ($p['params'] as $k => $v)
+  if(is_array($p['params'])) foreach ($p['params'] as $k => $v)
     print('<input type="hidden" name="'.$k.'" id="param_'.$k.'" value="'.htmlspecialchars($v).'"/>');
   ?></table><?php
     if ($form->jquerySections && !$form->sectionTerminated)

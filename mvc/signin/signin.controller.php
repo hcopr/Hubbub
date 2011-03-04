@@ -14,6 +14,7 @@ class SigninController extends HubbubController
 	function Index()
 	{ 
 		// this is for the Twitter sign in option
+		include_once('lib/cq-forms.php');
 		if(isset($_REQUEST['oauth_token']))
 		{
 			$this->model->completeOAuth($_REQUEST['oauth_token']);

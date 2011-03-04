@@ -11,7 +11,7 @@ function friends_pending_rowcallback($ds)
 	</div><?
 }
 
-print('<div class="balloonhelp">'.$this->l10n('pending.balloon').'</div>');
+print('<div class="balloonhelp">'.l10n('pending.balloon').'</div>');
 
 include_once('templates/friendlist.php');
 tmpl_friendlist($this->model->getFriends('req.sent'), 'friends_pending_rowcallback');

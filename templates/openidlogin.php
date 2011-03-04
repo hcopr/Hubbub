@@ -14,7 +14,7 @@
                 header('Location: ' . $openid->authUrl());
             }
           } elseif($_REQUEST['openid_mode'] == 'cancel') {
-              echo '<div class="banner">'.$this->l10n('openid.cancel').'</div>';
+              echo '<div class="banner">'.l10n('openid.cancel').'</div>';
           } else {
               $openid = new LightOpenID;
               if($openid->validate())
@@ -23,7 +23,7 @@
               }
               else
               {
-                ?><div class="banner"><?= $this->l10n('openid.error') ?> :-(</div><?
+                ?><div class="banner"><?= l10n('openid.error') ?> :-(</div><?
               }
           }
       } catch(ErrorException $e) {
@@ -32,7 +32,7 @@
     ?>
     <form action="<?= actionUrl() ?>#tabs-2" method="post">
         <div style="padding-bottom: 8px;">
-          <?= $this->l10n('openid.balloon') ?>
+          <?= l10n('openid.balloon') ?>
         </div>
         <table style="margin-left: 16px;">
           <tr class="hovercell">
@@ -55,7 +55,7 @@
           </tr>
         </table>
         <div style="padding-top: 8px;">
-          <?= $this->l10n('openid.manual') ?>
+          <?= l10n('openid.manual') ?>
           <div style="margin-left: 16px;padding-top: 8px;">
             <input type="text" name="identity" value="https://www.google.com/accounts/o8/id"/>
             <br/>

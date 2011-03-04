@@ -12,13 +12,13 @@ include_once('lib/cq-forms.php');
 $form = new CQForm('dbcred');
 
 $onChange = 'checkDBFields();';
-$form->add('string', 'host', array('default' => $defaultDBServer, 'placeholder' => 'enter DB server name', 'onchange' => $onChange));
-$form->add('string', 'user', array('default' => '', 'placeholder' => 'enter DB user name', 'onchange' => $onChange));
-$form->add('string', 'password', array('default' => '', 'placeholder' => 'enter DB password', 'onchange' => $onChange));
-$form->add('string', 'database', array('default' => 'hubbub2', 'placeholder' => 'enter name of database', 'onchange' => $onChange));
-$form->add('button', 'btn.check', array('onclick' => $onChange));
-
-$form->display();
+$form
+  ->add('string', 'host', array('default' => $defaultDBServer, 'placeholder' => 'enter DB server name', 'onchange' => $onChange))
+  ->add('string', 'user', array('default' => '', 'placeholder' => 'enter DB user name', 'onchange' => $onChange))
+  ->add('string', 'password', array('default' => '', 'placeholder' => 'enter DB password', 'onchange' => $onChange))
+  ->add('string', 'database', array('default' => 'hubbub2', 'placeholder' => 'enter name of database', 'onchange' => $onChange))
+  ->add('button', 'btn.check', array('onclick' => $onChange))
+  ->display();
 
 ?>
 <br/>

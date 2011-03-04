@@ -7,7 +7,6 @@
 		<link rel="icon" type="image/png" href="img/hubbub-logofarb32.png"/>
   </head>
   <body>
-    <? if($GLOBALS['content']['pane']) { ?><div class="springpane_back"></div><? } ?>
   	<noscript><div></div><p>Attention: Javascript is disabled on your browser. Hubbub does not work without Javascript. Please enable it before you proceed.</p></noscript>
     <div id="bgbar">
 
@@ -47,10 +46,6 @@
       ?></div><?
     }    
     ?></div><? } ?>
-
-		<? if($GLOBALS['content']['pane']) {
-			?><div class="springpane"><?= $GLOBALS['content']['pane'] ?></div><?
-		} ?>
 			        
     <div id="content_outer">
       <div id="content"><?php echo $GLOBALS['content.startuperrors'].$GLOBALS['content']['main'] ?></div>

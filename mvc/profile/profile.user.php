@@ -29,7 +29,7 @@
 
 if($defaultPic != '') print('<img src="'.$defaultPic.'" align="left" style="padding-right: 8px"/>');
 
-print($this->l10n('user.balloon'));
+print(l10n('user.balloon'));
 	
 ?></div>
 <? 
@@ -38,13 +38,16 @@ print($this->l10n('user.balloon'));
     $this->form = new CQForm('basicinfo');
     $this->form->ds = $this->user->ds;
 		$this->form->ds['username'] = safename(getdefault($this->user->getUsername(), $this->form->ds['username']));
+		
 		if($this->user->getUsername() == '')
-      $this->form->add('string', 'username', $this->l10n('username'), array('default' => $defaultUsername, 'validate' => 'notempty', 'filter' => 'safe'));
+      $this->form->add('string', 'username', array('default' => $defaultUsername, 'validate' => 'notempty', 'filter' => 'safe'));
     else
-      $this->form->add('readonly', 'username', $this->l10n('username'));
-    $this->form->add('string', 'u_name', $this->l10n('u_name'), array('default' => $defaultName, 'validate' => 'notempty'));
-		$this->form->add('dropdown', 'u_l10n', $this->l10n('u_l10n'), array('options' => array('en' => 'English', 'de' => 'Deutsch')));
-    $this->form->add('submit', 'saveprofile');
+      $this->form->add('readonly', 'username');
+      
+    $this->form
+      ->add('string', 'u_name', array('default' => $defaultName, 'validate' => 'notempty'))
+		  ->add('dropdown', 'u_l10n', array('options' => array('en' => 'English', 'de' => 'Deutsch')))
+      ->add('submit', 'saveprofile');
 		
 		if($this->form->submitted)
 		{
@@ -52,7 +55,7 @@ print($this->l10n('user.balloon'));
 			{
 			  if($this->user->getUsername() == '' && !HubbubEntity::isNameAvailable($this->form->ds['username']))
 			  {
-				  $this->form->errors['username'] = $this->l10n('username.notavailable');
+				  $this->form->errors['username'] = l10n('username.notavailable');
 			  }
 				else
 				{

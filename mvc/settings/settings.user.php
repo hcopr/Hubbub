@@ -1,8 +1,8 @@
 <?
 if($this->user->ds['u_name'] == '') 
-  print($this->l10n('user.firstuse'));
+  print(l10n('user.firstuse'));
 else
-  print($this->l10n('user.balloon'));
+  print(l10n('user.balloon'));
 	
 ?>
 <br/>
@@ -12,10 +12,11 @@ else
     include_once('lib/cq-forms.php');
     $this->form = new CQForm('basicinfo');
     $this->form->ds = $this->user->ds;
-    $this->form->add('string', 'u_name', $this->l10n('u_name'), array('validate' => 'notempty'));
-		$this->form->add('dropdown', 'u_l10n', $this->l10n('u_l10n'), array('options' => array('en' => 'English', 'de' => 'Deutsch')));
-		$this->form->add('file', 'pic', $this->l10n('pic'));
-    $this->form->add('submit', 'OK');
+    $this->form
+      ->add('string', 'u_name', l10n('u_name'), array('validate' => 'notempty'))
+		  ->add('dropdown', 'u_l10n', l10n('u_l10n'), array('options' => array('en' => 'English', 'de' => 'Deutsch')))
+		  ->add('file', 'pic', l10n('pic'))
+      ->add('submit', 'OK');
 
     $this->form->display();
 		

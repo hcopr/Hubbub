@@ -1,5 +1,5 @@
 <div style="width: 800px;">
-  <div class="balloonhelp"><?= $this->l10n('add.byusername.balloon') ?></div>
+  <div class="balloonhelp"><?= l10n('add.byusername.balloon') ?></div>
   <blockquote><?= $this->user->getUrl() ?></blockquote>
   <br/>
   <h2 style="padding-bottom: 8px;"><?= l10n('add.a.friend') ?></h2>

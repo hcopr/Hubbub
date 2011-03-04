@@ -81,13 +81,10 @@ class CQForm
     return($this->ds);
   }
   
-  function add($type, $name = null, $caption = '', $properties = array())
+  function add($type, $name = null, $properties = array())
   {
-    if (is_array($caption))
-    {
-      $properties = $caption;
-      $caption = ''; 
-    }
+    if (!is_array($properties))
+      $properties = stringParamsToArray($properties);
     if($properties['caption'] == '') $properties['caption'] = l10n($name, true);
     if($properties['caption'] == '') $properties['caption'] = '['.trim($name).']';
     $properties['name'] = $name;
@@ -102,6 +99,7 @@ class CQForm
     if (isset($properties['textoptions']))
       foreach(explode(getDefault($properties['textoptions.separator'], ';'), $properties['textoptions']) as $opt) $properties['options'][trim($opt)] = $opt;
     $this->elements[$elname] = $properties;
+    return($this);
   }
 
   function display($opt = array())
@@ -143,6 +141,7 @@ class CQForm
       print(getDefault($opt['field-end']));
       print($this->packEnd);
     }
+    return($this);
   }
 }
 

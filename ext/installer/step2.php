@@ -10,10 +10,6 @@ $_SESSION['install']['ref'] = getDefault($_SERVER['HTTP_REFERER'], $_SESSION['in
 include_once('lib/cq-forms.php');
 
 $form = new CQForm('dbcred');
-if($form->submitted)
-{
-  $form->getData(); 
-}
 
 $onChange = 'checkFields();';  
 
@@ -23,16 +19,12 @@ $sbase = $surl['host'].$port.$surl['path'];
 $sbase = getDefault($sbase, $_SESSION['installer']['server_base']);
 if(substr($sbase, -1) == '/') $sbase = substr($sbase, 0, -1);
 
-$form->add('string', 'hosturl', 'Server URL', array('default' => $sbase, 'onchange' => $onChange, 
-  'infomarker' => '^ This address must be publicly available via HTTP'));
-$form->add('string', 'adminpw', 'Admin password', array('default' => substr(base64_encode(md5(time())), 0, 8), 'onchange' => $onChange, 
-  'infomarker' => '^ Please make a note of your admin password'));
-$form->add('checkbox', 'pingsvc', array('default' => 'Y', 'onchange' => $onChange, 
-  'caption2' => 'Cron Service'));
-
-$form->add('button', 'btn.check', 'Check', array('onclick' => $onChange));
-
-$form->display();
+$form
+  ->add('string', 'hosturl', array('default' => $sbase, 'onchange' => $onChange, 'infomarker' => '^ This address must be publicly available via HTTP'))
+  ->add('string', 'adminpw', array('default' => substr(base64_encode(md5(time())), 0, 8), 'onchange' => $onChange, 'infomarker' => '^ Please make a note of your admin password'))
+  ->add('checkbox', 'pingsvc', array('default' => 'Y', 'onchange' => $onChange, 'caption2' => 'Cron Service'))
+  ->add('button', 'btn.check', array('onclick' => $onChange))
+  ->display();
 
 ?>
 <br/>

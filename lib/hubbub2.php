@@ -418,22 +418,8 @@ class HubbubController
 		$this->menu = array();
 		$GLOBALS['submenu'] = &$this->menu;
 		$GLOBALS['currentcontroller'] = &$this;
+    l10n_load('mvc/'.$this->name.'/l10n');
 	}		
-	
-	function l10n($key)
-	{
-		$this->loadL10n();
-    return(l10n($key));	  
-  }
-	
-	function loadL10n()
-	{
-	  if(!isset($this->l10n_loaded))
-	  {
-	    $this->l10n_loaded = true;
-			l10n_load('mvc/'.$this->name.'/l10n');
-    }
-	}
 	
 	function redirect($action, $controller = null, $params = array())
 	{
@@ -463,7 +449,7 @@ class HubbubController
 		{
 			$ctr++;
 			if(substr($item, 0, 1) == ':') $url = substr($item, 1); else $url = actionUrl($item, $this->name, $params);
-			$result[] = array('url' => $url, 'action' => $item, 'caption' => $this->l10n($item).$add[$ctr]);
+			$result[] = array('url' => $url, 'action' => $item, 'caption' => l10n($item).$add[$ctr]);
 		} 
 		return($result);
 	}
@@ -489,7 +475,7 @@ class HubbubController
   		
 	function invokeView($action)
 	{
-    $this->pageTitle = $this->l10n($action.'.title', $action);
+    $this->pageTitle = l10n($action.'.title', $action);
     ob_start();
     $action = getDefault($action, cfg('service.defaultaction'));
 		if(!$this->skipView)
