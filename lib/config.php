@@ -72,6 +72,7 @@
     'name' => 'Hubbub2',
 		'defaultcontroller' => 'home',
 		'defaultaction' => 'index',
+		'version' => 2011.0303,
     // number of open account signups this server should provide
 		'maxaccounts' => 30,
 		// the Hubbub server URL, please change this if your Hubbub instance is running in a subdirectory

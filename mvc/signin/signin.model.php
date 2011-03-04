@@ -2,6 +2,19 @@
 
 class SigninModel extends HubbubModel
 {
+  function getNews()
+  {
+    $newsFeedUrl = 'http://hubbub.at/news.json';
+    $news = h2_nv_retrieve($newsFeedUrl);
+    if(sizeof($news) == 0 || $news['date'] < time() - 60*60*24)
+    {
+      $feed = HubbubEndpoint::request($newsFeedUrl, array('version' => cfg('service.version'))); 
+      $news = json_decode($feed['body'], true);
+      h2_nv_store($newsFeedUrl, $news);
+    }
+    return($news);
+  }
+  
 	function initOAuth()
 	{
     require('ext/oauth/epi_curl.php');

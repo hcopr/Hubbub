@@ -33,8 +33,7 @@ if($_SESSION['msg'])
 	  $ef
 	    ->add('string', 'email')
 	    ->add('password', 'password')
-	    ->display();
-	  
+	    ->display();	  
 	  
 	  ?>
 	  
@@ -47,12 +46,39 @@ if($_SESSION['msg'])
   		monolithic sites and to give control over personal data back to the user.
     </div>
   </div>
+  
+	<div class="dynamic_box action_tile bubble clear padded_extra">
+    <h2>What's New?</h2>
+    <div class="paragraph">
+  		<?
+  		$news = $this->model->getNews();
+  		if(sizeof($news['items']) == 0)
+  		{
+  		  ?>There are no site news right now.<? 
+      }
+  		else
+  		{
+  		  foreach($news['items'] as $item)
+  		  {
+  		    ?><div>
+            <b><a href="<?= $item['url'] ?>" target="_blank"><?= htmlspecialchars($item['caption']) ?></a></b><br/>
+            <?= htmlspecialchars($item['text']) ?> <span class="infomarker">- <?= ageToString($item['date']) ?></span>
+          </div><? 
+        }
+      }  		
+  		?>
+    </div>
+  </div>
+  
 	<div class="dynamic_box action_tile bubble clear padded_extra">
 		<div class="paragraph">
+		  <h2>Pretentious Citation</h2>
   		<em><a href="http://en.wikipedia.org/wiki/Social_network">so·cial net·work</a>:</em>
   		a social structure made up of individuals (or organizations) called "nodes", which are tied (connected) by one or more specific types of interdependency, such as friendship, kinship, common interest, financial exchange, dislike, sexual relationships, or relationships of beliefs, knowledge or prestige.
     </div>
   </div>
+  
+  
   
 </div>
 

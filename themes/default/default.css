@@ -5,13 +5,13 @@ $stdMargin = '8px';
 $bgAttention = '<?= $bgAttention ?>';
 $borderColor = '1px solid #ccc';
 $textColor = '#333';
-$lightText = '#ccc';
+$lightText = '#aaa';
 $linkColor = '#04c';
 
 ?>/* ------------------------------------- DESIGN ------------------------------------ */
 
 body,textarea,input {
-   font-family: Myriad Pro, Trebuchet MS, Tahoma, Arial, Helvetica;
+   font-family: Myriad Pro, Trebuchet MS, Tahoma, Helvetica, Arial;
 }
 td,div,p,body,textarea {
   font-size: 11pt;
@@ -120,13 +120,6 @@ noscript p {
 #mainmenu a.active {
   color: #fff;
 }
-h1, .pretentious_citation {
-  font-family: Times New Roman; 
-}
-.pretentious_citation, .paragraph {
-  font-size: 16px;
-  color: <?= $darkGray ?>;
-}
 .emphasis {
   font-weight: bold;
 }
@@ -201,6 +194,9 @@ h1 span {
 }
 .clear {
   background: none; 
+}
+.paragraph {
+  text-align: justify; 
 }
 
 
