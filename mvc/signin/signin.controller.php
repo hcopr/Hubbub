@@ -66,28 +66,76 @@ class SigninController extends HubbubController
   	$this->openIdSignin('https://www.google.com/accounts/o8/id');
   }
 	
+	function openid()
+  {
+  	$this->openIdSignin($_REQUEST['id']);
+  }
+	
 	function yahoo()
 	{
 		$this->openIdSignin('https://me.yahoo.com');
 	}
 			
-  function ajax_emaillogin()
+  function ajax_do()
   {
-    $this->skipView = false;
-    $this->idAccount = DB_GetDatasetMatch('idaccounts', array(
-      'ia_type' => 'email',
-      'ia_url' => trim($_REQUEST['email']).':'.md5(trim($_REQUEST['password'])),  
-      ));
+    $msg = '';
+    $url = '';
+    
+    switch($_REQUEST['method'])
+    {
+      case('openid'): {
+        if(trim($_REQUEST['openid']) == '')
+        {
+          $msg = '<div class="banner">Please enter your OpenID URL into the field above.</div>';
+        }
+        else
+        {
+          $_SESSION['myopenidurl'] = trim($_REQUEST['openid']);
+          $_SESSION['load_signin'] = 'openid';
+          $msg = 'Signing in with OpenID URL '.$_SESSION['myopenidurl'].'...';
+          $url = actionUrl('openid', 'signin', array('id' => $_SESSION['myopenidurl']));
+        }
+        break;
+      }
+      case('email'): {
+        if(trim($_REQUEST['email']) == '' || trim($_REQUEST['password']) == '')
+        {
+          $msg = '<div class="banner">Please fill out both the email and password fields.</div>';
+        }
+        else
+        {
+          $_SESSION['load_signin'] = 'email';
+          if($_REQUEST['mode'] == 'new')
+          {
+            
+          }
+          else
+          {
+            $ids = $this->model->getAccount(trim($_REQUEST['email']), md5(trim($_REQUEST['password'])));
+            $msg = dumpArray($ids);
+            /*
+            if(sizeof($ids) == '' && $ids['ia_user'] > 0)
+            {
+              $msg = '<div class="banner">Wrong email/password, please check and try again.</div>';
+            }
+            else
+            {
+              object('user')->loginWithId($ids['ia_user']);
+              $msg = '<img src="themes/default/ajax-loader.gif"/> signing in...';
+              $url = actionUrl('index', 'home');
+            }*/
+          }
+        }
+        break; 
+      }
+    }
+    
+    print(json_encode(array(
+      'html' => $msg,
+      'url' => $url,
+      ))); 
   }
 
-  function ajax_emailsignup()
-  {
-    $this->skipView = false;
-    /*$this->idAccount = DB_GetDatasetMatch('idaccounts', array(
-      'ia_type' => 'email',
-      'ia_url' => trim($_REQUEST['email']).':'.md5(trim($_REQUEST['password'])),  
-      ));*/
-  }
 }
 
 ?>

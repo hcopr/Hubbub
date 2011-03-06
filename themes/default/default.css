@@ -361,6 +361,9 @@ h1 span {
 .blurp_excerpt {
 	margin-left: 16px;
 }
+.simple_border {
+  border: <?= $borderColor ?>; 
+}
 .result_box {
   padding: 12px;
   margin-top: <?= $stdMargin ?>;

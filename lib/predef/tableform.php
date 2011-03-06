@@ -103,13 +103,13 @@ function tableform_readonly($p, &$form)
 function tableform_string($p, &$form)
 {
 	global $firstField;
-  ?><tr><td valign="top" class="form-td-caption"><div class="element-caption"><?php echo $p['caption'] ?></div></td><td>
+  ?><tr><td valign="top" class="form-td-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><div class="element-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><?php echo $p['caption'] ?></div></td><td>
     <input class="<?php echo $p['class'] ?>" type="text" name="<?php echo $p['name'] ?>" id="fld_<?php echo $p['name'] ?>" 
       onchange="<?php echo $p['onchange'] ?>" placeholder="<?php echo htmlspecialchars($p['placeholder']) ?>"
       value="<?php echo htmlspecialchars(getDefault($p['value'])) ?>"/>
     <div class="infomarker"><?php echo $p['infomarker'] ?></div>
     <?php tableform_handle_error($p, $form); 
-		if ($firstField == null)
+		if ($firstField == null && $form->formOptions['auto-focus'])
     {
       $firstField = $p;
       ?>
@@ -134,7 +134,7 @@ function tableform_file($p, &$form)
 function tableform_checkbox($p, &$form)
 {
   if ($p['value'] == 'Y') $checked = 'checked';
-  ?><tr><td valign="top" class="form-td-caption"><div class="element-caption"><?php echo $p['caption2'] ?></div></td><td>
+  ?><tr><td valign="top" class="form-td-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><div class="element-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><?php echo $p['caption2'] ?></div></td><td>
     <input class="<?php echo $p['class'] ?>" <?php echo $checked ?> type="checkbox" onchange="<?php echo $p['onchange'] ?>" name="<?php echo $p['name'] ?>" id="<?php echo $p['name'] ?>" value="Y"/>
     <label for="<?php echo $p['name'] ?>"><?php echo $p['caption'] ?></label>
     <div class="infomarker"><?php echo $p['infomarker'] ?></div>
@@ -144,7 +144,7 @@ function tableform_checkbox($p, &$form)
 
 function tableform_dropdown($p, &$form)
 {
-  ?><tr><td valign="top" class="form-td-caption"><div class="element-caption"><?php echo $p['caption'] ?></div></td><td>
+  ?><tr><td valign="top" class="form-td-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><div class="element-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><?php echo $p['caption'] ?></div></td><td>
     <select class="<?php echo $p['class'] ?>" style="<?php echo $p['style'] ?>" onchange="<?php echo $p['onchange'] ?>" name="<?php echo $p['name'] ?>">
     <?php
     foreach ($p['options'] as $k => $v)
@@ -162,7 +162,7 @@ function tableform_dropdown($p, &$form)
 
 function tableform_radio($p, &$form)
 {
-  ?><tr><td valign="top" class="form-td-caption"><div class="element-caption"><?php echo $p['caption'] ?></div></td><td>
+  ?><tr><td valign="top" class="form-td-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><div class="element-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><?php echo $p['caption'] ?></div></td><td>
     <table>
     <?php
     foreach ($p['options'] as $k => $v)
@@ -196,7 +196,7 @@ function tableform_radio($p, &$form)
 function tableform_multicheck($p, &$form)
 {
   $values = unserialize($p['value']);
-  ?><tr><td valign="top" class="form-td-caption"><div class="element-caption"><?php echo $p['caption'] ?></div></td><td>
+  ?><tr><td valign="top" class="form-td-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><div class="element-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><?php echo $p['caption'] ?></div></td><td>
     <table>
     <?php
     foreach ($p['options'] as $k => $v)
@@ -257,7 +257,7 @@ function tableform_sectionend($p, &$form)
 
 function tableform_text($p, &$form)
 {
-  ?><tr><td valign="top" class="form-td-caption"><div class="element-caption"><?php echo $p['caption'] ?></div></td><td>
+  ?><tr><td valign="top" class="form-td-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><div class="element-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><?php echo $p['caption'] ?></div></td><td>
     <textarea class="<?php echo $p['class'] ?>" style="<?php echo $p['style'] ?>" onchange="<?php echo $p['onchange'] ?>" id="fld_<?php echo $p['name'] ?>"
     name="<?php echo $p['name'] ?>"><?php echo htmlspecialchars(getDefault($p['value'])) ?></textarea>
     <div class="infomarker"><?php echo $p['infomarker'] ?></div><?php
@@ -276,8 +276,8 @@ function tableform_text($p, &$form)
 
 function tableform_password($p, &$form)
 {
-  ?><tr><td valign="top" class="form-td-caption"><div class="element-caption"><?php echo $p['caption'] ?></div></td><td>
-    <input class="<?php echo $p['class'] ?>" type="password" <?php echo $p['attr'] ?>
+  ?><tr><td valign="top" class="form-td-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><div class="element-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><?php echo $p['caption'] ?></div></td><td>
+    <input class="<?php echo $p['class'] ?>" type="password" <?php echo $p['attr'] ?> placeholder="<?php echo htmlspecialchars($p['placeholder']) ?>"
       id="fld_<?php echo $p['name'] ?>" name="<?php echo $p['name'] ?>" value="<?php echo htmlspecialchars(getDefault($p['value'])) ?>"/>
     <div class="infomarker"><?php echo $p['infomarker'] ?></div><?php tableform_handle_error($p, $form); ?>
   </td></tr><?php
@@ -285,8 +285,8 @@ function tableform_password($p, &$form)
 
 function tableform_passworddouble($p, &$form)
 {
-  ?><tr><td valign="top" class="form-td-caption">
-  <div class="element-caption"><?php echo $p['caption'] ?></div></td><td>
+  ?><tr><td valign="top" class="form-td-caption" style="<?= $form->formOptions['style-td-caption'] ?>">
+  <div class="element-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><?php echo $p['caption'] ?></div></td><td>
     <input class="<?php echo $p['class'] ?>" autocomplete="off" type="password" <?php echo $p['attr'] ?> onkeyup="$('#fld_<?php echo $p['name'] ?>_msg').text(checkPwdEquivalency('fld_<?php echo $p['name'] ?>'));"
       id="fld_<?php echo $p['name'] ?>" name="<?php echo $p['name'] ?>" value="<?php echo htmlspecialchars(getDefault($p['value'])) ?>"/><br/>
     <input class="<?php echo $p['class'] ?>" autocomplete="off" type="password" <?php echo $p['attr'] ?> onkeyup="$('#fld_<?php echo $p['name'] ?>_msg').text(checkPwdEquivalency('fld_<?php echo $p['name'] ?>'));"
@@ -310,7 +310,7 @@ function tableform_start($p, &$form)
 
 function tableform_submit($p, &$form)
 {
-	?><tr><td valign="top" class="form-td-caption">&nbsp;</td><td>
+	?><tr><td valign="top" class="form-td-caption" style="<?= $form->formOptions['style-td-caption'] ?>">&nbsp;</td><td>
 	<?php 
 	if(!isset($form->formOptions['ajax']))
 	{

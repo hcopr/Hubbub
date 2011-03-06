@@ -24,6 +24,8 @@ class CQForm
     $this->defaultIdFieldname = 'id';
     $this->mandatoryMarker = ' <span class="form-mandatory">*</span>';
     $this->infoMarker = ' <a title="$" class="form-info">i</a>';
+    if (!is_array($fopt))
+      $fopt = stringParamsToArray($fopt);
     $this->formOptions = $fopt;
   }
 
@@ -90,6 +92,8 @@ class CQForm
     $properties['name'] = $name;
     $properties['type'] = getDefault($type, 'string');
     $elname = md5($name); $ectr = 1;
+    if($this->formOptions['placeholders'] == 'auto')
+      $properties['placeholder'] = l10n($name.'.placeholder');
     if (isset($this->elements[$elname]))
     {
       while (isset($this->elements[$elname.$ectr]))

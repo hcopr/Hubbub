@@ -1,5 +1,6 @@
-<div class="login_pane" id="bubble_items"><?
-
+<div class="login_pane"><?
+$srv = getDefault($_SERVER['HTTP_HOST'], 'This Server');
+$srvName = strtoupper(substr($srv, 0, 1)).substr($srv, 1);
 if($_SESSION['msg'])
 {
   ?><div class="banner fail">
@@ -7,12 +8,60 @@ if($_SESSION['msg'])
   </div><?
   unset($_SESSION['msg']);
 }
+$GLOBALS['page.h1'] = 'Hubbub Server';
 ?>
 <? if($_REQUEST['msg'] != '') print('<div class="banner">'.htmlspecialchars($_REQUEST['msg']).'</div>'); ?>
-	
+<table width="900" align="center">
+  <tr>
+    <td>
+    
+    <h2><?= $srvName ?> Hubbub Server</h2>
+    
+    <div id="bubble_items">
+    
+      <div class="paragraph padded_extra" style="width: 500px">      
+        <a href="http://hubbub.at">Hubbub</a> is a project for free and open social networking. With
+        Hubbub you can share all kinds of information with the people you care about.
+      </div>
+      
+      <div class="paragraph padded_extra" style="width: 500px">      
+        <? 
+          if($GLOBALS['config']['twitter']['enabled'] === true) $signInLinks[] = '<a href="'.actionUrl('twitter', 'signin').'">Twitter</a>';
+          if($GLOBALS['config']['facebook']['enabled'] === true) $signInLinks[] = '<a href="'.actionUrl('fb', 'signin').'">Facebook</a>';
+          $signInLinks[] = '<a href="'.actionUrl('google', 'signin').'">Google</a>';
+          $signInLinks[] = '<a href="'.actionUrl('yahoo', 'signin').'">Yahoo</a>';
+          $signInLinks[] = '<a onclick="$(\'#signinform\').html($(\'#signinform_openid\').html());">OpenID</a>';
+          $signInLinks[] = '<a onclick="$(\'#signinform\').html($(\'#signinform_email\').html());">Email</a>';
+          print('Use: '.implode(' &middot; ', $signInLinks));
+        ?>
+        <div id="signinform">
+          <? include('mvc/signin/signin.ajax_'.getDefault($_SESSION['load_signin'], 'email').'form.php'); ?>
+        </div>
+        <div id="signinform_email" style="display:none">
+          <? include('mvc/signin/signin.ajax_emailform.php'); ?>
+        </div>
+        <div id="signinform_openid" style="display:none">
+          <? include('mvc/signin/signin.ajax_openidform.php'); ?>
+        </div>
+        <div style="margin-bottom: 8px; margin-top: 4px;">
+          <input type="radio" name="signin_mode" value="existing" id="mode_existing" checked="true"/> <label for="mode_existing">sign into my account</label><br/>
+          <input type="radio" name="signin_mode" value="new" id="mode_newuser"/> <label for="mode_newuser">create a new user account for me now</label>
+        </div>
+        <div id="signinresult">
+          
+        </div>
+      </div>
+    
+    </div>
+    
+<!--    
+<div id="bubble_items">
+
 	<div class="dynamic_box action_tile bubble padded_extra paragraph">
-	   
-    <h2 style="text-align: center">Sign in with your</h2>
+    <h2 style="text-align: center">Connect with...</h2>
+    You can use other websites to log into your Hubbub server, just click on a button that you like:
+    <br/>
+    <br/>
     <div style="text-align: center">
       <? if($GLOBALS['config']['twitter']['api_key'] != '') { ?><a href="<?= actionUrl('twitter', 'signin') ?>"><img src="themes/default/buttons/greenbtn-twitter.png"/></a><? } ?>
       <? if($GLOBALS['config']['facebook']['app_id'] != '') { ?><a href="<?= actionUrl('fb', 'signin') ?>"><img src="themes/default/buttons/greenbtn-facebook.png"/></a><? }  ?>    
@@ -26,18 +75,42 @@ if($_SESSION['msg'])
 	</div>
 	
 	<div class="dynamic_box action_tile bubble padded_extra paragraph">
-	  <h2 style="text-align: center">Sign in with email</h2>
-	
+	  <h2 style="text-align: center">Sign In</h2>
 	  <?
-	  $ef = new CQForm('emailsignin');
+	  
+	  $ef = new CQForm('emailsignin', array('style-td-caption' => 'width: 80px;', 'placeholders' => 'auto'));
 	  $ef
 	    ->add('string', 'email')
 	    ->add('password', 'password')
+	    ->add('submit', 'signin')
+	    ->display();	  
+	   
+	  ?>
+	  
+	</div>
+
+	<div class="dynamic_box action_tile bubble padded_extra paragraph">
+	  <h2 style="text-align: center">New Account</h2>
+	  Register for a new account on this server:<br/>
+	  <br/>
+	  <?
+	  
+	  $ef = new CQForm('emailsignin', array('style-td-caption' => 'width: 80px;', 'placeholders' => 'auto'));
+	  $ef
+	    ->add('string', 'email')
+	    ->add('submit', 'signin')
 	    ->display();	  
 	  
 	  ?>
 	  
 	</div>
+
+ 	<div class="dynamic_box action_tile bubble clear padded_extra">
+    <h2><?= strtoupper(substr($srv, 0, 1)).substr($srv, 1) ?></h2>
+    <div class="paragraph">
+    <? include('mvc/signin/server.'.cfg('service.type', 'private').'.php'); ?>
+    </div>
+  </div>
 
 	<div class="dynamic_box action_tile bubble clear padded_extra">
     <h2>About Hubbub</h2>
@@ -47,39 +120,43 @@ if($_SESSION['msg'])
     </div>
   </div>
   
-	<div class="dynamic_box action_tile bubble clear padded_extra">
-    <h2>What's New?</h2>
-    <div class="paragraph">
   		<?
   		$news = $this->model->getNews();
   		if(sizeof($news['items']) == 0)
   		{
-  		  ?>There are no site news right now.<? 
+
       }
   		else
   		{
   		  foreach($news['items'] as $item)
   		  {
-  		    ?><div>
-            <b><a href="<?= $item['url'] ?>" target="_blank"><?= htmlspecialchars($item['caption']) ?></a></b><br/>
-            <?= htmlspecialchars($item['text']) ?> <span class="infomarker">- <?= ageToString($item['date']) ?></span>
+  		    ?><div class="dynamic_box action_tile bubble clear padded_extra">
+            <h2><a href="<?= $item['url'] ?>" target="_blank"><?= htmlspecialchars($item['caption']) ?></a></h2>
+            <div class="paragraph">
+              <?= htmlspecialchars($item['text']) ?> <span class="infomarker">- <?= ageToString($item['date']) ?></span>
+            </div>
           </div><? 
         }
       }  		
   		?>
-    </div>
-  </div>
   
 	<div class="dynamic_box action_tile bubble clear padded_extra">
-		<div class="paragraph">
-		  <h2>Pretentious Citation</h2>
-  		<em><a href="http://en.wikipedia.org/wiki/Social_network">so·cial net·work</a>:</em>
-  		a social structure made up of individuals (or organizations) called "nodes", which are tied (connected) by one or more specific types of interdependency, such as friendship, kinship, common interest, financial exchange, dislike, sexual relationships, or relationships of beliefs, knowledge or prestige.
+    <h2>Take the Tour</h2>
+    <div class="paragraph">
+      Welcome and thanks for trying out Hubbub, the open social network. 
+      You can jump right in if you create an account on this or any other Hubbub server.
+      If you're unsure what to expect, take a few moments and enjoy the guided tour to get up to speed.<br/>
+      <a href="http://hubbub-project.org/tour" target="_blank">
+        <img src="img/pointlesspics/frankfurt_skyline.jpg"/>
+        Take the tour now &gt;
+      </a>
     </div>
-  </div>
-  
-  
-  
+  </div>  
+</div>-->
+        
+    </td>
+  </tr>
+</table>	
 </div>
 
 <script>
