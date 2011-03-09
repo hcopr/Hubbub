@@ -28,7 +28,7 @@ class SettingsController extends HubbubController
 		if($this->form->submitted)
 		{
 			$this->form->getData();
-			$this->user->ds['u_email'] = getDefault($this->user->ds['u_email'], $this->form->ds['email']);
+			#$this->user->ds['u_email'] = getDefault($this->user->ds['u_email'], $this->form->ds['email']);
 			$this->user->save();
 		}
 	}

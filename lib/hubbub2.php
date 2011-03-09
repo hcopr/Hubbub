@@ -181,7 +181,7 @@ function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
     }
   ?></pre></div><?php
   $report = 'Error: '.$errstr.' in '.$errfile.':'.$errline."\r\n";
-  if(cfg('debug.verboselog')) logError('log/error.log', $report);
+  logError('log/error.log', $report);
   return(true);
 }
 	

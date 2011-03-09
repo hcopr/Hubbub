@@ -396,7 +396,7 @@ function stringToDateTime($string, $formatCode = null)
 /* makes an input totally safe by only allowing a-z, 0-9, and underscore (might not work correctly) */
 function safeName($raw)
 {
-	return(preg_replace('/[^a-z|0-9|\_]*/','', strtolower($raw)));
+	return(preg_replace('/[^a-z|0-9|\_|\.]*/','', strtolower($raw)));
 }
 
 /* version of strip_tags that kills attributes, since the PHP version is horribly unsafe */

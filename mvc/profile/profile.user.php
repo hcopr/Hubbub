@@ -9,7 +9,9 @@
   	$openInfo = h2_nv_retrieve('openid');
 		
 		// let's try to determine sensible user data from the login services
-		$defaultEmail = getFirst($openInfo['contact/email'], $fbInfo['email'], $this->user->ds['u_email']);
+		$idAccountWithEmail = DB_GetDatasetWQuery('SELECT * FROM '.getTableName('idaccounts').'
+		  WHERE ia_user=? AND ia_type = "email"', array($this->user->key()));
+		$defaultEmail = getFirst($openInfo['contact/email'], $fbInfo['email'], $idAccountWithEmail['ia_url']);
 		// determining a default username idea
 		$emlName = trim(substr($defaultEmail, 0, strpos($defaultEmail, '@')));
     $defaultUsername = safename(getFirst($twitterInfo['screen_name'], $fbInfo['first_name'], $emlName, $openInfo['namePerson/friendly']));   

@@ -80,7 +80,6 @@ class SigninController extends HubbubController
   {
     $msg = '';
     $url = '';
-    
     switch($_REQUEST['method'])
     {
       case('openid'): {
@@ -98,32 +97,56 @@ class SigninController extends HubbubController
         break;
       }
       case('email'): {
-        if(trim($_REQUEST['email']) == '' || trim($_REQUEST['password']) == '')
+        $emailAddress = trim(strtolower($_REQUEST['email']));
+        $loginPassword = trim($_REQUEST['password']);
+        $passwordHash = md5($emailAddress.$loginPassword);
+        if($emailAddress == '' || $loginPassword == '')
         {
           $msg = '<div class="banner">Please fill out both the email and password fields.</div>';
         }
         else
         {
+          require_once('lib/is_email.php');
           $_SESSION['load_signin'] = 'email';
           if($_REQUEST['mode'] == 'new')
           {
-            
+            $nds = $this->model->getAccount('email', $emailAddress);
+            if($ids['ia_user'] > 0)
+            {
+              $msg = '<div class="banner">This email address is already in use on this server, you cannot create a new account with it. Please sign in normally.</div>';
+            }
+            else
+            {
+              if(strlen($loginPassword) < 5)
+              {
+                $msg = '<div class="banner">For your own safety, please choose a password that has at least 5 characters.</div>';
+              }
+              else if(is_email($emailAddress, true, E_WARNING) != ISEMAIL_VALID)
+              {
+                $msg = '<div class="banner">Please enter a valid email address.</div>';
+              }
+              else
+              {
+                $msg = 'Your account is being created...';
+                $nds['ia_comments'] = $passwordHash;
+                $this->model->newAccount($nds);
+                $url = actionUrl('user', 'profile');
+              }
+            }
           }
           else
           {
-            $ids = $this->model->getAccount(trim($_REQUEST['email']), md5(trim($_REQUEST['password'])));
-            $msg = dumpArray($ids);
-            /*
-            if(sizeof($ids) == '' && $ids['ia_user'] > 0)
-            {
-              $msg = '<div class="banner">Wrong email/password, please check and try again.</div>';
-            }
-            else
+            $ids = $this->model->getAccount('email', $emailAddress);
+            if($ids['ia_user'] > 0 && $ids['ia_comments'] == $passwordHash)
             {
               object('user')->loginWithId($ids['ia_user']);
               $msg = '<img src="themes/default/ajax-loader.gif"/> signing in...';
               $url = actionUrl('index', 'home');
-            }*/
+            }
+            else
+            {
+              $msg = '<div class="banner">Wrong email/password, please check and try again.</div>';
+            }
           }
         }
         break; 

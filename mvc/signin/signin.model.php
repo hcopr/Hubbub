@@ -29,12 +29,11 @@ class SigninModel extends HubbubModel
 		return($twitterObj->getAuthenticateUrl().'&oauth_callback='.urlencode(scriptURI()));
 	}
 	
-	function getAccount($type, $url)
+	function getAccount($type, $url = null)
 	{
-		return(DB_GetDatasetMatch('idaccounts', array(
-		  'ia_type' => $type,
-			'ia_url' => $url,
-		  )));
+	  $match = array('ia_type' => $type);
+	  if($url != null) $match['ia_url'] = $url;
+		return(DB_GetDatasetMatch('idaccounts', $match));
 	}
 	
 	function newAccount(&$ads)
@@ -58,7 +57,7 @@ class SigninModel extends HubbubModel
 	    $ukey = DB_UpdateDataset('users', $uds);      
 	    $_SESSION['uid'] = $ukey;
 	    $ads['ia_user'] = $ukey;
-	    DB_UpdateDataset('idaccounts', $ads);
+	    $ads['ia_key'] = DB_UpdateDataset('idaccounts', $ads);
 	    return(true);
 		}
 	}

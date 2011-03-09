@@ -21,7 +21,7 @@
   session_start();
 
 	// log errors, basic ini stuff
-  ini_set('error_log', 'log/error.php.log');
+  ini_set('error_log', 'log/error.log');
   ini_set('magic_quotes_gpc', 0);
 	ini_set('magic_quotes_runtime', 0);
   ini_set('log_errors', true);
@@ -82,5 +82,7 @@
 		// size of the DMN list
 		'dmn_maxsize' => 10,
     ) as $k => $v) if(!isset($svc[$k])) $svc[$k] = $v;
+    
+  $GLOBALS['config']['debug']['verboselog'] = true;
 
 ?>
