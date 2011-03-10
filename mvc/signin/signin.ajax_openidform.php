@@ -14,7 +14,7 @@
   
   function loginWithOpenID()
   {
-    $('#signinresult').html('<img src="themes/default/ajax-loader.gif"/> '.l10n('openid.signing.in').'...');
+    $('#signinresult').html('<img src="themes/default/ajax-loader.gif"/> <?= l10n('openid.signing.in') ?>...');
     var openid = $('#openidurl').val();
     var mode = $('input:radio[name=signin_mode]:checked').val();
     $.post('<?= actionUrl('ajax_do', 'signin') ?>', { 'openid' : openid, 'mode' : mode, 'method' : 'openid' }, function(data) {

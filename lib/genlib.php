@@ -129,7 +129,7 @@ function logError($logfile, $msg, $level = 0)
 
 
 /* makes an URL calling a specific controller with a specific action */
-function actionUrl($action = '', $controller = '', $params = array())
+function actionUrl($action = '', $controller = '', $params = array(), $fullUrl = false)
 { 
   $p = '';
   $controller = getDefault($controller, $_REQUEST['controller']);
@@ -144,13 +144,19 @@ function actionUrl($action = '', $controller = '', $params = array())
     $p = '?'.http_build_query($params);
   }
   $url = $controller.($action == 'index' ? '' : URL_CA_SEPARATOR.$action).$p;  
+  if($fullUrl)
+  {
+    $base = cfg('service.base');
+    if(trim($base) == '') $base = 'http://'.cfg('service.server');
+    if(substr($base, -1) != '/') $base .= '/';
+  }
   if($GLOBALS['config']['service']['url_rewrite'])
   {
-    return(cfg('service.base').$url);
+    return($base.$url);
   }
   else 
   {
-    return(cfg('service.base').'?'.$url);
+    return($base.'?'.$url);
   }  
 }
 

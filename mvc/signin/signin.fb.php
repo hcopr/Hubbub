@@ -7,7 +7,7 @@ function get_facebook_cookie($app_id, $application_secret) {
   $payload = '';
   foreach ($args as $key => $value) {
     if ($key != 'sig') {
-      $payload .= $key . '=' . $value;
+      $payload .= $key . '=' . $value; 
     }
   }
   if (md5($payload . $application_secret) != $args['sig']) {

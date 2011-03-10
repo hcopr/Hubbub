@@ -16,7 +16,7 @@
   
   function loginWithEmail()
   {
-    $('#signinresult').html('<img src="themes/default/ajax-loader.gif"/> '.l10n('email.signing.in').'...');
+    $('#signinresult').html('<img src="themes/default/ajax-loader.gif"/> <?= l10n('email.signing.in') ?>...');
     var email = $('#email').val();
     var password = $('#password').val();
     var mode = $('input:radio[name=signin_mode]:checked').val();

@@ -3,7 +3,20 @@
 /* templated mail sending func */
 function send_mail($to, $template, $params = array())
 {
-  mail($to, $subject, execTemplate($template, $params), $headers);
+  $srvEmail = cfg('service.email');
+  if(trim($srvEmail) == '') $srvEmail = 'hubbub@'.$_SERVER['HTTP_HOST'];
+  $headers = array(
+    'Content-Type: text/plain; charset="utf-8"', 
+    'From: '.cfg('service.server').' Hubbub Server <'.$srvEmail.'>',
+    'Return-Path: '.$srvEmail,
+    'Message-ID: <'.md5(time()).'-hubbub@'.$_SERVER['HTTP_HOST'].'>',
+    );
+  foreach ($params as $k => $v) $$k = $v;
+  ob_start();
+  include('templates/'.$template);
+  $body = ob_get_clean();
+  ini_set('mail.add_x_header', false);
+  return(mail($to, $subject, $body, implode(chr(10), $headers), '-f '.$srvEmail));
 }
 
 /* executes a php page with $params as local variables (be careful!) */

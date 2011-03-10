@@ -13,39 +13,7 @@ function h2_init_hubbub_environment()
       
 	$GLOBALS['obj']['user'] = new HubbubUser();
 	
-	switch(object('user')->lang)
-	{
-    case('en'): {
-      $GLOBALS['l10n'] = array(
-        'home' => 'Home',
-        'profile' => 'Profile',
-        'friends' => 'Friends',
-				'settings' => 'Settings',
-        'logout' => 'Log out',
-				'.title' => 'Home',
-        'change' => 'change',
-				'commented' => 'commented on',
-				'comment_on_wall' => 'profile',
-				'field.cannotbeempty' => 'please fill out this field',
-        );
-      break;
-    }
-    case('de'): {
-      $GLOBALS['l10n'] = array(
-        'home' => 'Neuigkeiten',
-        'profile' => 'Profil',
-        'friends' => 'Freunde',
-				'settings' => 'Optionen',
-        'logout' => 'Abmelden',
-				'.title' => 'Home',
-        'change' => 'ändern',
-        'commented' => 'hat einen Kommentar auf',
-        'comment_on_wall' => 'Profil hinterlassen',
-				'field.cannotbeempty' => 'bitte fülle dieses Feld aus',
-        );
-      break;
-    }
-	}
+	l10n_load('mvc/l10n');
 	
 	if(isset($_REQUEST['hubbub_msg']))
 	{
@@ -65,13 +33,7 @@ function l10n($s, $silent = false)
   else if($silent === true)
     return('');
   else
-  {
-    /*if(cfg('l10ndebug') == true && $GLOBALS['l10n_files_last'] != '')
-    {
-      WriteToFile($GLOBALS['l10n_files_last'], $s.'=['.$s.']'."\n");
-    }*/
     return('['.$s.']');
-  }
 }
 
 function l10n_load($filename_base)

@@ -1,6 +1,5 @@
 <div class="login_pane"><?
-$srv = getDefault($_SERVER['HTTP_HOST'], l10n('this.server'));
-$srvName = strtoupper(substr($srv, 0, 1)).substr($srv, 1);
+
 if($_SESSION['msg'])
 {
   ?><div class="banner fail">
@@ -15,7 +14,7 @@ $GLOBALS['page.h1'] = l10n('hubbub.server');
   <tr>
     <td>
     
-    <h2><?= $srvName ?> <?= l10n('hubbub.server') ?></h2>
+    <h2><?= $this->srvName ?> <?= l10n('hubbub.server') ?></h2>
     
     <div id="bubble_items">
     

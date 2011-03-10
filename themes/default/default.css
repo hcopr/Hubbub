@@ -2,11 +2,12 @@
 
 $darkGray = '#555';
 $stdMargin = '8px';
-$bgAttention = '<?= $bgAttention ?>';
+$bgAttention = '#ffa';
 $borderColor = '1px solid #ccc';
 $textColor = '#333';
 $lightText = '#aaa';
 $linkColor = '#04c';
+$menuColor = '#abf';
 
 ?>/* ------------------------------------- DESIGN ------------------------------------ */
 
@@ -82,7 +83,7 @@ input[type=text]:focus, input[type=password]:focus {
   background: #fff;
 }
 .errormsg {
-  background: #fb8;
+  background: <?= $bgAttention ?>;
 }
 .element-readonly {
   color: <?= $lightText ?>;
@@ -117,8 +118,8 @@ noscript p {
   color: white;
   text-decoration: none;
 }
-#mainmenu a.active {
-  color: #fff;
+#mainmenu a {
+  color: <?= $menuColor ?>;
 }
 .emphasis {
   font-weight: bold;
@@ -225,6 +226,7 @@ h2 {
 }
 .hubbub_logo {
   font-style: italic; 
+  font-weight: bold;
 }
 .balloonhelp {
   padding-top: <?= $stdMargin ?>;
@@ -299,9 +301,6 @@ noscript p {
   left: 0;
   width: 100%;
   z-index: 1000;
-}
-#mainmenu {
-  padding-top: 1px;
 }
 #mainmenu a {
   display: inline-block;

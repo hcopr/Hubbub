@@ -13,12 +13,14 @@
           <?
           if($_SESSION['uid'] > 0)
           {
+            $uname = object('user')->ds['u_name'];
+            if(trim($uname) == '') $uname = l10n('profile');
           	?><div id="mainmenu"><?
-          	foreach(explode(',', 'home,profile,friends,mail,app') as $url)
+          	foreach(explode(',', 'home,profile,friends,mail') as $url)
           	{
           	  $caption = l10n($url);
-          	  if($url == 'profile') $caption = h2_make_excerpt(object('user')->ds['u_name'], 16);
-          	  else if($url == 'home') $caption = '<span class="hubbub_logo">hubbub<sup>v2</sup></span> '.$caption;
+          	  if($url == 'profile') $caption = h2_make_excerpt($uname, 16);
+          	  else if($url == 'home') $caption = '<span class="hubbub_logo">hubbub</span>';
 							$class = ''; if(object('controller')->name == $url) $class = 'active';
 		          ?><a class="<?= $class ?>" href="<?= actionUrl('index', $url) ?>"><?= $caption ?></a><?
             }

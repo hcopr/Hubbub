@@ -88,7 +88,7 @@ function tableform_handle_error(&$p, &$form)
   if ($error != '') 
   { 
     $p['class'] .= ' fielderror'; 
-    print(' <div class="errormsg">'.$error.'</div>'); 
+    print(' <div class="errormsg"> ^ '.$error.'</div>'); 
   }
 }
 
@@ -299,7 +299,7 @@ function tableform_passworddouble($p, &$form)
 
 function tableform_start($p, &$form)
 {
-  ?><form action="?" id="<?php echo $form->name ?>" enctype="multipart/form-data" method="post"><?php
+  ?><form action="<?= actionUrl($_REQUEST['action'], $_REQUEST['controller']) ?>" id="<?php echo $form->name ?>" enctype="multipart/form-data" method="post"><?php
   if ($form->jquerySections)
   {
     ?><div id="accordion"><h3 href="#"><?php echo $p['caption'] ?></h3>
@@ -338,7 +338,7 @@ function tableform_button($p, &$form)
 
 function tableform_end($p, &$form)
 {
-  if(is_array($p['params'])) foreach ($p['params'] as $k => $v)
+  if(is_array($form->params)) foreach ($form->params as $k => $v)
     print('<input type="hidden" name="'.$k.'" id="param_'.$k.'" value="'.htmlspecialchars($v).'"/>');
   ?></table><?php
     if ($form->jquerySections && !$form->sectionTerminated)

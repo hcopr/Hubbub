@@ -9,6 +9,8 @@ class SigninController extends HubbubController
 		{
 			$_SESSION['redirect.override'] = $_REQUEST['r'];
 		}
+		$srv = getDefault($_SERVER['HTTP_HOST'], l10n('this.server'));
+    $this->srvName = strtoupper(substr($srv, 0, 1)).substr($srv, 1);
 	}
 	
 	function Index()
@@ -75,6 +77,27 @@ class SigninController extends HubbubController
 	{
 		$this->openIdSignin('https://me.yahoo.com');
 	}
+			
+  function recover()
+  {
+    require_once('lib/cq-forms.php');
+    require_once('lib/special-io.php');
+  }
+
+  function reset()
+  {
+    require_once('lib/cq-forms.php');
+    require_once('lib/special-io.php');
+    $this->uds = DB_GetDataset('idaccounts', $_REQUEST['i'], 'ia_recovery');
+    $this->userFound = $this->uds['ia_user'] > 0;
+    if($this->userFound) 
+      $this->usr = DB_GetDataset('users', $this->uds['ia_user']);
+    else
+    {
+      $this->skipView = true;
+      print('<br/><br/><div class="banner">'.l10n('email.recovery.failload').'</div><br/>&gt; <a href="'.actionUrl('index', 'signin').'">'.l10n('cancel').'</a>'); 
+    }
+  }
 			
   function ajax_do()
   {
@@ -145,7 +168,7 @@ class SigninController extends HubbubController
             }
             else
             {
-              $msg = '<div class="banner">'.l10n('email.login.fail').'</div>';
+              $msg = '<div class="banner">'.l10n('email.login.fail').'<br/><a href="'.actionUrl('recover', 'signin').'">'.l10n('email.recover').'</a></div>';
             }
           }
         }

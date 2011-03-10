@@ -42,9 +42,17 @@ class CQForm
     }
   }
   
+  function receive($handler)
+  {
+    // registers a data handler 
+    $this->handlers['receive'] = $handler;
+    return($this);
+  }
+  
   function getData()
   {
     global $config;
+    if(!$this->submitted) return;
     $this->ds = array();
     $this->errors = array();
     $controller = &$config['currentcontroller'];
@@ -73,22 +81,46 @@ class CQForm
             break;
           }
           case('email'): {
-            if (!eregi("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$", 
-              $value)) $this->errors[$e['name']] = l10n('field.invalidemail'); 
+            require_once('lib/is_email.php');
+            if(is_email($value, true, E_WARNING) != ISEMAIL_VALID)
+              $this->errors[$e['name']] = l10n('field.invalidemail'); 
             break;
           }
         }
+        if(!isset($this->errors[$e['name']]) && isset($e['onvalidate']))
+        {
+          $valid = $e['onvalidate']($value, $e, $this);
+          if(!($valid === true || $valid == '')) $this->errors[$e['name']] = $valid;
+        }
       }
     }      
+    if(isset($this->handlers['receive']) && sizeof($this->errors) == 0)
+    {
+      $this->handlers['receive']($this->ds, $this);
+    }
     return($this->ds);
+  }
+  
+  function ds($ds = array())
+  {
+    $this->ds = $ds;
+    $this->getDataOnDisplay = true;
+    return($this); 
   }
   
   function add($type, $name = null, $properties = array())
   {
+    if($type == 'param')
+    {
+      $this->params[$name] = $properties;
+      return($this); 
+    }
+
     if (!is_array($properties))
       $properties = stringParamsToArray($properties);
     if($properties['caption'] == '') $properties['caption'] = l10n($name, true);
     if($properties['caption'] == '') $properties['caption'] = '['.trim($name).']';
+        
     $properties['name'] = $name;
     $properties['type'] = getDefault($type, 'string');
     $elname = md5($name); $ectr = 1;
@@ -108,12 +140,11 @@ class CQForm
 
   function display($opt = array())
   {
+    if ($this->getDataOnDisplay) $this->getData();
     if ($this->hidden) return;
     if ($this->formClosed != true)
     {
       $this->params['formsubmit'] = $this->name;
-      $this->params['controller'] = getDefault($this->controller, $_REQUEST['controller']);
-      $this->params['action'] = getDefault($this->action, $_REQUEST['action']);
       $this->add('end', $name, $name, array('params' => $this->params));
       $this->formClosed = true;
     }
