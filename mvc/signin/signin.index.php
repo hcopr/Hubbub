@@ -1,5 +1,5 @@
 <div class="login_pane"><?
-$srv = getDefault($_SERVER['HTTP_HOST'], 'This Server');
+$srv = getDefault($_SERVER['HTTP_HOST'], l10n('this.server'));
 $srvName = strtoupper(substr($srv, 0, 1)).substr($srv, 1);
 if($_SESSION['msg'])
 {
@@ -8,20 +8,19 @@ if($_SESSION['msg'])
   </div><?
   unset($_SESSION['msg']);
 }
-$GLOBALS['page.h1'] = 'Hubbub Server';
+$GLOBALS['page.h1'] = l10n('hubbub.server');
 ?>
 <? if($_REQUEST['msg'] != '') print('<div class="banner">'.htmlspecialchars($_REQUEST['msg']).'</div>'); ?>
 <table width="900" align="center">
   <tr>
     <td>
     
-    <h2><?= $srvName ?> Hubbub Server</h2>
+    <h2><?= $srvName ?> <?= l10n('hubbub.server') ?></h2>
     
     <div id="bubble_items">
     
       <div class="paragraph padded_extra" style="width: 500px">      
-        <a href="http://hubbub.at">Hubbub</a> is a project for free and open social networking. With
-        Hubbub you can share all kinds of information with the people you care about.
+        <a href="http://hubbub.at">Hubbub</a> <?= l10n('hubbub.is') ?>
       </div>
       
       <div class="paragraph padded_extra" style="width: 500px">      
@@ -44,8 +43,8 @@ $GLOBALS['page.h1'] = 'Hubbub Server';
           <? include('mvc/signin/signin.ajax_openidform.php'); ?>
         </div>
         <div style="margin-bottom: 8px; margin-top: 4px;">
-          <input type="radio" name="signin_mode" value="existing" id="mode_existing" checked="true"/> <label for="mode_existing">sign into my account</label><br/>
-          <input type="radio" name="signin_mode" value="new" id="mode_newuser"/> <label for="mode_newuser">create a new user account for me now</label>
+          <input type="radio" name="signin_mode" value="existing" id="mode_existing" checked="true"/> <label for="mode_existing"><?= l10n('mode.signin') ?></label><br/>
+          <input type="radio" name="signin_mode" value="new" id="mode_newuser"/> <label for="mode_newuser"><?= l10n('mode.create') ?></label>
         </div>
         <div id="signinresult">
           
