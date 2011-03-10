@@ -3,14 +3,14 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Feb 19, 2011 at 03:43 PM
+-- Generation Time: Mar 10, 2011 at 05:27 AM
 -- Server version: 5.1.47
 -- PHP Version: 5.3.3
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 --
--- Database: `hubbub2`
+-- Database: `hubme`
 --
 
 -- --------------------------------------------------------
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `h2_auditlog` (
   `l_result` varchar(4) NOT NULL,
   `l_reason` varchar(128) NOT NULL,
   PRIMARY KEY (`l_key`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `h2_connections` (
   KEY `c_serverkey` (`c_toserverkey`),
   KEY `c_count_sent` (`c_count_sent`),
   KEY `c_count_rcvd` (`c_count_rcvd`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS `h2_entities` (
   KEY `_local` (`_local`),
   KEY `url` (`url`),
   KEY `server` (`server`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -92,11 +92,13 @@ CREATE TABLE IF NOT EXISTS `h2_idaccounts` (
   `ia_url` varchar(250) NOT NULL,
   `ia_user` int(11) NOT NULL,
   `ia_comments` varchar(200) NOT NULL,
+  `ia_recovery` varchar(32) NOT NULL,
   PRIMARY KEY (`ia_key`),
   KEY `ia_user` (`ia_user`),
   KEY `ia_url` (`ia_url`),
-  KEY `ia_type` (`ia_type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+  KEY `ia_type` (`ia_type`),
+  KEY `ia_recovery` (`ia_recovery`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -110,7 +112,7 @@ CREATE TABLE IF NOT EXISTS `h2_localgroups` (
   `lg_name` varchar(128) NOT NULL,
   PRIMARY KEY (`lg_key`),
   KEY `lg_entity` (`lg_entity`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -144,7 +146,7 @@ CREATE TABLE IF NOT EXISTS `h2_messages` (
   KEY `m_votehash` (`m_votehash`),
   KEY `m_publish` (`m_publish`),
   KEY `m_tag` (`m_tag`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=60 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -178,7 +180,7 @@ CREATE TABLE IF NOT EXISTS `h2_servers` (
   PRIMARY KEY (`s_key`),
   KEY `s_url` (`s_url`),
   KEY `s_lastpolled` (`s_lastpolled`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -200,7 +202,7 @@ CREATE TABLE IF NOT EXISTS `h2_usagestats` (
   KEY `st_type` (`st_type`),
   KEY `st_call` (`st_call`),
   KEY `st_interval` (`st_interval`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -211,7 +213,6 @@ CREATE TABLE IF NOT EXISTS `h2_usagestats` (
 CREATE TABLE IF NOT EXISTS `h2_users` (
   `u_key` int(11) NOT NULL AUTO_INCREMENT,
   `u_name` varchar(128) NOT NULL,
-  `u_email` varchar(128) NOT NULL,
   `u_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `u_l10n` varchar(5) NOT NULL,
   `u_settings` longtext NOT NULL,
@@ -221,7 +222,7 @@ CREATE TABLE IF NOT EXISTS `h2_users` (
   PRIMARY KEY (`u_key`),
   KEY `u_entity` (`u_entity`),
   KEY `u_sessionkey` (`u_sessionkey`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
