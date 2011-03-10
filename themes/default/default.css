@@ -37,7 +37,6 @@ a {
 }
 .banner {
   background: <?= $bgAttention ?>;
-  color: red;
 }
 input[type=text], input[type=password] {
   font-size: 98%; 
@@ -123,6 +122,7 @@ noscript p {
 }
 .emphasis {
   font-weight: bold;
+  color: #666;
 }
 sup {
   font-size: 50%;
@@ -190,7 +190,7 @@ h1 span {
   font-style: italic; 
 }
 .bubble {
-  background: #def;  
+  background: #eee;  
   width: 250px;
 }
 .clear {

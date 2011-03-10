@@ -84,5 +84,11 @@
     ) as $k => $v) if(!isset($svc[$k])) $svc[$k] = $v;
     
   $GLOBALS['config']['debug']['verboselog'] = true;
+  
+  foreach(array(
+    'user_new' => 'friendlyui',
+    'show_notice' => 'friendlyui',
+    'publish_attachments_register' => 'multimedia',
+    ) as $k => $v) $GLOBALS['config']['plugins'][$k][] = $v;
 
 ?>

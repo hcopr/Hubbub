@@ -23,6 +23,7 @@ $cookie = get_facebook_cookie(cfg('facebook.app_id'), cfg('facebook.app_secret')
 <span id="fb-root"></span>
 <script src="http://connect.facebook.net/en_US/all.js"></script>
 <script>
+
   FB.init({appId: '<?= cfg('facebook.app_id') ?>', status: true, cookie: true, xfbml: true});
   FB.Event.subscribe('auth.login', function(response) {
         window.location.reload();
@@ -32,6 +33,7 @@ $cookie = get_facebook_cookie(cfg('facebook.app_id'), cfg('facebook.app_secret')
   {
     FB.login();   
   }
+
 </script>
 <?
 
@@ -39,7 +41,7 @@ if($cookie['access_token'])
 {
   $userdata = json_decode(file_get_fromurl('https://graph.facebook.com/me?fields=picture&access_token='.$cookie['access_token']), true);
   $ads = $this->model->getAccount('fb', $userdata['id']);
-	$ads['ia_comments'] = $userdata['name'].' (#'.$userdata['id'].')';
+	$ads['ia_properties'] = json_encode($userdata['name']);
   $this->model->newAccount($ads);
   h2_nv_store('fb.basic/'.$ads['ia_key'], $userdata);
   h2_nv_store('fb.basic', $userdata);
@@ -56,4 +58,4 @@ if($cookie['access_token'])
 <br/>
 <br/>
 <fb:login-button></fb:login-button>
-&nbsp;&nbsp;<a href="<?= actionUrl('index', 'signin') ?>" class="btn"><?= l10n('cancel') ?></a>
+&nbsp;&nbsp;<a href="<?= actionUrl('index', 'settings') ?>" class="btn"><?= l10n('cancel') ?></a>

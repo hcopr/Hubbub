@@ -25,7 +25,7 @@ class UiController extends HubbubController
         if(file_exists($editorFile))
           include($editorFile);
         else
-          print('<div class="banner">Editor not found: '.$att['caption'].'</div>');
+          print(h2_uibanner('Editor not found: '.$att['caption']));
       }
     }
   }

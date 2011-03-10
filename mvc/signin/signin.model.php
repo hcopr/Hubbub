@@ -46,9 +46,10 @@ class SigninModel extends HubbubModel
     }
 		else if($_SESSION['uid'] > 0)
 		{
-			// if we're still logged in
+			// if we're still logged in, add this to an existing account!
 			$ads['ia_user'] = $_SESSION['uid'];
       DB_UpdateDataset('idaccounts', $ads);
+      $this->redirectOverride = array('auth', 'settings');
       return(false);			
 		}
 		else
@@ -76,7 +77,7 @@ class SigninModel extends HubbubModel
 		$ads = $this->getAccount('twitter', $token->oauth_token.':'.$token->oauth_token_secret);
     $twitterInfo= $twitterObj->get_accountVerify_credentials();
     $twitterInfo->response; 
-    $ads['ia_comments'] = $twitterInfo->response['name'].' (@'.$twitterInfo->response['screen_name'].')';         
+		$ads['ia_properties'] = json_encode($twitterInfo->response);
 		$this->newAccount($ads);
     h2_nv_store('twitterinfo/'.$ads['ia_key'], $twitterInfo->response);
     h2_nv_store('twitterinfo', $twitterInfo->response);
@@ -110,7 +111,7 @@ class SigninModel extends HubbubModel
   {
   	$ads = $this->getAccount('openid', $openid->identity);
 		$attr = $openid->getAttributes();
-		$ads['ia_comments'] = trim($attr['contact/email']);
+		$ads['ia_properties'] = json_encode($attr);
 		$this->newAccount($ads);
     h2_nv_store('openid/'.$ads['ia_key'], $attr);
     h2_nv_store('openid', $attr);

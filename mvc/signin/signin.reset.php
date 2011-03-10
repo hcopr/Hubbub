@@ -14,7 +14,7 @@
     
     <?
     
-    $form = new CQForm('pwrecovery');
+    $form = new CQForm('pwrecovery', array('auto-focus' => true));
     $form
       ->add('password', 'new_pwd', array('onvalidate' => function($value, $e, $form) { 
           $form->pwd = trim($value);
@@ -25,7 +25,7 @@
       ->ds($_REQUEST)
       ->receive(function($data, $form) {
           $uds = DB_GetDataset('idaccounts', $_REQUEST['i'], 'ia_recovery');
-          $uds['ia_comments'] = md5($uds['ia_url'].$form->pwd);
+          $uds['ia_password'] = md5($uds['ia_url'].$form->pwd);
           $uds['ia_recovery'] = '';
           DB_UpdateDataset('idaccounts', $uds);
           object('user')->loginWithId($uds['ia_user']);

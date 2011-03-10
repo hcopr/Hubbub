@@ -9,7 +9,7 @@ if($_SESSION['msg'])
 }
 $GLOBALS['page.h1'] = l10n('hubbub.server');
 ?>
-<? if($_REQUEST['msg'] != '') print('<div class="banner">'.htmlspecialchars($_REQUEST['msg']).'</div>'); ?>
+<? if($_REQUEST['msg'] != '') print(h2_uibanner(htmlspecialchars($_REQUEST['msg']))); ?>
 <table width="900" align="center">
   <tr>
     <td>
@@ -22,32 +22,11 @@ $GLOBALS['page.h1'] = l10n('hubbub.server');
         <a href="http://hubbub.at">Hubbub</a> <?= l10n('hubbub.is') ?>
       </div>
       
-      <div class="paragraph padded_extra" style="width: 500px">      
+      <div>
+        Sign in with<br/>
         <? 
-          if($GLOBALS['config']['twitter']['enabled'] === true) $signInLinks[] = '<a href="'.actionUrl('twitter', 'signin').'">Twitter</a>';
-          if($GLOBALS['config']['facebook']['enabled'] === true) $signInLinks[] = '<a href="'.actionUrl('fb', 'signin').'">Facebook</a>';
-          $signInLinks[] = '<a href="'.actionUrl('google', 'signin').'">Google</a>';
-          $signInLinks[] = '<a href="'.actionUrl('yahoo', 'signin').'">Yahoo</a>';
-          $signInLinks[] = '<a onclick="$(\'#signinform\').html($(\'#signinform_openid\').html());">OpenID</a>';
-          $signInLinks[] = '<a onclick="$(\'#signinform\').html($(\'#signinform_email\').html());">Email</a>';
-          print('Use: '.implode(' &middot; ', $signInLinks));
+        include('mvc/signin/signin.widget.php');
         ?>
-        <div id="signinform">
-          <? include('mvc/signin/signin.ajax_'.getDefault($_SESSION['load_signin'], 'email').'form.php'); ?>
-        </div>
-        <div id="signinform_email" style="display:none">
-          <? include('mvc/signin/signin.ajax_emailform.php'); ?>
-        </div>
-        <div id="signinform_openid" style="display:none">
-          <? include('mvc/signin/signin.ajax_openidform.php'); ?>
-        </div>
-        <div style="margin-bottom: 8px; margin-top: 4px;">
-          <input type="radio" name="signin_mode" value="existing" id="mode_existing" checked="true"/> <label for="mode_existing"><?= l10n('mode.signin') ?></label><br/>
-          <input type="radio" name="signin_mode" value="new" id="mode_newuser"/> <label for="mode_newuser"><?= l10n('mode.create') ?></label>
-        </div>
-        <div id="signinresult">
-          
-        </div>
       </div>
     
     </div>
@@ -156,9 +135,3 @@ $GLOBALS['page.h1'] = l10n('hubbub.server');
   </tr>
 </table>	
 </div>
-
-<script>
-  $(window).load(function() {
-    $('#bubble_items').masonry({});
-    });
-</script>

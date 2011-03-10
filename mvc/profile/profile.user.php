@@ -22,22 +22,29 @@
       } while (!HubbubEntity::isNameAvailable($defaultUsername2));
 			$defaultUsername = $defaultUsername2;
 		}
+		
+		// making a reasonable default name of of the email address
+		$nameParts = array();
+		foreach(explode('.', $defaultUsername) as $namePart)
+		  $nameParts[] = strtoupper(substr($namePart, 0, 1)).strtolower(substr($namePart, 1));
+		$emailNameReconstruction = implode(' ', $nameParts);
+		
 		// other default data
-    $defaultName = getFirst($openInfo['namePerson/first'].' '.$openInfo['namePerson/last'], $fbInfo['name'], $twitterInfo['name'], $openInfo['namePerson/friendly']);		
-		$gravatarImg = 'http://www.gravatar.com/avatar/'.md5(strtolower(trim($defaultEmail))).'&s=48';
+    $defaultName = getFirst(
+      $openInfo['namePerson/first'].' '.$openInfo['namePerson/last'], 
+      $fbInfo['name'], 
+      $twitterInfo['name'], 
+      $openInfo['namePerson/friendly'],
+      $emailNameReconstruction);			
+		$gravatarImg = 'http://www.gravatar.com/avatar/'.md5(strtolower(trim($defaultEmail))).'&s=96';
 		$defaultPic = getFirst($fbInfo['picture'], $twitterInfo['profile_image_url'], $gravatarImg);
 		
-?><div class="balloonhelp"><?
+    if($defaultPic != '') print('<img src="'.$defaultPic.'" align="right" style="padding: 8px;" width="96"/>');
 
-if($defaultPic != '') print('<img src="'.$defaultPic.'" align="left" style="padding-right: 8px"/>');
-
-print(l10n('user.balloon'));
-	
-?></div>
-<? 
-    
+?><div class="balloonhelp"><?= l10n('user.balloon') ?></div> 
+<div style="width: 70%"><?
     include_once('lib/cq-forms.php');
-    $this->form = new CQForm('basicinfo');
+    $this->form = new CQForm('basicinfo', array('auto-focus' => trim($defaultName) == ''));
     $this->form->ds = $this->user->ds;
 		$this->form->ds['username'] = safename(getdefault($this->user->getUsername(), $this->form->ds['username']));
 		
@@ -75,4 +82,4 @@ print(l10n('user.balloon'));
 
     $this->form->display();
 
-?>
+?></div>

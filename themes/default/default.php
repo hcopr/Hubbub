@@ -16,7 +16,7 @@
             $uname = object('user')->ds['u_name'];
             if(trim($uname) == '') $uname = l10n('profile');
           	?><div id="mainmenu"><?
-          	foreach(explode(',', 'home,profile,friends,mail') as $url)
+          	foreach(explode(',', 'home,profile,friends,mail,settings') as $url)
           	{
           	  $caption = l10n($url);
           	  if($url == 'profile') $caption = h2_make_excerpt($uname, 16);
@@ -63,11 +63,8 @@
     </div>
 
     <script>
-      function apply_style()
-      {
-        $("button, input:submit, input:button, a.btn").button();
-      }
-      apply_style();
+      $(document).ready(function() { $("button, input:submit, input:button, a.btn").button(); } );
+      $(window).load(function() { $('.masonry_container').masonry({}); });
     </script>
   </body>
   <? profile_point('page template'); ?>

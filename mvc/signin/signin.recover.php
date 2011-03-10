@@ -14,7 +14,7 @@
     
     <?
     
-    $form = new CQForm('pwrecovery');
+    $form = new CQForm('pwrecovery', array('auto-focus' => true));
     $form
       ->add('string', 'email_address', array('validate' => 'email', 'onvalidate' => function($data, $e, $form) { 
           $form->ads = DB_GetDataset('idaccounts', trim($data), 'ia_url');

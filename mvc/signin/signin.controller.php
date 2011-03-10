@@ -5,10 +5,6 @@ class SigninController extends HubbubController
 	function __init()
 	{
 		$this->invokeModel();
-		if($_REQUEST['r'])
-		{
-			$_SESSION['redirect.override'] = $_REQUEST['r'];
-		}
 		$srv = getDefault($_SERVER['HTTP_HOST'], l10n('this.server'));
     $this->srvName = strtoupper(substr($srv, 0, 1)).substr($srv, 1);
 	}
@@ -21,7 +17,7 @@ class SigninController extends HubbubController
 		{
 			$this->model->completeOAuth($_REQUEST['oauth_token']);
       $this->user->login();
-      $this->redirect('index', 'home');
+      $this->redirectAfterSignin();
 		}
     
 	}
@@ -52,7 +48,7 @@ class SigninController extends HubbubController
       {
         $this->model->completeOpenID($this->model->openid);
 				$this->user->login();
-        $this->redirect('index', 'home');
+				$this->redirectAfterSignin();
       }
 			else
 			{
@@ -95,8 +91,29 @@ class SigninController extends HubbubController
     else
     {
       $this->skipView = true;
-      print('<br/><br/><div class="banner">'.l10n('email.recovery.failload').'</div><br/>&gt; <a href="'.actionUrl('index', 'signin').'">'.l10n('cancel').'</a>'); 
+      print('<br/><br/>'.h2_uibanner(l10n('email.recovery.failload')).'<br/>&gt; 
+        <a href="'.actionUrl('index', 'signin').'">'.l10n('cancel').'</a>'); 
     }
+  }
+  
+  function redirectAfterSignin()
+  {
+    if(is_array($this->model->redirectOverride))
+    {
+      $this->redirect($this->model->redirectOverride[0], $this->model->redirectOverride[1]);
+    }
+    else
+      $this->redirect('index', 'home'); 
+  }
+  
+  function getUrlAfterSignin()
+  {
+    if(is_array($this->model->redirectOverride))
+    {
+      return(actionUrl($this->model->redirectOverride[0], $this->model->redirectOverride[1]));
+    }
+    else
+      return(actionUrl('index', 'home')); 
   }
 			
   function ajax_do()
@@ -108,7 +125,7 @@ class SigninController extends HubbubController
       case('openid'): {
         if(trim($_REQUEST['openid']) == '')
         {
-          $msg = '<div class="banner">'.l10n('openid.please').'</div>';
+          $msg = h2_uibanner(l10n('openid.please'));
         }
         else
         {
@@ -125,7 +142,7 @@ class SigninController extends HubbubController
         $passwordHash = md5($emailAddress.$loginPassword);
         if($emailAddress == '' || $loginPassword == '')
         {
-          $msg = '<div class="banner">'.l10n('fillout.fields').'</div>';
+          $msg = h2_uibanner(l10n('fillout.fields'));
         }
         else
         {
@@ -134,41 +151,41 @@ class SigninController extends HubbubController
           if($_REQUEST['mode'] == 'new')
           {
             $nds = $this->model->getAccount('email', $emailAddress);
-            if($ids['ia_user'] > 0)
+            if($nds['ia_user'] > 0)
             {
-              $msg = '<div class="banner">'.l10n('email.inuse').'</div>';
+              $msg = h2_uibanner(l10n('email.inuse'));
             }
             else
             {
               if(strlen($loginPassword) < 5)
               {
-                $msg = '<div class="banner">'.l10n('email.password.tooshort').'</div>';
+                $msg = h2_uibanner(l10n('email.password.tooshort'));
               }
               else if(is_email($emailAddress, true, E_WARNING) != ISEMAIL_VALID)
               {
-                $msg = '<div class="banner">'.l10n('email.invalid').'</div>';
+                $msg = h2_uibanner(l10n('email.invalid'));
               }
               else
               {
                 $msg = l10n('email.creating.account').'...';
-                $nds['ia_comments'] = $passwordHash;
+                $nds['ia_password'] = $passwordHash;
                 $this->model->newAccount($nds);
-                $url = actionUrl('user', 'profile');
+                $url = $this->getUrlAfterSignin();
               }
             }
           }
           else
           {
             $ids = $this->model->getAccount('email', $emailAddress);
-            if($ids['ia_user'] > 0 && $ids['ia_comments'] == $passwordHash)
+            if($ids['ia_user'] > 0 && $ids['ia_password'] == $passwordHash)
             {
               object('user')->loginWithId($ids['ia_user']);
               $msg = '<img src="themes/default/ajax-loader.gif"/> '.l10n('email.signing.in').'...';
-              $url = actionUrl('index', 'home');
+              $url = $this->getUrlAfterSignin();
             }
             else
             {
-              $msg = '<div class="banner">'.l10n('email.login.fail').'<br/><a href="'.actionUrl('recover', 'signin').'">'.l10n('email.recover').'</a></div>';
+              $msg = h2_uibanner(l10n('email.login.fail').'<br/><a href="'.actionUrl('recover', 'signin').'">'.l10n('email.recover').'</a>');
             }
           }
         }

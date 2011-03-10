@@ -57,6 +57,17 @@ function l10n_load($filename_base)
   }
 }
 
+function h2_uibanner($msg, $flag = '')
+{
+  $after = '';
+  $bannerid = 'banner'.($GLOBALS['bannercount']++);
+  if($flag == 'fadeout')
+    $after = '<script><!--
+    setTimeout(function() { $("#'.$bannerid.'").fadeOut("slow"); }, 2000);   
+    //--></script>';
+  return('<div id="'.$bannerid.'" class="banner">'.$msg.'</div>'.$after);
+}
+
 /* retrieve a config value (don't use $GLOBALS['config'] directly if possible) */
 function cfg($name, $default = null)
 {
