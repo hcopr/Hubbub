@@ -29,27 +29,25 @@ foreach($openIDList as $ida)
 		$properties = json_decode($ida['ia_properties'], true);
 		$svcType = $idTypes[$ida['ia_type']];
     $description = getDefault($ida['ia_comments'], $host); 
+    $desc = array();
 		
 		switch($ida['ia_type'])
 		{
 		  case('email'): {
-        $description = $ida['ia_url'];      
+		    $desc = array();
+        $desc['email'] = htmlspecialchars($ida['ia_url']); 
+        if($properties['verified'] > 0)
+          $desc['email.verified'] = l10n('email.is.verified');
+        else
+          $desc['email.verified'] = l10n('email.isnot.verified');
         break;
       }
       case('openid'): {
         if($host == 'google.com') $svcType = 'Google '.$svcType;
-        if($host == 'yahoo.com') $svcType = 'Yahoo '.$svcType;
-        if($host == 'yahoo.co.jp') $svcType = 'Yahoo Japan '.$svcType;
-        if($host == 'yahoo.de') $svcType = 'Yahoo Germany '.$svcType;
-        $desc = array();
-        foreach($properties as $k => $v)
-        {
-          $caption = l10n(strtolower(trim($k)), true);
-          if(trim($caption) != '')
-            $desc[] = '<span style="color:gray">'.$caption.'</span>: '.htmlspecialchars($v).''; 
-        }        
-        if(sizeof($desc) > 0)
-          $description = implode('<br/>', $desc);
+        if($host == 'me.yahoo.com') $svcType = 'Yahoo '.$svcType;
+        if($host == 'me.yahoo.co.jp') $svcType = 'Yahoo Japan '.$svcType;
+        if($host == 'me.yahoo.de') $svcType = 'Yahoo Germany '.$svcType;
+        $desc = $properties;
         break;
       }
 		  default: {
@@ -58,6 +56,17 @@ foreach($openIDList as $ida)
       }
     }
 		
+		$descLines = array();
+    foreach($desc as $k => $v)
+    {
+      $caption = l10n(strtolower(trim($k)), true);
+      if(trim($caption) != '')
+        $descLines[] = '<span style="color:gray">'.$caption.'</span>: '.htmlspecialchars($v).''; 
+    }        
+
+    if(sizeof($descLines) > 0)
+      $description = implode('<br/>', $descLines);     
+
 		?><div class="dynamic_box action_tile bubble added_extra">
 			<div style="float: right"><?
 	      if(sizeof($openIDList) > 1) {
