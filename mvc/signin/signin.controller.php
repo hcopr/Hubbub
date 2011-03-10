@@ -54,7 +54,7 @@ class SigninController extends HubbubController
       }
 			else
 			{
-			  $_SESSION['msg'] = 'Something went wrong when signing in with OpenID.';
+			  $_SESSION['msg'] = l10n('openid.fail');
 			  #logToFile('log/openid.error.log', $_REQUEST);
 				$this->redirect('index', 'signin');
 			}
@@ -85,13 +85,13 @@ class SigninController extends HubbubController
       case('openid'): {
         if(trim($_REQUEST['openid']) == '')
         {
-          $msg = '<div class="banner">Please enter your OpenID URL into the field above.</div>';
+          $msg = '<div class="banner">'.l10n('openid.please').'</div>';
         }
         else
         {
           $_SESSION['myopenidurl'] = trim($_REQUEST['openid']);
           $_SESSION['load_signin'] = 'openid';
-          $msg = 'Signing in with OpenID URL '.$_SESSION['myopenidurl'].'...';
+          $msg = l10n('openid.signing.in').' '.$_SESSION['myopenidurl'].'...';
           $url = actionUrl('openid', 'signin', array('id' => $_SESSION['myopenidurl']));
         }
         break;
@@ -102,7 +102,7 @@ class SigninController extends HubbubController
         $passwordHash = md5($emailAddress.$loginPassword);
         if($emailAddress == '' || $loginPassword == '')
         {
-          $msg = '<div class="banner">Please fill out both the email and password fields.</div>';
+          $msg = '<div class="banner">'.l10n('fillout.fields').'</div>';
         }
         else
         {
@@ -113,21 +113,21 @@ class SigninController extends HubbubController
             $nds = $this->model->getAccount('email', $emailAddress);
             if($ids['ia_user'] > 0)
             {
-              $msg = '<div class="banner">This email address is already in use on this server, you cannot create a new account with it. Please sign in normally.</div>';
+              $msg = '<div class="banner">'.l10n('email.inuse').'</div>';
             }
             else
             {
               if(strlen($loginPassword) < 5)
               {
-                $msg = '<div class="banner">For your own safety, please choose a password that has at least 5 characters.</div>';
+                $msg = '<div class="banner">'.l10n('email.password.tooshort').'</div>';
               }
               else if(is_email($emailAddress, true, E_WARNING) != ISEMAIL_VALID)
               {
-                $msg = '<div class="banner">Please enter a valid email address.</div>';
+                $msg = '<div class="banner">'.l10n('email.invalid').'</div>';
               }
               else
               {
-                $msg = 'Your account is being created...';
+                $msg = l10n('email.creating.account').'...';
                 $nds['ia_comments'] = $passwordHash;
                 $this->model->newAccount($nds);
                 $url = actionUrl('user', 'profile');
@@ -140,12 +140,12 @@ class SigninController extends HubbubController
             if($ids['ia_user'] > 0 && $ids['ia_comments'] == $passwordHash)
             {
               object('user')->loginWithId($ids['ia_user']);
-              $msg = '<img src="themes/default/ajax-loader.gif"/> signing in...';
+              $msg = '<img src="themes/default/ajax-loader.gif"/> '.l10n('email.signing.in').'...';
               $url = actionUrl('index', 'home');
             }
             else
             {
-              $msg = '<div class="banner">Wrong email/password, please check and try again.</div>';
+              $msg = '<div class="banner">'.l10n('email.login.fail').'</div>';
             }
           }
         }

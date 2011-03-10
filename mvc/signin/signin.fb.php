@@ -51,13 +51,9 @@ if($cookie['access_token'])
 
 ?>
 <br/>
-<h2>Signing in with Facebook...</h2>
-<div class="balloonhelp">
-  Click on the "Login" button below to sign into your Facebook account. If you
-  do not yet have a Hubbub account on this server, Facebook will ask you for
-  permission first. 
-</div>
+<h2><?= l10n('fb.signing.in') ?>...</h2>
+<div class="balloonhelp"><?= l10n('fb.balloon') ?></div>
 <br/>
 <br/>
 <fb:login-button></fb:login-button>
-&nbsp;&nbsp;<a href="<?= actionUrl('index', 'signin') ?>" class="btn">Cancel</a>
+&nbsp;&nbsp;<a href="<?= actionUrl('index', 'signin') ?>" class="btn"><?= l10n('cancel') ?></a>

@@ -1,12 +1,12 @@
 <?
 
 $url = trim($this->model->openIdAuthUrl());
-if($url == '') $url = actionUrl('index', 'signin', array('msg' => 'Error signing in with OpenID, please contact your administrator.'));
+if($url == '') $url = actionUrl('index', 'signin', array('msg' => l10n('openid.fail')));
 
 ?>
 <br/>
-<h2>Signing in with OpenID...</h2>
-<a href="<?= actionUrl('index', 'signin') ?>" class="btn">Cancel</a>
+<h2><?= l10n('openid.signing.in') ?>...</h2>
+<a href="<?= actionUrl('index', 'signin') ?>" class="btn"><?= l10n('cancel') ?></a>
 <script>
   document.location.href = '<?= $url ?>';
 </script>
