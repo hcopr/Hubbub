@@ -68,6 +68,8 @@
   foreach(array(
     // enable stats
     // server's standard date/time format
+    'menu' => 'home,profile,friends,mail',
+    'sysmenu' => 'settings',
     'dateformat' => 'H:i d.m.Y',
     'name' => 'Hubbub2',
 		'defaultcontroller' => 'home',

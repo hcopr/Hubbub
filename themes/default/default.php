@@ -16,7 +16,7 @@
             $uname = object('user')->ds['u_name'];
             if(trim($uname) == '') $uname = l10n('profile');
           	?><div id="mainmenu"><?
-          	foreach(explode(',', 'home,profile,friends,mail,settings') as $url)
+          	foreach(explode(',', cfg('service.menu')) as $url)
           	{
           	  $caption = l10n($url);
           	  if($url == 'profile') $caption = h2_make_excerpt($uname, 16);
@@ -24,8 +24,16 @@
 							$class = ''; if(object('controller')->name == $url) $class = 'active';
 		          ?><a class="<?= $class ?>" href="<?= actionUrl('index', $url) ?>"><?= $caption ?></a><?
             }
-	          ?><a style="float: right;" href="<?= actionUrl('logout', 'signin') ?>"><img src="img/endturn.png" align="absmiddle" title="<?= $GLOBALS['l10n']['logout'] ?>"/></a>
-	          </div><?
+            
+	          ?><a style="float: right;" href="<?= actionUrl('logout', 'signin') ?>"><img src="img/endturn.png" align="absmiddle" title="<?= $GLOBALS['l10n']['logout'] ?>"/></a><?
+
+            foreach(explode(',', cfg('service.sysmenu')) as $url)
+          	{
+          		$class = ''; if(object('controller')->name == $url) $class = 'active';
+		          ?><a style="float: right;" class="<?= $class ?>" href="<?= actionUrl('index', $url) ?>"><?= l10n($url) ?></a><?
+            }
+            
+	          ?></div><?
           }
 
           if(isset($GLOBALS['page.h1'])) print('<div id="mainmenu"><a>'.$GLOBALS['page.h1'].'</a></div>');

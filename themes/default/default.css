@@ -70,6 +70,10 @@ input[type=text]:focus, input[type=password]:focus {
   background: #0073ea url('../../ext/jqueryui/css/flick/images/ui-bg_highlight-soft_25_0073ea_1x100.png') 50% 50% repeat-x;
   color: white;
 }
+#mainmenu a.active {
+  color: #fff; 
+  background: #006;
+}
 #submenu div.active a {
   color: <?= $linkColor ?>;
   background: #ddd;
