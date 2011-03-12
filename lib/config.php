@@ -53,6 +53,8 @@
 	// set httpOnly flag for more secure cookie handling
   ini_set('session.cookie_httponly', 1);
 		
+	$cfgCategory = 'config';
+		
   // include the server-specific config
   if(file_exists('conf/'.$_SERVER['HTTP_HOST'].'.php'))
     require('conf/'.$_SERVER['HTTP_HOST'].'.php');

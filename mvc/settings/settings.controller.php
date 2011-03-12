@@ -5,7 +5,7 @@ class SettingsController extends HubbubController
 	function __init()
 	{
     access_policy('auth');
-		$this->menu = $this->makeMenu('index,auth,url');
+		$this->menu = $this->makeMenu('index,auth,url'.(object('user')->isAdmin() ? ',#admin,login,server' : ''));
 		$this->invokeModel();
     include_once('lib/cq-forms.php');
 	}
@@ -15,8 +15,8 @@ class SettingsController extends HubbubController
 		$this->form = new CQForm('settings');
 		$this->form->ds = &$this->user->settings;
     $this->form
-      ->add('html', '<div class="balloonhelp">'.l10n('email.address').'</div>')
-		  ->add('string', 'email')
+      #->add('html', '<div class="balloonhelp">'.l10n('email.address').'</div>')
+		  #->add('string', 'email')
 		  ->add('html', l10n('email.notify'))
       ->add('checkbox', 'email_friendrequest')
       ->add('checkbox', 'email_wallpost')
@@ -36,6 +36,17 @@ class SettingsController extends HubbubController
 	function url()
 	{		
 	}
+	
+	function login()
+	{
+	  access_policy('auth,admin');
+	  require_once('ext/installer/lib.php');
+  }
+	
+	function server()
+	{
+	  $this->login();
+  }
 	
 	function ajax_changeurl()
 	{

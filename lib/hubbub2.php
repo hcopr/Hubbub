@@ -161,6 +161,7 @@ function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
 /* use this to instance a controller object */
 function h2_getController($controllerName)
 {
+  $controllerName = safeName($controllerName);
 	$controllerFile = 'mvc/'.strtolower($controllerName).'/'.strtolower($controllerName).'.controller.php';
 	if(!file_exists($controllerFile))
 	{
@@ -422,7 +423,10 @@ class HubbubController
 		{
 			$ctr++;
 			if(substr($item, 0, 1) == ':') $url = substr($item, 1); else $url = actionUrl($item, $this->name, $params);
-			$result[] = array('url' => $url, 'action' => $item, 'caption' => l10n($item).$add[$ctr]);
+			if(substr($item, 0, 1) == '#') 
+			  $result[] = array('type' => 'header', 'caption' => l10n($item).$add[$ctr]);
+      else
+  			$result[] = array('url' => $url, 'action' => $item, 'caption' => l10n($item).$add[$ctr]);
 		} 
 		return($result);
 	}

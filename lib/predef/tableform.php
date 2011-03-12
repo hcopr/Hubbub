@@ -52,8 +52,7 @@ function tableform_radio_save($p)
 
 function tableform_checkbox_save($p)
 {
-  if ($_REQUEST[$p['name']] == 'Y')
-    return('Y'); else return('N');
+  return($_REQUEST[$p['name']] == 'Y');
 }
 
 function tableform_password_save($p)
@@ -133,7 +132,7 @@ function tableform_file($p, &$form)
 
 function tableform_checkbox($p, &$form)
 {
-  if ($p['value'] == 'Y') $checked = 'checked';
+  if ($p['value'] === true || $p['value'] == 'Y') $checked = 'checked';
   ?><tr><td valign="top" class="form-td-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><div class="element-caption" style="<?= $form->formOptions['style-td-caption'] ?>"><?php echo $p['caption2'] ?></div></td><td>
     <input class="<?php echo $p['class'] ?>" <?php echo $checked ?> type="checkbox" onchange="<?php echo $p['onchange'] ?>" name="<?php echo $p['name'] ?>" id="<?php echo $p['name'] ?>" value="Y"/>
     <label for="<?php echo $p['name'] ?>"><?php echo $p['caption'] ?></label>

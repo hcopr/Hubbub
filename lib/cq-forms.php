@@ -5,6 +5,21 @@
  * Description: provides the CQForm object that abstracts HTML forms
  */
 
+function saveValueToArray(&$array, $key, $value)
+{
+  $arq = array();
+  foreach(explode('/', $key) as $ks)
+    $arq[] = "['".safeName($ks)."']";
+  eval('$array'.implode('', $arq).' = $value;');
+}
+
+function getValueFromArray($array, $key)
+{
+  foreach(explode('/', $key) as $ks)
+    $array = $array[$ks];
+  return($array);
+}
+
 class CQForm
 {
   function CQForm($name = 'unnamed', $fopt = array())
@@ -70,7 +85,8 @@ class CQForm
 						break;
 					}
 				}
-        $this->ds[$e['name']] = $value;
+				saveValueToArray($this->ds, $e['name'], $value);
+        #$this->ds[$e['name']] = $value;
         switch ($e['validate'])
         {
           case('notempty'): {
@@ -165,7 +181,7 @@ class CQForm
       $dFunction = $this->presentationName.'_'.$e['type'];
       if ($e['sessiondefault'] == true)
         $e['default'] = getDefault($_SESSION[$sessionFieldName], $e['default']);
-      $e['value'] = getDefault($this->ds[$e['name']], $e['default']);
+      $e['value'] = getFirst(getValueFromArray($this->ds, $e['name']), $e['default']);
       if ($e['sessiondefault'] == true)
         $_SESSION[$sessionFieldName] = $e['value'];
       $e['error'] = $this->errors[$e['name']];

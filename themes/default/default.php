@@ -46,7 +46,14 @@
       foreach($GLOBALS['submenu'] as $item)
       {
       	$class = ''; if ($item['action'] == object('controller')->lastAction) $class = 'active';
-        ?><div class="<?= $class ?>"><a href="<?= $item['url'] ?>"><?= htmlspecialchars($item['caption']) ?></a></div><?
+      	if($item['type'] == 'header')
+      	{
+          ?><div style="margin: 8px; margin-top: 16px; margin-bottom: 2px;" class="smalltext"><?= htmlspecialchars($item['caption']) ?></a></div><?
+        }
+        else
+        {
+          ?><div class="<?= $class ?>"><a href="<?= $item['url'] ?>"><?= htmlspecialchars($item['caption']) ?></a></div><?
+        }
       }
     ?><div class="submenushadow"></div><?
     if(sizeof($GLOBALS['subcat']))

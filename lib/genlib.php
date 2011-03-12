@@ -88,25 +88,6 @@ function logToFile($filename, $content, $clearfile = false)
     '  '.trim($content)."\r\n");
 }	
 
-/* takes a query string or request_uri and parses it for parameters */
-function interpretQueryString($qs)
-{
-  $uri = parse_url('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
-  
-  if($uri['query'] != '') 
-  {
-    parse_str($uri['query'], $_REQUEST_new);
-    $_REQUEST = array_merge($_REQUEST, $_REQUEST_new);
-  }
-  
-  $path = substr($uri['path'], 1);  
-  $call = explode(URL_CA_SEPARATOR, $path);
-  if(!array_search($path, array('robots.txt', 'favicon.ico')) === false) return;
-
-  $_REQUEST['controller'] = getDefault($call[0], cfg('service.defaultcontroller'));
-  $_REQUEST['action'] = getDefault($call[1], cfg('service.defaultaction'));
-}
-
 /* logs an error, duh */
 function logError($logfile, $msg, $level = 0)
 {
@@ -127,6 +108,28 @@ function logError($logfile, $msg, $level = 0)
 	}
 }
 
+/* takes a query string or request_uri and parses it for parameters */
+function interpretQueryString($qs)
+{
+  $uri = parse_url('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+  
+  if($uri['query'] != '') 
+  {
+    $segments = explode('&', $uri['query']);
+    $path = $segments[0];
+    parse_str($uri['query'], $_REQUEST_new);
+    $_REQUEST = array_merge($_REQUEST, $_REQUEST_new);
+  }
+  else
+  {
+    $path = substr($uri['path'], 1);  
+  }
+  $call = explode(URL_CA_SEPARATOR, $path);
+  if(!array_search($path, array('robots.txt', 'favicon.ico')) === false) return;
+
+  $_REQUEST['controller'] = getDefault($call[0], cfg('service.defaultcontroller'));
+  $_REQUEST['action'] = getDefault($call[1], cfg('service.defaultaction'));
+}
 
 /* makes an URL calling a specific controller with a specific action */
 function actionUrl($action = '', $controller = '', $params = array(), $fullUrl = false)
@@ -140,10 +143,10 @@ function actionUrl($action = '', $controller = '', $params = array(), $fullUrl =
     // prevent cookies from appearing in the server log by accident
     foreach(array('session-key', session_id()) as $k) 
       if(isset($params[$k])) unset($params[$k]);
-    #  
-    $p = '?'.http_build_query($params);
-  }
-  $url = $controller.($action == 'index' ? '' : URL_CA_SEPARATOR.$action).$p;  
+    $pl = http_build_query($params);
+    $p = '?'.$pl;
+    $pn = '&'.$pl;
+  }   
   if($fullUrl)
   {
     $base = cfg('service.base');
@@ -152,11 +155,13 @@ function actionUrl($action = '', $controller = '', $params = array(), $fullUrl =
   }
   if($GLOBALS['config']['service']['url_rewrite'])
   {
+    $url = $controller.($action == 'index' ? '' : URL_CA_SEPARATOR.$action).$p; 
     return($base.$url);
   }
   else 
   {
-    return($base.'?'.$url);
+    $url = '?'.$controller.($action == 'index' ? '' : URL_CA_SEPARATOR.$action).$pn; 
+    return(getDefault($base, './').$url);
   }  
 }
 

@@ -24,7 +24,7 @@ switch($_REQUEST['part'])
     $myUserName = trim(shell_exec('whoami'));
     $myUserName = getDefault($myUserName, 'root');
     
-    $tmplFile = '<? $GLOBALS["config"] = json_decode(\''.json_format(json_encode($_SESSION['installer']['cfg'])).'\', true); ?>';
+    $tmplFile = '<? $GLOBALS[$cfgCategory] = json_decode(\''.json_format(json_encode($_SESSION['installer']['cfg'])).'\', true); ?>';
     $cfgFileName = 'conf/default.php';
     if(!file_exists($cfgFileName))
     {      
