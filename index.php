@@ -42,7 +42,7 @@
 		}		
 		default: {
 			header('content-type: text/html;charset=UTF-8');
-      require('themes/'.cfg('page.theme', 'default').'/'.$templateName.'.php');
+      require('themes/'.cfg('theme.name', 'default').'/'.$templateName.'.php');
       break;
 		}
 	}

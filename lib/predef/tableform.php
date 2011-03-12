@@ -149,6 +149,7 @@ function tableform_dropdown($p, &$form)
     foreach ($p['options'] as $k => $v)
     {
       $selected = '';
+      if (!$p['optionkeys']) $k = $v;
       if ($k == $p['value']) $selected = 'selected';
       print('<option '.$selected.' value="'.htmlspecialchars($k).'">'.htmlspecialchars(getDefault($v, $k)).'</option>');
     }

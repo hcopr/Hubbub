@@ -2,12 +2,26 @@
 
 $cfgData = getConfigData();
 
+$themeManifestFile = 'themes/'.cfg('theme.name', 'default').'/manifest.php';
+if(file_exists($themeManifestFile)) 
+{
+  include($themeManifestFile); 
+  $colorSchemes = $GLOBALS['config']['themeoptions']['colorschemes'];
+}
+else
+{
+  $colorSchemes = array('default');
+}
+
 $form = new CQForm('admin_server');
 $form
 
   ->add('html', '<b class="smalltext">'.l10n('basic.settings').'</b>')
   ->add('string', 'service/server')
+  ->add('dropdown', 'theme/defaultcolor', array('options' => $colorSchemes, 'default' => 'default'))
   ->add('checkbox', 'service/url_rewrite')
+  ->add('string', 'service/maxusers', array('default' => 30))
+  ->add('checkbox', 'service/privateserver')
   
   ->add('html', '<b class="smalltext">'.l10n('ping.settings').'</b>')
   ->add('checkbox', 'ping/remote')
@@ -31,4 +45,6 @@ $form
     })
   ->display();
 
-?>
+?><br/><hr/>
+Advanced options: 
+<a href="<?= actionUrl('index', 'test') ?>">run unit tests</a>

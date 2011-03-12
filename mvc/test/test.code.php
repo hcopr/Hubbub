@@ -1,5 +1,6 @@
-<h2>Code Tests</h2>
+<h2>Code Redundancy Tests</h2>
 <?
+include_once('lib/special-io.php');
 
 foreach(json_decode(
   '["if()","chr()","substr()","md5()","strtolower()","array()","foreach()","count()","implode()","return()","sender()","unset()","hubbubserver()","time()","gmdate()","json_decode()","gzinflate()",'.
