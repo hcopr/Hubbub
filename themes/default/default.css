@@ -1,15 +1,25 @@
 <?
 
-$darkGray = '#555';
 $stdMargin = '8px';
 $bgAttention = '#ffc';
-$borderColor = '1px solid #ddd';
+$borderColor = '1px solid #dddddd';
 $borderBanner = '1px solid #cb8';
-$textColor = '#333';
-$lightText = '#aaa';
-$linkColor = '#04c';
-$menuColor = '#abf';
-$boxShadow = '0px 0px 5px #bbb';
+$textColor = '#333333';
+$lightText = '#999999';
+$boxShadowDef = '0px 0px 5px #dddddd';
+$colorBoxShadowDef = '0px 0px 5px '.$darkerColor;
+
+$roundedBorders = '  -moz-border-radius: '.$stdMargin.';
+  -webkit-border-radius: '.$stdMargin.';
+  border-radius: '.$stdMargin.';';
+  
+$boxShadow = '  box-shadow: '.$boxShadowDef.';
+  -moz-box-shadow: '.$boxShadowDef.';
+  -webkit-box-shadow: '.$boxShadowDef.';';
+
+$colorBoxShadow = '  box-shadow: '.$colorBoxShadowDef.';
+  -moz-box-shadow: '.$colorBoxShadowDef.';
+  -webkit-box-shadow: '.$colorBoxShadowDef.';';
 
 ?>/* ------------------------------------- DESIGN ------------------------------------ */
 
@@ -38,15 +48,11 @@ a {
   color: <?= $linkColor ?>;
 }
 .btn:hover, input[type=button]:hover, #submenu a:hover {
-  box-shadow: <?= $boxShadow ?>;
-  -moz-box-shadow: <?= $boxShadow ?>;
-  -webkit-box-shadow: <?= $boxShadow ?>;
+  text-decoration: none;
 }
 .banner {
   background: <?= $bgAttention ?>;
-  box-shadow: <?= $boxShadow ?>;
-  -moz-box-shadow: <?= $boxShadow ?>;
-  -webkit-box-shadow: <?= $boxShadow ?>;
+  <?= $boxShadow ?>
 }
 input[type=text], input[type=password] {
   font-size: 98%; 
@@ -62,20 +68,13 @@ input[type=text]:focus, input[type=password]:focus {
 	color: <?= $linkColor ?>;
 }
 #submenu a {
-  background: #eee;
-  color: <?= $textColor ?>;
-  text-decoration: none;
+  background: <?= $lightGrayBackground ?>;
 }
-#submenu a:hover, #mainmenu a:hover {
+#submenu a:hover {
   background: #0073ea url('../../ext/jqueryui/css/flick/images/ui-bg_highlight-soft_25_0073ea_1x100.png') 50% 50% repeat-x;
   color: white;
 }
-#mainmenu a.active {
-  color: #fff; 
-  background: #006;
-}
 #submenu div.active a {
-  color: <?= $linkColor ?>;
   background: #ddd;
 }
 #submenu div.active {
@@ -89,23 +88,11 @@ input[type=text]:focus, input[type=password]:focus {
 .submenushadow {
   background: url(submenuback30.png);
 }
-.datatable {
-  background: #cde;
-}
-.datatable td {
-  background: #fff;
-}
 .errormsg {
   background: <?= $bgAttention ?>;
 }
-.element-readonly {
+.balloon, .balloonhelp, .element-readonly {
   color: <?= $lightText ?>;
-}
-.balloon, .balloonhelp {
-  color: #58a;
-}
-blockquote {
-  color: green;
 }
 .win {
   font-weight: bold;
@@ -120,23 +107,28 @@ noscript div {
   opacity: 0.7;
 }
 noscript p {
-  background: #ffffcc;
+  background: <?= $bgAttention ?>;
   color: red;
   font-weight: bold;  
 }
 #bgbar {
-  background: url(bgback2.png) #fff;
+  background: <?= $baseColor ?>;
 }
 #mainmenu a:hover {
-  color: white;
-  text-decoration: none;
+  background: <?= $lighterColor ?>;
+}
+#mainmenu a.active {
+  color: <?= $veryLightColor ?>; 
+  background: <?= $darkerColor ?>;
+  <?= $colorBoxShadow ?>
 }
 #mainmenu a {
-  color: <?= $menuColor ?>;
+  text-decoration: none;
+  color: <?= $veryLightColor ?>;
+  <?= $roundedBorders ?>
 }
 .emphasis {
   font-weight: bold;
-  color: #666;
 }
 sup {
   font-size: 50%;
@@ -166,16 +158,13 @@ h1 span {
   font-size: 9pt;
 }
 .blurp_post, .comment_item {
-  background: #eee;
+  background: <?= $lightGrayBackground ?>;
 }
 .smallbtn {
 	font-size: 9pt;
 }
 .blurp_post {
 	background: none;
-}
-.result_box {
-  background: #ffe; 
 }
 .green {
   color: green;
@@ -186,14 +175,8 @@ h1 span {
 .red {
   color: red;
 }
-.masbox {
-  background: #ccc;
-}
-.notice_me {
-  background: #dfc; 
-}
-.action_tile {
-  background: #fff; 
+.notice_me, .masbox {
+  background: <?= $lightGrayBackground ?>; 
 }
 .biggray {
   font-size: 48px;
@@ -204,7 +187,7 @@ h1 span {
   font-style: italic; 
 }
 .bubble {
-  background: #f5f5f5;  
+  background: <?= $lightGrayBackground ?>;  
   width: 250px;
 }
 .clear {
@@ -236,7 +219,7 @@ h1, h2, h3, h4 {
 }
 h2 {
   margin-bottom: <?= $stdMargin ?>; 
-  color: <?= $darkGray ?>;
+  color: <?= $lightText ?>;
 }
 .hubbub_logo {
   font-style: italic; 
@@ -276,8 +259,9 @@ input[type=text],input[type=password] {
   padding: <?= $stdMargin ?>; 
   display: block;
   width: 131px;
-  text-decoration: none;
-  border-bottom: <?= $borderColor ?>;
+  <?= $boxShadow ?>
+  border-bottom: 1px solid <?= $borderColor ?>;
+  border-right: 1px solid <?= $borderColor ?>;
 }
 .submenushadow {
   height: 16px;
@@ -309,7 +293,6 @@ noscript p {
   top: 100px;
 }
 #bgbar {
-  height: 45px;
   position: fixed;
   top: 0;
   left: 0;
@@ -317,8 +300,13 @@ noscript p {
   z-index: 1000;
 }
 #mainmenu a {
-  display: inline-block;
-  padding: 9px;
+  display: inline-block; 
+  padding: 4px;
+  margin: 6px;
+  margin-left: 2px;
+  margin-right: 2px;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 h1 span {
   vertical-align: text-bottom;
@@ -377,33 +365,23 @@ h1 span {
 .simple_border {
   border: <?= $borderColor ?>; 
 }
-.result_box {
-  padding: 12px;
-  margin-top: <?= $stdMargin ?>;
-  border: <?= $borderColor ?>;
-  border-radius: 16px;
-  -moz-border-radius: 16px;
-}
 .masbox {
   margin: 4px;
   float: left;
   border: <?= $borderColor ?>;
   padding: 4px;
-  -moz-border-radius: <?= $stdMargin ?>;
-  border-radius: <?= $stdMargin ?>;
+  <?= $roundedBorders ?>
 }
 .notice_me {
   border: <?= $borderColor ?>;
   padding: 6px;
-  -moz-border-radius: <?= $stdMargin ?>;
-  border-radius: <?= $stdMargin ?>;   
+  <?= $roundedBorders ?>
 }
 .action_tile {
   padding: 4px;
   margin: 4px;
-  -moz-border-radius: <?= $stdMargin ?>;
-  border-radius: <?= $stdMargin ?>;   
   border: <?= $borderColor ?>;
+  <?= $roundedBorders ?>
 }
 #publisher {
   width: <?= CSS_COL_QUANTUM*4 ?>px;

@@ -3,7 +3,7 @@
   <head>
     <title><?php echo cfg('page.title', 'unnamed').' | '.cfg('service.name', 'Hubbub') ?></title>
     <script type="text/javascript" src="lib/all.js.php"></script>   
-    <link type="text/css" rel="stylesheet" href="themes/default/all.css.php"/> 
+    <link type="text/css" rel="stylesheet" href="themes/default/all.css.php?scheme=<?= cfg('theme.colorscheme', getDefault($GLOBALS['config']['theme']['defaultcolor'], 'default')) ?>"/> 
 		<link rel="icon" type="image/png" href="img/hubbub-logofarb32.png"/>
   </head>
   <body>
