@@ -3,7 +3,7 @@
 if($_REQUEST['controller'] != 'signin') l10n_load('mvc/signin/l10n');
 
 ?>
-  <div class="paragraph padded_extra" style="width: 500px">      
+  <div class="paragraph padded_extra" style="width: 550px">      
     <? 
       if($GLOBALS['config']['twitter']['enabled'] === true) $signInLinks[] = '<a class="btn" href="'.actionUrl('twitter', 'signin').'">Twitter</a>';
       if($GLOBALS['config']['facebook']['enabled'] === true) $signInLinks[] = '<a class="btn" href="'.actionUrl('fb', 'signin').'">Facebook</a>';
@@ -11,7 +11,7 @@ if($_REQUEST['controller'] != 'signin') l10n_load('mvc/signin/l10n');
       $signInLinks[] = '<a class="btn" href="'.actionUrl('yahoo', 'signin').'">Yahoo</a>';
       $signInLinks[] = '<a class="btn" onclick="$(\'#signinform\').html($(\'#signinform_openid\').html());">OpenID</a>';
       $signInLinks[] = '<a class="btn" onclick="$(\'#signinform\').html($(\'#signinform_email\').html());">Email</a>';
-      print(implode('  ', $signInLinks));
+      print(implode(' ', $signInLinks));
     ?><br/><br/>
     <div id="signinform">
       <? include('mvc/signin/signin.ajax_'.getDefault($_SESSION['load_signin'], 'email').'form.php'); ?>

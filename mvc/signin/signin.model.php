@@ -26,7 +26,7 @@ class SigninModel extends HubbubModel
 	{
     $this->initOAuth();    
 		$twitterObj = new EpiTwitter(cfg('twitter.consumer_key'), cfg('twitter.consumer_secret'));
-		return($twitterObj->getAuthenticateUrl().'&oauth_callback='.urlencode(scriptURI()));
+		return($twitterObj->getAuthenticateUrl().'&oauth_callback='.urlencode(actionUrl('index', 'signin', array(), true)));
 	}
 	
 	function getAccount($type, $url = null)

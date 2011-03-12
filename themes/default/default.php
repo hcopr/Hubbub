@@ -78,7 +78,7 @@
     </div>
 
     <script>
-      $(document).ready(function() { $("button, input:submit, input:button, a.btn").button(); } );
+      $("button, input:submit, input:button, a.btn").button(); 
       $(window).load(function() { $('.masonry_container').masonry({}); });
     </script>
   </body>

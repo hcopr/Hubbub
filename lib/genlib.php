@@ -115,10 +115,13 @@ function interpretQueryString($qs)
   
   if($uri['query'] != '') 
   {
-    $segments = explode('&', $uri['query']);
-    $path = $segments[0];
     parse_str($uri['query'], $_REQUEST_new);
     $_REQUEST = array_merge($_REQUEST, $_REQUEST_new);
+  }
+  if(substr($_SERVER['REQUEST_URI'], 0, 1) == '?')
+  {
+    $segments = explode('&', $uri['query']);
+    $path = $segments[0];
   }
   else
   {
