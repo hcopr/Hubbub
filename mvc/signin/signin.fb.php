@@ -36,10 +36,12 @@ $cookie = get_facebook_cookie(cfg('facebook/app_id'), cfg('facebook/app_secret')
 
 </script>
 <?
-
+#print_r($cookie);
 if($cookie['access_token'])
 {
-  $userdata = json_decode(file_get_fromurl('https://graph.facebook.com/me?fields=picture&access_token='.$cookie['access_token']), true);
+  $userdata_pic = json_decode(file_get_fromurl('https://graph.facebook.com/me?fields=picture&access_token='.$cookie['access_token']), true);
+  $userdata = json_decode(file_get_fromurl('https://graph.facebook.com/me?access_token='.$cookie['access_token']), true);
+  $userdata['picture'] = $userdata_pic['picture'];
   $ads = $this->model->getAccount('fb', $userdata['id']);
 	$ads['ia_properties'] = json_encode($userdata['name']);
   $this->model->newAccount($ads);
