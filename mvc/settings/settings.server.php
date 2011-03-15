@@ -2,11 +2,11 @@
 
 $cfgData = getConfigData();
 
-$themeManifestFile = 'themes/'.cfg('theme.name', 'default').'/manifest.php';
+$themeManifestFile = 'themes/'.cfg('theme/name', 'default').'/manifest.php';
 if(file_exists($themeManifestFile)) 
 {
   include($themeManifestFile); 
-  $colorSchemes = $GLOBALS['config']['themeoptions']['colorschemes'];
+  $colorSchemes = cfg('themeoptions/colorschemes');
 }
 else
 {

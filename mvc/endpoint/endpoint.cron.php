@@ -6,10 +6,10 @@ newFile('log/cron.last.log', json_encode(array(
   'from' => $_SERVER['REMOTE_ADDR'],
   )));
 
-$srvInterval = cfg('service.poll_interval');
+$srvInterval = cfg('service/poll_interval', 60*10);
 
 foreach(DB_GetList('SELECT * FROM '.getTableName('servers').'
-  WHERE s_lastpolled < '.(time()-$srvInterval)) as $sds) if($sds['s_url'] != cfg('service.server'))
+  WHERE s_lastpolled < '.(time()-$srvInterval)) as $sds) if($sds['s_url'] != cfg('service/server'))
 {
   $sds['s_lastpolled'] = time(); 
   WriteToFile('log/cron.message.log', "Polling Server ".$sds['s_key'].' '.$sds['s_url'].chr(10));

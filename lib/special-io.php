@@ -3,11 +3,11 @@
 /* templated mail sending func */
 function send_mail($to, $template, $params = array())
 {
-  $srvEmail = cfg('service.email');
+  $srvEmail = cfg('service/email');
   if(trim($srvEmail) == '') $srvEmail = 'hubbub@'.$_SERVER['HTTP_HOST'];
   $headers = array(
     'Content-Type: text/plain; charset="utf-8"', 
-    'From: '.cfg('service.server').' Hubbub Server <'.$srvEmail.'>',
+    'From: '.cfg('service/server').' Hubbub Server <'.$srvEmail.'>',
     'Return-Path: '.$srvEmail,
     'Message-ID: <'.md5(time()).'-hubbub@'.$_SERVER['HTTP_HOST'].'>',
     );

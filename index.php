@@ -24,7 +24,7 @@
   WriteToFile('log/activity.log', 'call '.$_REQUEST['controller'].'-'.$_REQUEST['action']."\n");
 
   // instantiate controller, invoke action, render view	
-  $_REQUEST['controller'] = getDefault($_REQUEST['controller'], cfg('service.defaultcontroller'));
+  $_REQUEST['controller'] = getDefault($_REQUEST['controller'], cfg('service/defaultcontroller'));
 	$baseCtr = h2_getController($_REQUEST['controller']);
   profile_point('controller invoked');
 	h2_invokeAction($baseCtr, $_REQUEST['action']);
@@ -33,7 +33,7 @@
   profile_point('view executed');
   
 	// output through page template
-	$templateName = cfg('page.template', 'default');
+	$templateName = cfg('page/template', 'default');
 	switch($templateName)
 	{
 		case('blank'): {
@@ -42,7 +42,7 @@
 		}		
 		default: {
 			header('content-type: text/html;charset=UTF-8');
-      require('themes/'.cfg('theme.name', 'default').'/'.$templateName.'.php');
+      require('themes/'.cfg('theme/name', 'default').'/'.$templateName.'.php');
       break;
 		}
 	}

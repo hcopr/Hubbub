@@ -32,7 +32,7 @@ class EndpointController extends HubbubController
   
   function verifyPwd()
   {
-    if(md5(cfg('service.ping_password')) == $_REQUEST['p'])
+    if(md5(cfg('ping/password')) == $_REQUEST['p'])
     {
       ?>OK<? 
     }

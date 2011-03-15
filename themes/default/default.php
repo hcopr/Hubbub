@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"> 
   <head>
-    <title><?php echo cfg('page.title', 'unnamed').' | '.cfg('service.name', 'Hubbub') ?></title>
+    <title><?php echo cfg('page/title', 'unnamed').' | '.cfg('service/name', 'Hubbub') ?></title>
     <script type="text/javascript" src="lib/all.js.php"></script>   
-    <link type="text/css" rel="stylesheet" href="themes/default/all.css.php?scheme=<?= cfg('theme.colorscheme', getDefault($GLOBALS['config']['theme']['defaultcolor'], 'default')) ?>"/> 
+    <link type="text/css" rel="stylesheet" href="themes/default/all.css.php?scheme=<?= cfg('theme/colorscheme', getDefault($GLOBALS['config']['theme']['defaultcolor'], 'default')) ?>"/> 
 		<link rel="icon" type="image/png" href="img/hubbub-logofarb32.png"/>
   </head>
   <body>
@@ -16,7 +16,7 @@
             $uname = object('user')->ds['u_name'];
             if(trim($uname) == '') $uname = l10n('profile');
           	?><div id="mainmenu"><?
-          	foreach(explode(',', cfg('service.menu')) as $url)
+          	foreach(explode(',', cfg('service/menu')) as $url)
           	{
           	  $caption = l10n($url);
           	  if($url == 'profile') $caption = h2_make_excerpt($uname, 16);
@@ -27,7 +27,7 @@
             
 	          ?><a style="float: right;" href="<?= actionUrl('logout', 'signin') ?>"><img src="img/endturn.png" align="absmiddle" title="<?= $GLOBALS['l10n']['logout'] ?>"/></a><?
 
-            foreach(explode(',', cfg('service.sysmenu')) as $url)
+            foreach(explode(',', cfg('service/sysmenu')) as $url)
           	{
           		$class = ''; if(object('controller')->name == $url) $class = 'active';
 		          ?><a style="float: right;" class="<?= $class ?>" href="<?= actionUrl('index', $url) ?>"><?= l10n($url) ?></a><?

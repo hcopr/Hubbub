@@ -16,7 +16,7 @@ function get_facebook_cookie($app_id, $application_secret) {
   return $args;
 }
 
-$cookie = get_facebook_cookie(cfg('facebook.app_id'), cfg('facebook.app_secret'));
+$cookie = get_facebook_cookie(cfg('facebook/app_id'), cfg('facebook/app_secret'));
 
 ?>
 
@@ -24,7 +24,7 @@ $cookie = get_facebook_cookie(cfg('facebook.app_id'), cfg('facebook.app_secret')
 <script src="http://connect.facebook.net/en_US/all.js"></script>
 <script>
 
-  FB.init({appId: '<?= cfg('facebook.app_id') ?>', status: true, cookie: true, xfbml: true});
+  FB.init({appId: '<?= cfg('facebook/app_id') ?>', status: true, cookie: true, xfbml: true});
   FB.Event.subscribe('auth.login', function(response) {
         window.location.reload();
       });

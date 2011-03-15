@@ -8,7 +8,7 @@ class SigninModel extends HubbubModel
     $news = h2_nv_retrieve($newsFeedUrl);
     if(sizeof($news) == 0 || $news['date'] < time() - 60*60*24)
     {
-      $feed = HubbubEndpoint::request($newsFeedUrl, array('version' => cfg('service.version'))); 
+      $feed = HubbubEndpoint::request($newsFeedUrl, array('version' => cfg('service/version'))); 
       $news = json_decode($feed['body'], true);
       h2_nv_store($newsFeedUrl, $news);
     }
@@ -25,7 +25,7 @@ class SigninModel extends HubbubModel
 	function oAuthSignin()
 	{
     $this->initOAuth();    
-		$twitterObj = new EpiTwitter(cfg('twitter.consumer_key'), cfg('twitter.consumer_secret'));
+		$twitterObj = new EpiTwitter(cfg('twitter/consumer_key'), cfg('twitter/consumer_secret'));
 		return($twitterObj->getAuthenticateUrl().'&oauth_callback='.urlencode(actionUrl('index', 'signin', array(), true)));
 	}
 	
@@ -69,7 +69,7 @@ class SigninModel extends HubbubModel
 	  ob_start();
     $result = '';
     $this->initOAuth();
-    $twitterObj = new EpiTwitter(cfg('twitter.consumer_key'), cfg('twitter.consumer_secret'));
+    $twitterObj = new EpiTwitter(cfg('twitter/consumer_key'), cfg('twitter/consumer_secret'));
 		$twitterObj->setToken($token);
     $token = $twitterObj->getAccessToken();
 		$twitterObj->setToken($token->oauth_token, $token->oauth_token_secret);

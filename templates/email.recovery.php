@@ -8,7 +8,7 @@ $subject = 'Recover Your Hubbub Password';
 ?>Dear Hubbub user,
 
 you (or someone using your email address) requested that your Hubbub
-password on server <?= cfg('service.server') ?> be reset. 
+password on server <?= cfg('service/server') ?> be reset. 
 
 Please click on the following link to change it:
 

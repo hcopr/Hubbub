@@ -8,14 +8,14 @@ class ProfileModel extends HubbubModel
 	  $userObj = object('user');
 	  
 	  $userObj->isNewUser = $this->ds['u_key'] > 0;
-	  $userObj->server = new HubbubServer(cfg('service.server'), true);
+	  $userObj->server = new HubbubServer(cfg('service/server'), true);
 		$userObj->loadEntity();
 		
 		$userObj->entityDS['user'] = safename($username);
-		$userObj->entityDS['url'] = getDefault($userObj->entityDS['url'], cfg('service.server').'/'.(cfg('service.url_rewrite')?'':'?').$username);
+		$userObj->entityDS['url'] = getDefault($userObj->entityDS['url'], cfg('service/server').'/'.(cfg('service/url_rewrite') ? '' : '?').$username);
 		$userObj->entityDS['_local'] = 'Y';
 		$userObj->entityDS['_serverkey'] = $userObj->server->ds['s_key'];
-		$userObj->entityDS['server'] = cfg('service.server');
+		$userObj->entityDS['server'] = cfg('service/server');
 		
 		if(trim($userObj->entityDS['user']) != '') $ekey = DB_UpdateDataset('entities', $userObj->entityDS);
 		$userObj->ds['u_entity'] = $ekey;

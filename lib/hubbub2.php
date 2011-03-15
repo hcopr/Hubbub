@@ -72,7 +72,7 @@ function h2_uibanner($msg, $flag = '')
 function cfg($name, $default = null)
 {
 	$vr = &$GLOBALS['config'];
-	foreach(explode('.', $name) as $ni) if(isset($vr)) $vr = &$vr[$ni];
+	foreach(explode('/', $name) as $ni) if(isset($vr)) $vr = &$vr[$ni];
 	$vr = getDefault($vr, $default);
 	return($vr);
 }
@@ -128,12 +128,12 @@ function h2_exceptionhandler($exception)
     foreach($bt as $trace)
     {
       print('^ &nbsp;'.$trace['function'].'(');
-      if(cfg('debug.showparams') && is_array($trace['args'])) print(implode(', ', $trace['args']));
+      if(cfg('debug/showparams') && is_array($trace['args'])) print(implode(', ', $trace['args']));
       print(') in '.basename($trace['file']).' | Line '.$trace['line'].'<br/>');
     }
   ?></div><?php
   $report = 'Exception: '.$exception->getMessage().' in '.$exception->getFile().':'.$exception->getLine();
-  if(cfg('debug.verboselog')) logError('log/error.log', $report);
+  if(cfg('debug/verboselog')) logError('log/error.log', $report);
   return(true);
 }
 
@@ -149,7 +149,7 @@ function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
     foreach($bt as $trace)
     {
       print('^ '.$trace['function'].'(');
-      if(cfg('debug.showparams') && is_array($trace['args'])) print(implode(', ', $trace['args']));
+      if(cfg('debug/showparams') && is_array($trace['args'])) print(implode(', ', $trace['args']));
       print(') in '.basename($trace['file']).' | Line '.$trace['line']."\n");
     }
   ?></pre></div><?php
@@ -238,7 +238,7 @@ function is_this_host($hostName)
 {
   return(true);
   $hostName = strtolower($hostName);  
-  return($hostName == strtolower(cfg('service.server')) || 
+  return($hostName == strtolower(cfg('service/server')) || 
     $hostName == strtolower($_SERVER['SERVER_ADDR']) ||
     $hostName == strtolower($_SERVER['SERVER_NAME']) ||
     $hostName == strtolower($_SERVER['HTTP_HOST']));
@@ -351,7 +351,7 @@ class HubbubUser
 	{
     $this->loadEntity();
     $this->entityDS['name'] = $this->ds['u_name'];
-		if($this->entityDS['_local'] == 'Y') $this->entityDS['server'] = cfg('service.server');
+		if($this->entityDS['_local'] == 'Y') $this->entityDS['server'] = cfg('service/server');
 		h2_execute_event('user_save', $this->entityDS, $this->ds);
 		if(trim($this->entityDS['user']) != '')  $this->entityDS['_key'] = DB_UpdateDataset('entities', $this->entityDS);
 		$this->ds['u_settings'] = serialize($this->settings);
@@ -433,7 +433,7 @@ class HubbubController
 
 	function invokeAction($action)
   {
-    $action = getDefault($action, cfg('service.defaultaction'));
+    $action = getDefault($action, cfg('service/defaultaction'));
 		$this->lastAction = $action;
 
     if(substr($action, 0, 5) == 'ajax_')
@@ -454,7 +454,7 @@ class HubbubController
 	{
     $this->pageTitle = l10n($action.'.title', $action);
     ob_start();
-    $action = getDefault($action, cfg('service.defaultaction'));
+    $action = getDefault($action, cfg('service/defaultaction'));
 		if(!$this->skipView)
 		{
       include('mvc/'.strtolower($this->name).'/'.strtolower($this->name).'.'.getDefault($this->viewName, $action).'.php');
@@ -832,7 +832,7 @@ class HubbubEntity
 			if($record['_key'] > 0)
 			{
 			  $this->ds = DB_GetDataset('entities', $record['_key']);
-				if($this->ds['_local'] == 'Y') $this->ds['server'] = cfg('service.server');
+				if($this->ds['_local'] == 'Y') $this->ds['server'] = cfg('service/server');
 				if($this->ds['_key'] > 0) return;
 			}
 			// if the user is identified by their Hubbub URL:
@@ -842,7 +842,7 @@ class HubbubEntity
 				if(sizeof($this->ds) > 0) return;
 			}
 			$record['server'] = strtolower(trim($record['server']));
-			if(!$this->load($record['user'], $record['server']) && $record['server'] != cfg('service.server'))
+			if(!$this->load($record['user'], $record['server']) && $record['server'] != cfg('service/server'))
 			{
 			  $this->server = new HubbubServer($record['server']);
 				// if this entity isn't known yet, create it
@@ -943,7 +943,7 @@ class HubbubEntity
 		$rec = array();
 		$ds = DB_GetDatasetWQuery('SELECT * FROM '.getTableName('entities').' WHERE _local="Y" AND user=?', 
       array($record['user']));
-    if($ds['_local'] == 'Y') $ds['server'] = cfg('service.server');
+    if($ds['_local'] == 'Y') $ds['server'] = cfg('service/server');
     return($ds);
 	}
 	
@@ -953,8 +953,8 @@ class HubbubEntity
     $rec = array();
     $record['server'] = strtolower(trim($record['server']));
     $ds = DB_GetDatasetWQuery('SELECT * FROM '.getTableName('entities').' WHERE user=? AND server=?', 
-      array($record['user'], getDefault($record['server'], cfg('service.server'))));
-    if($ds['_local'] == 'Y') $ds['server'] = cfg('service.server');
+      array($record['user'], getDefault($record['server'], cfg('service/server'))));
+    if($ds['_local'] == 'Y') $ds['server'] = cfg('service/server');
     return($ds);
   }
 }
@@ -1070,7 +1070,7 @@ class HubbubServer
 	function localEntity()
 	{
     return(array(
-      'server' => cfg('service.server'),
+      'server' => cfg('service/server'),
       'type' => 'server',
       'user' => '*',
       ));

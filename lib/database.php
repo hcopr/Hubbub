@@ -15,7 +15,7 @@ function getTableName($table)
 
 function checkTableName(&$table)
 {
-	$prefix = cfg('db.prefix');
+	$prefix = cfg('db/prefix');
   $l = strlen($prefix);
   if (substr($table, 0, $l) != $prefix)
     $table = $prefix.$table;
@@ -29,9 +29,9 @@ function DB_Safe($raw)
 
 function DB_StripPrefix($tableName)
 {
-  $preFix = substr($tableName, 0, strlen(cfg('db.prefix')));
-  if ( $preFix == cfg('db.prefix') ) 
-    $tableName = substr($tableName, strlen(cfg('db.prefix')));
+  $preFix = substr($tableName, 0, strlen(cfg('db/prefix')));
+  if ( $preFix == cfg('db/prefix') ) 
+    $tableName = substr($tableName, strlen(cfg('db/prefix')));
   return($tableName); 
 }
 
@@ -141,7 +141,7 @@ function DB_ListFields($tablename)
 function DB_GetKeys($tablename)
 {
   checkTableName($tablename);
-  if (cfg('db.keys.'.$tablename)) return(cfg('db.keys.'.$tablename));
+  if (cfg('db/keys/'.$tablename)) return(cfg('db/keys/'.$tablename));
   if ($GLOBALS['db_link'] != null)
   {
     if (!isset($GLOBALS['dbkeytmp'][$tablename]))
@@ -225,7 +225,7 @@ function DB_UpdateDataset($tablename, &$dataset, $keyvalue = null, $keyname = nu
 	else  
 	  $nds = $dataset;
   
-  if (cfg('db.packextended'))
+  if (cfg('db/packextended'))
     DB_PackDataset($tablename, $nds);
 
   $pureData = $nds;
@@ -247,7 +247,7 @@ function DB_UpdateDataset($tablename, &$dataset, $keyvalue = null, $keyname = nu
 // get all the tables in the current database
 function DB_GetTables()
 {
-  $result = mysql_list_tables(cfg('db.database'), $GLOBALS['db_link']);
+  $result = mysql_list_tables(cfg('db/database'), $GLOBALS['db_link']);
   $tableList = array();
   while ($row = mysql_fetch_row($result))
       $tableList[$row[0]] = $row[0];
@@ -281,7 +281,7 @@ function DB_GetDataSet($tablename, $keyvalue, $keyname = null, $options = array(
   $fields = @$options['fields'];
   $fields = getDefault($fields, '*'); 
   if (!$GLOBALS['db_link']) return(array());
-  if (@$options['nocache'] == true && cfg('db.usecache')) 
+  if (@$options['nocache'] == true && cfg('db/usecache')) 
   {
     unset($GLOBALS['dbtmp'][$tablename][$keyname.'.'.$keyvalue]); 
   }
@@ -308,13 +308,13 @@ function DB_GetDataSet($tablename, $keyvalue, $keyname = null, $options = array(
       {
         $result = $line;
         mysql_free_result($rs);
-        if (cfg('db.packextended'))
+        if (cfg('db/packextended'))
           DB_UnpackDataset($tablename, $result);
       }
       else
         $result = array();
     }
-    if (cfg('cfg.usecache'))
+    if (cfg('cfg/usecache'))
       $GLOBALS['dbtmp'][$tablename][$keyname.'.'.$keyvalue] = $result;
   }
   else
@@ -434,11 +434,11 @@ function DB_GetList($query, $parameters = null, $opt = array())
 
 profile_point('DB_Init: code');
 ob_start();
-$GLOBALS['db_link'] = mysql_pconnect(cfg('db.host'), cfg('db.user'), cfg('db.password')) or
-  $DBERR = 'The database connection to server '.cfg('db.user').'@'.cfg('db.host').' could not be established (code: '.@mysql_error($GLOBALS['db_link']).')';
+$GLOBALS['db_link'] = mysql_pconnect(cfg('db/host'), cfg('db/user'), cfg('db/password')) or
+  $DBERR = 'The database connection to server '.cfg('db/user').'@'.cfg('db/host').' could not be established (code: '.@mysql_error($GLOBALS['db_link']).')';
 
-mysql_select_db(cfg('db.database'), $GLOBALS['db_link']) or
-  $DBERR = 'The database connection to database '.cfg('db.database').' on '.cfg('db.user').'@'.cfg('db.host').' could not be established. (code: '.@mysql_error($GLOBALS['db_link']).')';
+mysql_select_db(cfg('db/database'), $GLOBALS['db_link']) or
+  $DBERR = 'The database connection to database '.cfg('db/database').' on '.cfg('db/user').'@'.cfg('db/host').' could not be established. (code: '.@mysql_error($GLOBALS['db_link']).')';
 ob_get_clean();
 
 if ($DBERR != '')

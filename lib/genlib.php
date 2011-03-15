@@ -130,8 +130,8 @@ function interpretQueryString($qs)
   $call = explode(URL_CA_SEPARATOR, $path);
   if(!array_search($path, array('robots.txt', 'favicon.ico')) === false) return;
 
-  $_REQUEST['controller'] = getDefault($call[0], cfg('service.defaultcontroller'));
-  $_REQUEST['action'] = getDefault($call[1], cfg('service.defaultaction'));
+  $_REQUEST['controller'] = getDefault($call[0], cfg('service/defaultcontroller'));
+  $_REQUEST['action'] = getDefault($call[1], cfg('service/defaultaction'));
 }
 
 /* makes an URL calling a specific controller with a specific action */
@@ -153,7 +153,7 @@ function actionUrl($action = '', $controller = '', $params = array(), $fullUrl =
   if($fullUrl)
   {
     $base = cfg('service.base');
-    if(trim($base) == '') $base = 'http://'.cfg('service.server');
+    if(trim($base) == '') $base = 'http://'.cfg('service/server');
     if(substr($base, -1) != '/') $base .= '/';
   }
   if($GLOBALS['config']['service']['url_rewrite'])
@@ -356,11 +356,11 @@ function ageToString($unixDate, $new = 'new', $ago = 'ago')
   else if ($difference < $oneDay)
     $result = floor($difference/$oneHour).' h '.$ago;
   else if ($difference < $oneDay*5)
-    $result = gmdate(getDefault(cfg('service.dateformat-week'), 'l · H:i'), $unixDate);
+    $result = gmdate(getDefault(cfg('service/dateformat-week'), 'l · H:i'), $unixDate);
   else if ($difference < $oneDay*365)
-    $result = gmdate(getDefault(cfg('service.dateformat-year'), 'M dS · H:i'), $unixDate);
+    $result = gmdate(getDefault(cfg('service/dateformat-year'), 'M dS · H:i'), $unixDate);
   else
-    $result = date(getDefault(cfg('service.dateformat'), 'd. M Y · H:i'), $unixDate);
+    $result = date(getDefault(cfg('service/dateformat'), 'd. M Y · H:i'), $unixDate);
   return($result);
 }
 
@@ -372,12 +372,12 @@ function get_user_timeoffset()
 
 function dateToString($unixDate)
 {
-  return(date(cfg('service.dateformat'), $unixDate));
+  return(date(cfg('service/dateformat'), $unixDate));
 }
 
 function dateTimeToString($unixDate)
 {
-  return(date(cfg('service.dateformat').' '.cfg('service.timeformat'), $unixDate));
+  return(date(cfg('service/dateformat').' '.cfg('service/timeformat'), $unixDate));
 }
 
 /* convoluted function that tries to parse a date into a Unix timestamp */
@@ -389,7 +389,7 @@ function stringToDateTime($string, $formatCode = null)
   $placeHoldersMeanings = array('year', 'month', 'day', 'hour', 'minute', 'second', 'day', 'year', 'month');
   // if not formatting code is given, assume standard date + time
   if ($formatCode == null)
-    $formatCode = cfg('service.dateformat').' '.cfg('service.timeformat');
+    $formatCode = cfg('service/dateformat').' '.cfg('service/timeformat');
   // determine the order of the placeholders used in the formatting string
   for ($a = 0; $a < strlen($formatCode); $a++) 
   {
