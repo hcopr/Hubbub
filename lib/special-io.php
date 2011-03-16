@@ -9,7 +9,7 @@ function send_mail($to, $template, $params = array())
     'Content-Type: text/plain; charset="utf-8"', 
     'From: '.cfg('service/server').' Hubbub Server <'.$srvEmail.'>',
     'Return-Path: '.$srvEmail,
-    'Message-ID: <'.md5(time()).'-hubbub@'.$_SERVER['HTTP_HOST'].'>',
+    'Message-ID: <'.randomHashId().'-hubbub@'.$_SERVER['HTTP_HOST'].'>',
     );
   foreach ($params as $k => $v) $$k = $v;
   ob_start();

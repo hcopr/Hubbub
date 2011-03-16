@@ -20,7 +20,8 @@ switch($_REQUEST['part'])
   case(1): {
     $cv = array();
     include_once('lib/special-io.php');
-    $_SESSION['installer']['cfg']['cron']['password'] = md5(time());
+    $_SESSION['installer']['cfg']['cron']['password'] = randomHashId();
+    $_SESSION['installer']['cfg']['service']['salt'] = randomHashId();
     $myUserName = trim(shell_exec('whoami'));
     $myUserName = getDefault($myUserName, 'root');
     

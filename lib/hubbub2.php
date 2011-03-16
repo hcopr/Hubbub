@@ -329,7 +329,7 @@ class HubbubUser
     {
       if($this->ds['u_sessionkey'] == '')
       {
-        $this->ds['u_sessionkey'] = md5(time().rand(1, 100000));
+        $this->ds['u_sessionkey'] = randomHashId();
         $this->save();
       }
       setcookie('session-key', $this->ds['u_sessionkey'], time()+3600*24*30*3);
@@ -514,7 +514,7 @@ class HubbubMessage
   function owner($ads) { $this->data['owner'] = $ads; }
 	function to($ads) { $this->owner($ads); }
   function from($ads) { $this->author($ads); }
-	function newMsgId() {	return(md5($GLOBALS['config']['service']['server'].time().rand(1, 1000000))); }
+	function newMsgId() {	return(randomHashId()); }
 	function getExistingDS()	{ return(DB_GetDataset('messages', $this->data['msgid'], 'm_id')); }
   function markChanged($time = null) { if($time == null) $time = time(); $this->data['changed'] = $time; }
 	function index(&$ds)	{ /* indexing hook, not used right now */ }
@@ -805,7 +805,6 @@ class HubbubMessage
   {
     $this->fromServer = new HubbubServer($this->data[$signedBy]['server']);
 		$validSignature = md5(trim($this->fromServer->inboundKey()).trim($this->payload));
-		//$this->usedSig = 's:'.$this->signature.'/v:'.$validSignature.'/f:'.$this->fromServer->inboundKey().'/e:'.md5($this->fromServer->inboundKey()).'/nk:'.md5($this->payload);
 		if($validSignature != $this->signature)
 		{
 			$this->expectedSignature = $validSignature;
@@ -1093,7 +1092,7 @@ class HubbubServer
 		$msg->data['author'] = $this->localEntity();
 		$this->save();
 		// make new key if there is none
-    $this->ds['s_key_in'] = getDefault($this->ds['s_key_in'], md5(time().rand(1, 10000)));
+    $this->ds['s_key_in'] = getDefault($this->ds['s_key_in'], randomHashId());
 		DB_UpdateField('servers', $this->ds['s_key'], 's_key_in', $this->ds['s_key_in']);
 		$msg->data['mykey'] = $this->ds['s_key_in'];
 		// we need to save at this point because the other server will try to make a trust_sendkey2-request in the meantime

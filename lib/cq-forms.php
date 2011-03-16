@@ -31,7 +31,6 @@ class CQForm
     $this->presentationName = getDefault($config['site.formlayout'], 'tableform');
     $this->add('start', $name, $name, array());
     $this->params = array();
-    $this->params['checksum'] = md5(time());
     $this->submitted = ($_REQUEST['formsubmit'] == $name);
     $this->packStart = '<div>';
     $this->packEnd = '</div>';

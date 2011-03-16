@@ -9,6 +9,11 @@
 $GLOBALS['profiler_last'] = getDefault($GLOBALS['profiler_start'], microtime());
 define('URL_CA_SEPARATOR', '-');
 
+function randomHashId()
+{
+  return(md5($GLOBALS['config']['service']['salt'].time().rand(1, 100000)));
+}
+
 /* makes a commented profiler entry */ 
 function profile_point($text)
 {

@@ -24,7 +24,7 @@ function trust_sendkey1_receive(&$data, &$msg)
 		// accept the new key (it's not confirmed yet)
 		$server = new HubbubServer($serverUrl, true);
 		$server->ds['s_newkey_out'] = $data['mykey'];
-		$server->ds['s_key_in'] = getDefault($server->ds['s_key_in'], md5(time().rand(1, 100000)));
+		$server->ds['s_key_in'] = getDefault($server->ds['s_key_in'], randomHashId());
     DB_UpdateField('servers', $server->ds['s_key'], 's_key_in', $server->ds['s_key_in']);
     logError('notrace', 'received temp outbound key: '.$data['mykey'].' /// '.dumpArray($server->ds));
 		// now, get origin confirmation

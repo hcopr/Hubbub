@@ -1,6 +1,6 @@
 <?
 
-$params['ia_recovery'] = md5(time().$params['ia_url']);
+$params['ia_recovery'] = randomHashId();
 DB_UpdateDataset('idaccounts', $params);
 
 $subject = 'Recover Your Hubbub Password';
