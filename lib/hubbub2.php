@@ -72,7 +72,8 @@ function h2_uibanner($msg, $flag = '')
 function cfg($name, $default = null)
 {
 	$vr = &$GLOBALS['config'];
-	foreach(explode('/', $name) as $ni) if(isset($vr)) $vr = &$vr[$ni];
+	foreach(explode('/', $name) as $ni) 
+	  if(is_array($vr)) $vr = &$vr[$ni]; else $vr = '';
 	$vr = getDefault($vr, $default);
 	return($vr);
 }
