@@ -117,7 +117,7 @@ noscript div {
 }
 #mainmenu a.active {
   color: <?= $veryLightColor ?>; 
-  background: <?= $darkerColor ?>;
+  <?= css_gradient($darkerColor, $baseColor) ?>
   <?= $colorBoxShadow ?>
 }
 #mainmenu a {
