@@ -26,9 +26,12 @@ $colorBoxShadow = '  box-shadow: '.$colorBoxShadowDef.';
 body,textarea,input {
    font-family: Myriad Pro, Trebuchet MS, Tahoma, Helvetica, Arial;
 }
-td,div,p,body,textarea {
-  font-size: 11pt;
+td,div,p,body,textarea,input {
+  font-size: 10.5pt;
   color: <?= $textColor ?>;
+}
+textarea,input {
+  color: #000; 
 }
 a {
   text-decoration: none;
@@ -49,16 +52,14 @@ a {
 }
 .btn:hover, input[type=button]:hover, #submenu a:hover {
   text-decoration: none;
-}
-.banner {
-  background: <?= $bgAttention ?>;
   <?= $boxShadow ?>
 }
-input[type=text], input[type=password] {
-  font-size: 98%; 
+.banner {
+  <?= css_gradient($bgAttention, '#ffffff') ?>
+  <?= $boxShadow ?>
 }
-input[type=text]:focus, input[type=password]:focus {
-  background: <?= $bgAttention ?>;
+input[type=text]:focus, input[type=password]:focus, textarea:focus {
+  <?= css_gradient($bgAttention, '#ffffff') ?>
 }
 .smalltext, .smalltext a {
   color: <?= $lightText ?>;
@@ -71,7 +72,7 @@ input[type=text]:focus, input[type=password]:focus {
   background: <?= $lightGrayBackground ?>;
 }
 #submenu a:hover {
-  background: #0073ea url('../../ext/jqueryui/css/flick/images/ui-bg_highlight-soft_25_0073ea_1x100.png') 50% 50% repeat-x;
+  <?= $mouseOver ?>
   color: white;
 }
 #submenu div.active a {
@@ -88,9 +89,6 @@ input[type=text]:focus, input[type=password]:focus {
 .submenushadow {
   background: url(submenuback30.png);
 }
-.errormsg {
-  background: <?= $bgAttention ?>;
-}
 .balloon, .balloonhelp, .element-readonly {
   color: <?= $lightText ?>;
 }
@@ -106,13 +104,13 @@ noscript div {
   background: #888;
   opacity: 0.7;
 }
-noscript p {
-  background: <?= $bgAttention ?>;
+.errormsg, noscript p {
+  <?= css_gradient($bgAttention, '#ffcc99') ?>
   color: red;
   font-weight: bold;  
 }
 #bgbar {
-  background: <?= $baseColor ?>;
+  <?= css_gradient($baseColor, $lighterColor) ?>
 }
 #mainmenu a:hover {
   background: <?= $lighterColor ?>;
@@ -125,6 +123,7 @@ noscript p {
 #mainmenu a {
   text-decoration: none;
   color: <?= $veryLightColor ?>;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
   <?= $roundedBorders ?>
 }
 .emphasis {
@@ -253,12 +252,12 @@ input[type=text],input[type=password] {
   position: fixed;
   left: 0;
   top: 45px;
-  width: 160px;
+  width: 150px;
 }
 #submenu a {
   padding: <?= $stdMargin ?>; 
   display: block;
-  width: 131px;
+  width: 122px;
   <?= $boxShadow ?>
   border-bottom: 1px solid <?= $borderColor ?>;
   border-right: 1px solid <?= $borderColor ?>;
@@ -298,6 +297,9 @@ noscript p {
   left: 0;
   width: 100%;
   z-index: 1000;
+}
+#mainmenu, #submenu {
+  margin-left: <?= $stdMargin ?>; 
 }
 #mainmenu a {
   display: inline-block; 

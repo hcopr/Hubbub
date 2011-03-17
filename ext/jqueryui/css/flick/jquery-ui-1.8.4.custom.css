@@ -66,9 +66,9 @@
 
 /* Interaction states
 ----------------------------------*/
-.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #dddddd; background: #f6f6f6 50% 50% repeat-x; font-weight: normal; color: <?= $linkColor ?>; }
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #dddddd; <?= css_gradient($lightGrayBackground, '#ffffff') ?> font-weight: normal; color: <?= $linkColor ?>; }
 .ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited { color: <?= $linkColor ?>; text-decoration: none; }
-.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { border: 1px solid #0073ea; background: <?= $lighterColor ?> 50% 50% repeat-x; font-weight: normal; color: #ffffff; }
+.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { <?= $mouseOver ?> font-weight: normal; color: #ffffff; }
 .ui-state-hover a, .ui-state-hover a:hover { color: #ffffff; text-decoration: none; }
 .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #dddddd; background: #ffffff url(../../ext/jqueryui/css/flick/images/ui-bg_glass_65_ffffff_1x400.png) 50% 50% repeat-x; font-weight: normal; color: #00aa00; }
 .ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited { color: #00aa00; text-decoration: none; }

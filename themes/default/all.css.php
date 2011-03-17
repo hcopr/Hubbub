@@ -29,15 +29,25 @@ function css_color($b, $lightenBy = 0)
   return('#'.$result);    
 }
 
+function css_gradient($c1, $c2, $defaultColor = null)
+{
+  if($defaultColor == null) $defaultColor = $c1;
+  return("
+  background: $defaultColor;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$c2', endColorstr='$c1'); 
+  background: -webkit-gradient(linear, left top, left bottom, from($c2), to($c1)); 
+  background: -moz-linear-gradient(top,  $c2,  $c1); ");
+}
+
 $defaultScheme = 'default';
 
 $colorSchemes = array(
   'default'  => array('basecolor' => array(0x00, 0x40, 0xA0), 'linkcolor' => 0),
-  'green'    => array('basecolor' => array(0x00, 0xA0, 0x40), 'linkcolor' => -50),
+  'green'    => array('basecolor' => array(0x00, 0x90, 0x00), 'linkcolor' => -50),
   'orange'   => array('basecolor' => array(0xFF, 0x60, 0x00), 'linkcolor' => -50),
-  'gray'     => array('basecolor' => array(0x99, 0x99, 0x99), 'linkcolor' => -50),
-  'pink'     => array('basecolor' => array(0xCC, 0x66, 0xCC), 'linkcolor' => -50),
-  'graphite' => array('basecolor' => array(0x66, 0x77, 0x99), 'linkcolor' => -50),
+  'gray'     => array('basecolor' => array(0x80, 0x80, 0x80), 'linkcolor' => -50),
+  'pink'     => array('basecolor' => array(0xCC, 0x50, 0xCC), 'linkcolor' => -50),
+  'graphite' => array('basecolor' => array(0x60, 0x70, 0x90), 'linkcolor' => -50),
   'blue'     => array('basecolor' => array(0x00, 0x40, 0xA0), 'linkcolor' => 0),
   );
 
@@ -48,13 +58,23 @@ $b = $colorSchemes[$_REQUEST['scheme']]['basecolor'];
 
 $baseColor = css_color($b, 0);
 $lighterColor = css_color($b, +30);
+$lighterColorHighlight = css_color($b, +70);
 $veryLightColor = css_color($b, +180);
 $darkerColor = css_color($b, -50);
 $linkColor = css_color($b, $colorSchemes[$_REQUEST['scheme']]['linkcolor']);
-
 $lightGrayBackground = '#f6f6f6';
+$mouseOver = css_gradient($lighterColor, $lighterColorHighlight);
 
 include('../../ext/jqueryui/css/flick/jquery-ui-1.8.4.custom.css');
 include('default.css');
+
+
+
+
+
+
+
+
+
 
 ?>
