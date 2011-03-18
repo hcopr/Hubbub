@@ -11,10 +11,10 @@
 		// let's try to determine sensible user data from the login services
 		$idAccountWithEmail = DB_GetDatasetWQuery('SELECT * FROM '.getTableName('idaccounts').'
 		  WHERE ia_user=? AND ia_type = "email"', array($this->user->key()));
-		$defaultEmail = getFirst($openInfo['contact/email'], $fbInfo['email'], $idAccountWithEmail['ia_url']);
+		$defaultEmail = getDefault($openInfo['contact/email'], $fbInfo['email'], $idAccountWithEmail['ia_url']);
 		// determining a default username idea
 		$emlName = trim(substr($defaultEmail, 0, strpos($defaultEmail, '@')));
-    $defaultUsername = safename(getFirst($twitterInfo['screen_name'], $fbInfo['first_name'], $emlName, $openInfo['namePerson/friendly']));   
+    $defaultUsername = safename(getDefault($twitterInfo['screen_name'], $fbInfo['first_name'], $emlName, $openInfo['namePerson/friendly']));   
     if($defaultUsername != '' && !HubbubEntity::isNameAvailable($defaultUsername)) 
 		{
       do {
@@ -30,14 +30,14 @@
 		$emailNameReconstruction = implode(' ', $nameParts);
 		
 		// other default data
-    $defaultName = getFirst(
+    $defaultName = getDefault(
       $openInfo['namePerson/first'].' '.$openInfo['namePerson/last'], 
       $fbInfo['name'], 
       $twitterInfo['name'], 
       $openInfo['namePerson/friendly'],
       $emailNameReconstruction);			
 		$gravatarImg = 'http://www.gravatar.com/avatar/'.md5(strtolower(trim($defaultEmail))).'&s=96';
-		$defaultPic = getFirst($fbInfo['picture'], $twitterInfo['profile_image_url'], $gravatarImg);
+		$defaultPic = getDefault($fbInfo['picture'], $twitterInfo['profile_image_url'], $gravatarImg);
 		
     if($defaultPic != '') print('<img src="'.$defaultPic.'" align="right" style="padding: 8px;" width="96"/>');
 

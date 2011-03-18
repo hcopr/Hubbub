@@ -87,7 +87,7 @@ function tmpl_commentlist($postDS, &$comments, $withContainer = false)
 	{
     $data = HubbubMessage::unpackData($comment);
 	  $metaElements = array(
-	    CoolDate($comment['m_created']));
+	    ageToString($comment['m_created']));
     if(object('user')->entity == $comment['m_owner'] || object('user')->entity == $comment['m_author']) $metaElements[] = '<a onclick="deleteComment('.$comment['m_key'].')">Delete</a>';
 		?><div id="comment_item_<?= $comment['m_key'] ?>" class="comment_item comment_entry">
 				<div class="comment_img"><img src="img/anonymous.png" width="32"/></div>
@@ -173,7 +173,7 @@ function dyn_type_post(&$data, &$ds, &$flags)
 	$comments = MsgModel::getComments($ds['m_key']);
 	/* define the standard actions for this post */
 	$metaElements = array(
-	  CoolDate($ds['m_created']), 
+	  ageToString($ds['m_created']), 
 	  '<a onclick="springComment('.$ds['m_key'].')">Comment</a>', 
 		'<a onclick="springVote('.$ds['m_key'].')">Vote</a>');
 	/* insert entries from the cmd array in $flags (these come from plugins) */

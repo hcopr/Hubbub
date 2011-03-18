@@ -22,7 +22,7 @@ foreach(json_decode(
   as $b) $builtIn[$b] = true;
   
 foreach(explode(',', 
-  'cqrequest,datetimetostring,datetostring,db_gettables,db_stripprefix,do_fb_login,from,readstringlistfile,send_mail,stringlisttotext,get_user_timeoffset,stringtodatetime,strip_tags_attributes,'.
+  'cqrequest,datetimetostring,datetostring,db_gettables,db_stripprefix,do_fb_login,from,readstringlistfile,send_mail,stringlisttotext,get_user_timeoffset,strip_tags_attributes,'.
   'texttostringlist'
   ) as $b) $ignoreCallCheck[$b.'()'] = true;
 

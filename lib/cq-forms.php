@@ -180,7 +180,7 @@ class CQForm
       $dFunction = $this->presentationName.'_'.$e['type'];
       if ($e['sessiondefault'] == true)
         $e['default'] = getDefault($_SESSION[$sessionFieldName], $e['default']);
-      $e['value'] = getFirst(getValueFromArray($this->ds, $e['name']), $e['default']);
+      $e['value'] = getDefault(getValueFromArray($this->ds, $e['name']), $e['default']);
       if ($e['sessiondefault'] == true)
         $_SESSION[$sessionFieldName] = $e['value'];
       $e['error'] = $this->errors[$e['name']];

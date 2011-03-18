@@ -6,8 +6,123 @@
  */
 
 /* inits the profiler that allows performance measurement */
+error_reporting(E_ALL ^ E_NOTICE);
 $GLOBALS['profiler_last'] = getDefault($GLOBALS['profiler_start'], microtime());
 define('URL_CA_SEPARATOR', '-');
+
+/* retrieve a config value (don't use $GLOBALS['config'] directly if possible) */
+function cfg($name, $default = null)
+{
+	$vr = &$GLOBALS['config'];
+	foreach(explode('/', $name) as $ni) 
+	  if(is_array($vr)) $vr = &$vr[$ni]; else $vr = '';
+	$vr = getDefault($vr, $default);
+	return($vr);
+}
+
+/* returns an object from the global context (such as an instantiated model) */
+function object($name)
+{
+	return($GLOBALS['obj'][$name]);
+}
+
+function cache_connect()
+{
+  if(!cfg('memcache/enabled')) return(false);
+  if(isset($GLOBALS['obj']) && $GLOBALS['obj']['memcache']) return(true);
+  
+  $mcUrl = explode(':', cfg('memcache/server'));
+  $mc = @memcache_pconnect($mcUrl[0], $mcUrl[1]+0);
+
+  if($mc === false)
+  {
+    $GLOBALS['config']['memcache']['enabled'] = false;
+    $GLOBALS['errors']['memcache'] = 'Could not connect';
+    logError('', 'memcache: could not connect to server '.cfg('memcache/server'));
+    return(false);
+  }  
+  
+  $GLOBALS['obj']['memcache'] = $mc;
+  return(true);
+}
+
+function cache_delete($key)
+{
+  if(!cache_connect()) return(false);
+  return(memcache_delete(object('memcache'), $GLOBALS['config']['service']['server'].'/'.$key));
+}
+
+function cache_get($key)
+{
+  if(!cache_connect()) return(false);
+  return(memcache_get(object('memcache'), $GLOBALS['config']['service']['server'].'/'.$key));
+}
+
+function cache_set($key, $value)
+{
+  if(!cache_connect()) return(false);
+  $key = $GLOBALS['config']['service']['server'].'/'.$key;
+  $op = memcache_replace(object('memcache'), $key, $value, MEMCACHE_COMPRESSED, 60*60);
+  if($op == false)
+    memcache_add(object('memcache'), $key, $value, MEMCACHE_COMPRESSED, 60*60);
+}
+
+function cache_region($key, $generateFunction)
+{
+  $out = cache_get($key);
+  if($out === false)
+  {
+    ob_start();
+    $generateFunction();
+    $out = ob_get_clean();
+    cache_set($key, $out);    
+  }
+  print($out);
+}
+
+function cache_get_array($key)
+{
+  $value = cache_get($key);
+  if($value === false) return(false); else return(json_decode($value, true));
+}
+
+function cache_set_array($key, $value)
+{
+  cache_set($key, json_encode($value));
+}
+
+function l10n($s, $silent = false)
+{
+  $lout = $GLOBALS['l10n'][$s];
+  if(isset($lout)) 
+    return($lout);
+  else if($silent === true)
+    return('');
+  else
+    return('['.$s.']');
+}
+
+function l10n_load($filename_base)
+{
+  if(isset($GLOBALS['l10n_files'][$filename_base])) return;
+  $lang_try = array();
+  $usr = object('user');
+  if($usr != null) $lang = $usr->lang; 
+  if($lang != '') $lang_try[] = $lang;
+  $lang_try[] = 'en';
+  foreach($lang_try as $ls)
+  {
+    $lang_file = $filename_base.'.'.$ls.'.cfg';
+    if(file_exists($lang_file))
+    {
+	    foreach(stringsToStringlist(file($lang_file)) as $k => $v) 
+	      $GLOBALS['l10n'][$k] = $v;
+	    $GLOBALS['l10n_files'][$filename_base] = $lang_file;
+	    if(cfg('l10ndebug') == true) $GLOBALS['l10n_files_last'] = $lang_file;
+    }
+  }
+}
+
 
 function randomHashId()
 {
@@ -186,27 +301,11 @@ function stringParamsToArray($paramStr)
 }
 
 /* returns the first entry of an array (workaround to some PHP array wackyness) */
-function getFirst($array)
+function getDefault($array)
 {
 	foreach(func_get_args() as $a)
-		if($a != null && trim($a) != '') return($a);
-}
-
-/* if $def1 is empty, return $def2 */
-function GetDefault(&$def1, $def2 = '', $zero_ok = false)
-{
-  //if ($def=='0' && $zero_ok) return($def1);
-  if (!isset($def1) || $def1=='')
-  {
-    if (!isset($def2))
-      return '';
-    else
-      return $def2;
-  }
-  else
-  {
-    return $def1;
-  }
+		if($a != null && $a != '') return($a);
+	return('');
 }
 
 /* cut $cake at the first occurence of $segdiv, returns the slice */
@@ -321,31 +420,6 @@ function cqrequest($url, $post = array(), $timeout = 2, $headerMode = true, $onl
     'body' => trim($resBody)));
 }
 
-/* convert an SQL timestamp into a human-friendly output */
-function SqlCoolTime($raw)
-{
-	if($raw == '0000-00-00 00:00:00') return('(n/a)');
-  return(ageToString(timestampToDate($raw)));
-}
-
-/* cool date */
-function CoolDate($unixDate)
-{
-  return(ageToString($unixDate)); 
-}
-
-/* convert SQL timestamp into GMT Unix timestamp */
-function timestampToDate($raw)
-{
-  $year = substr($raw, 0, 4);
-  $month = substr($raw, 5, 2);
-  $day =  substr($raw, 8, 2);
-  $hour = substr($raw, 11, 2);
-  $minute = substr($raw, 14, 2); 
-  $second = substr($raw, 17, 2);
-  return(gmmktime($hour, $minute, $second, $month, $day, $year)); 
-}
-
 /* makes a Unix timestamp human-friendly, web-trendy and supercool */
 function ageToString($unixDate, $new = 'new', $ago = 'ago')
 {
@@ -383,33 +457,6 @@ function dateToString($unixDate)
 function dateTimeToString($unixDate)
 {
   return(date(cfg('service/dateformat').' '.cfg('service/timeformat'), $unixDate));
-}
-
-/* convoluted function that tries to parse a date into a Unix timestamp */
-function stringToDateTime($string, $formatCode = null)
-{
-  // list of allowed placeholders
-  $placeHolders = array('Y', 'm', 'd', 'H', 'i', 's', 'j', 'y', 'n');
-  // the meanings of those placeholders
-  $placeHoldersMeanings = array('year', 'month', 'day', 'hour', 'minute', 'second', 'day', 'year', 'month');
-  // if not formatting code is given, assume standard date + time
-  if ($formatCode == null)
-    $formatCode = cfg('service/dateformat').' '.cfg('service/timeformat');
-  // determine the order of the placeholders used in the formatting string
-  for ($a = 0; $a < strlen($formatCode); $a++) 
-  {
-    $phPositionFound = array_search(substr($formatCode, $a, 1), $placeHolders);
-    if (!($phPositionFound === false))
-      $phOrder[] = $placeHoldersMeanings[$phPositionFound];
-  }
-  // prepare the mask for sscanf 
-  $formatMask = str_replace('{*1*}', '%d', str_replace($placeHolders, '{*1*}', $formatCode));
-  // extract the values from the string
-  $values = sscanf($string, $formatMask);
-  foreach ($values as $k => $v)
-    $$phOrder[$k] = $v;
-  $result = mktime($hour, $minute, $second, $month, $day, $year);
-  return($result);
 }
 
 /* makes an input totally safe by only allowing a-z, 0-9, and underscore (might not work correctly) */

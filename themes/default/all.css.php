@@ -7,7 +7,7 @@
 
 header('content-type: text/css; charset=UTF-8');
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-header("Expires: " . gmdate("D, d M Y H:i:s", time()+60*60*8) . " GMT");
+header("Expires: " . gmdate("D, d M Y H:i:s", time()+60*60*4) . " GMT");
 ob_start("ob_gzhandler");
 
 define('CSS_COL_QUANTUM', 205);
@@ -64,17 +64,10 @@ $darkerColor = css_color($b, -50);
 $linkColor = css_color($b, $colorSchemes[$_REQUEST['scheme']]['linkcolor']);
 $lightGrayBackground = '#f6f6f6';
 $mouseOver = css_gradient($lighterColor, $lighterColorHighlight);
+$btnBackground = css_gradient('#e0e0e0', '#ffffff', $lightGrayBackground);
 
 include('../../ext/jqueryui/css/flick/jquery-ui-1.8.4.custom.css');
 include('default.css');
-
-
-
-
-
-
-
-
 
 
 ?>

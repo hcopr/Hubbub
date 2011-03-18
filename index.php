@@ -4,6 +4,8 @@
   $GLOBALS['APP.BASEDIR'] = dirname(__FILE__);
 
   // init environment
+  ob_start("ob_gzhandler");
+  
   ob_start();
   chdir($GLOBALS['APP.BASEDIR']);
   require('lib/genlib.php');
@@ -18,7 +20,6 @@
   $GLOBALS['content.startuperrors'] = trim(ob_get_clean());
 
   // enable gzip compression by default
-  ob_start("ob_gzhandler");
   profile_point('environment ready');
 
   WriteToFile('log/activity.log', 'call '.$_REQUEST['controller'].'-'.$_REQUEST['action']."\n");

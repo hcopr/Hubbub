@@ -25,38 +25,6 @@ function h2_init_hubbub_environment()
 	}
 }
 
-function l10n($s, $silent = false)
-{
-  $lout = $GLOBALS['l10n'][$s];
-  if(isset($lout)) 
-    return($lout);
-  else if($silent === true)
-    return('');
-  else
-    return('['.$s.']');
-}
-
-function l10n_load($filename_base)
-{
-  if(isset($GLOBALS['l10n_files'][$filename_base])) return;
-  $lang_try = array();
-  $usr = object('user');
-  if($usr != null) $lang = $usr->lang; 
-  if($lang != '') $lang_try[] = $lang;
-  $lang_try[] = 'en';
-  foreach($lang_try as $ls)
-  {
-    $lang_file = $filename_base.'.'.$ls.'.cfg';
-    if(file_exists($lang_file))
-    {
-	    foreach(stringsToStringlist(file($lang_file)) as $k => $v) 
-	      $GLOBALS['l10n'][$k] = $v;
-	    $GLOBALS['l10n_files'][$filename_base] = $lang_file;
-	    if(cfg('l10ndebug') == true) $GLOBALS['l10n_files_last'] = $lang_file;
-    }
-  }
-}
-
 function h2_uibanner($msg, $flag = '')
 {
   $after = '';
@@ -66,22 +34,6 @@ function h2_uibanner($msg, $flag = '')
     setTimeout(function() { $("#'.$bannerid.'").fadeOut("slow"); }, 2000);   
     //--></script>';
   return('<div id="'.$bannerid.'" class="banner">'.$msg.'</div>'.$after);
-}
-
-/* retrieve a config value (don't use $GLOBALS['config'] directly if possible) */
-function cfg($name, $default = null)
-{
-	$vr = &$GLOBALS['config'];
-	foreach(explode('/', $name) as $ni) 
-	  if(is_array($vr)) $vr = &$vr[$ni]; else $vr = '';
-	$vr = getDefault($vr, $default);
-	return($vr);
-}
-
-/* returns an object from the global context (such as an instantiated model) */
-function object($name)
-{
-	return($GLOBALS['obj'][$name]);
 }
 
 /* logs a transaction into the database */

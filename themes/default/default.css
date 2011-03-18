@@ -6,7 +6,7 @@ $borderColor = '1px solid #dddddd';
 $borderBanner = '1px solid #cb8';
 $textColor = '#333333';
 $lightText = '#999999';
-$boxShadowDef = '0px 0px 5px #dddddd';
+$boxShadowDef = '0px 0px 5px #ccc';
 $colorBoxShadowDef = '0px 0px 5px '.$darkerColor;
 
 $roundedBorders = '  -moz-border-radius: '.$stdMargin.';
@@ -86,7 +86,7 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
 #submenu div.active a:hover {
   color: <?= $textColor ?>;
 }
-.submenushadow {
+.xsubmenushadow {
   background: url(submenuback30.png);
 }
 .balloon, .balloonhelp, .element-readonly {
@@ -297,9 +297,6 @@ noscript p {
   left: 0;
   width: 100%;
   z-index: 1000;
-}
-#mainmenu, #submenu {
-  margin-left: <?= $stdMargin ?>; 
 }
 #mainmenu a {
   display: inline-block; 
