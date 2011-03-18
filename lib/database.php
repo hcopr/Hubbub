@@ -56,85 +56,16 @@ function MakeValuesList(&$ds)
     foreach ($ds as $k => $v)
     {
       if ($k!='')
-        $result = $result.',"'.mysql_real_escape_string($v, $GLOBALS['db_link']).'"';
+        $result = $result.',"'.DB_Safe($v).'"';
     }
   return substr($result,1);
-}
-
-function DB_ListItems($tablename, $where = '1', $params = array())
-{
-  if (!is_array($params)) 
-    $params = stringParamsToArray($params);
-    
-  if (is_array($where))
-  {
-    $twhere = array();
-    foreach ($where as $k => $v)
-      $twhere[] = $k.'="'.DB_Safe($v).'"';
-    $where = implode(' AND ', $twhere);
-    if (trim($where)=='') $where = '1';
-  }
-
-  if ($params['limit'] != 0)
-    $limitStatement = 'LIMIT '.getDefault($params['offset'], 0).','.$params['limit'];
-  else
-    $limitStatement = '';
-
-  $result = DB_GetList('SELECT * FROM '.getTableName($tablename).
-                       ' WHERE '.$where.
-                       ' '.getDefault($params['order']).
-                       ' '.$limitStatement);
-  
-	profile_point('DB_ListItems('.$tablename.')');
-	
-  return($result);
 }
 
 function DB_UpdateField($tableName, $rowId, $fieldName, $value)
 {
 	if(is_array($value)) $value = $value[$fieldName];
 	$keys = DB_GetKeys($tableName);
-	DB_Update('UPDATE '.getTableName($tableName).' SET `'.$fieldName.'` = "'.mysql_real_escape_string($value).'" WHERE `'.$keys[0].'` = '.($rowId+0));
-}
-
-// retrieves a list of fields and their metadata for the give table
-function DB_ListFields($tablename)
-{
-  checkTableName($tablename);
-  $fieldDesc = array();
-  
-  $metaFields = array();
-  
-  $result = mysql_query("SELECT * FROM ".$tablename." LIMIT 1");
-  $fields = @mysql_num_fields($result);
-  $table = @mysql_field_table($result, 0);
-  for ($i=0; $i < $fields; $i++)
-  {
-    $fieldName = mysql_field_name($result, $i);
-    if (!$clearXdata || ($fieldName!='_xdata' && substr($fieldName, 0, 1)!='_'))
-    {
-      @$fullInfo = array(
-            'type' => mysql_field_type($result, $i),
-            'name' => $fieldName,
-            'length' => mysql_field_len($result, $i),
-            'flags' => explode(' ', mysql_field_flags($result, $i)),
-            'caption' => getDefault($metaFields[$fieldName.'.caption'], $fieldName),
-            'subtype' => $metaFields[$fieldName.'.subtype'],
-            'ref' => getDefault($metaFields[$fieldName.'.ref']),
-            );
-      foreach($fullInfo['flags'] as $flag) $fullInfo['flags'][$flag] = true;
-      if ($withKeys)
-        $fieldDesc[$fieldName] = $fullInfo; 
-      else if ($simple)
-        $fieldDesc[$fieldName] = $fieldName;
-      else
-        $fieldDesc[$fieldName] = $fullInfo;
-    }
-  }
-  @mysql_free_result($result);
-	
-	profile_point('DB_ListFields('.$tablename.')');
-  return($fieldDesc);
+	DB_Update('UPDATE '.getTableName($tableName).' SET `'.$fieldName.'` = "'.DB_Safe($value).'" WHERE `'.$keys[0].'` = '.($rowId+0));
 }
 
 // gets a list of keys for the table
@@ -167,81 +98,22 @@ function DB_GetKeys($tablename)
   return $pk;
 }
 
-function DB_PackDataset($table, &$rawds)
-{
-  $fields = DB_ListFields($table);
-  $ext = array();
-  foreach($rawds as $k => $v)
-  {
-    if (!isset($extFieldname)) 
-    {
-      $f = $k; 
-      $extFieldname = CutSegment('_', $f).'_extended';
-      if (!isset($fields[$extFieldname])) return;
-    }
-    if (!isset($fields[$k]))
-    {
-      $ext[$k] = $v;
-      unset($rawds[$k]);
-    }
-  }
-  $rawds[$extFieldname] = serialize($ext);
-}
-
-function DB_UnpackDataset($table, &$rawds)
-{
-  #$fields = DB_ListFields($table);
-  foreach($rawds as $k => $v)
-  {
-    if (!isset($extFieldname)) 
-    {
-      $extFieldname = CutSegment('_', $k).'_extended';
-      if (!isset($rawds[$extFieldname])) return;
-    }
-  }
-  $ext = unserialize($rawds[$extFieldname]);
-  if (is_array($ext)) foreach($ext as $k => $v)
-  {
-    $rawds[$k] = getDefault($rawds[$k], $v); 
-  }
-}
-
 // updates/creates the $dataset in the $tablename
-function DB_UpdateDataset($tablename, &$dataset, $keyvalue = null, $keyname = null, $options = array())
+function DB_UpdateDataset($tablename, &$dataset, $options = array())
 {
   checkTableName($tablename);
   $keynames = DB_GetKeys($tablename);
-  if ($keyname == null)
-    $keyname = $keynames[0]; 
-		
-	if($options['prefix'] != '')
-	{
-		$nds = array();
-		$pfx = $options['prefix'];
-		$pfxl = strlen($options['prefix']);
-		foreach($dataset as $k => $v)
-		  if(substr($k, 0, $pfxl) == $pfx) $nds[$k] = $v;
-	}
-	else  
-	  $nds = $dataset;
-  
-  if (cfg('db/packextended'))
-    DB_PackDataset($tablename, $nds);
-
-  $pureData = $nds;
-  if ($keyvalue != null)
-    $pureData[$keyname] = $keyvalue;
-
-  $query='REPLACE INTO '.$tablename.' ('.MakeNamesList($pureData).
-      ') VALUES('.MakeValuesList($pureData).');';
+  $keyname = $keynames[0]; 
+		 
+  $query='REPLACE INTO '.$tablename.' ('.MakeNamesList($dataset).
+      ') VALUES('.MakeValuesList($dataset).');';
   
   mysql_query($query, $GLOBALS['db_link']) or $DBERR = (mysql_error().'{ '.$query.' }');
   if (trim($DBERR)!='') logError('error_sql', $DBERR);
   $dataset[$keyname] = getDefault($dataset[$keyname], mysql_insert_id($GLOBALS['db_link']));
-  $pureData[$keyname] = $dataset[$keyname];
   
   profile_point('DB_UpdateDataset('.$tablename.', '.DB_UpdateDataset.')');
-  return $pureData[$keyname];
+  return $dataset[$keyname];
 }
 
 // get all the tables in the current database
@@ -261,9 +133,9 @@ function DB_GetDatasetMatch($table, $matchOptions, $fillIfEmpty = true, $noMatch
   if (!is_array($matchOptions))
     $matchOptions = stringParamsToArray($matchOptions);
   foreach($matchOptions as $k => $v)
-    $where[] = '('.$k.'="'.mysql_real_escape_string($v).'")';
+    $where[] = '('.$k.'="'.DB_Safe($v).'")';
   foreach($noMatchOptions as $k => $v)
-    $where[] = '('.$k.'!="'.mysql_real_escape_string($v).'")';
+    $where[] = '('.$k.'!="'.DB_Safe($v).'")';
   $iwhere = implode(' AND ', $where);
 	$query = 'SELECT * FROM '.getTableName($table).
     ' WHERE '.$iwhere;
@@ -281,46 +153,26 @@ function DB_GetDataSet($tablename, $keyvalue, $keyname = null, $options = array(
   $fields = @$options['fields'];
   $fields = getDefault($fields, '*'); 
   if (!$GLOBALS['db_link']) return(array());
-  if (@$options['nocache'] == true && cfg('db/usecache')) 
+
+  checkTableName($tablename);
+  if ($keyname == null)
   {
-    unset($GLOBALS['dbtmp'][$tablename][$keyname.'.'.$keyvalue]); 
+    $keynames = DB_GetKeys($tablename);
+    $keyname = $keynames[0];
   }
-  if (!isset($GLOBALS['dbtmp'][$tablename][$keyname.'.'.$keyvalue]))
+
+  $query = 'SELECT '.$fields.' FROM '.$tablename.' '.$options['join'].' WHERE '.$keyname.'="'.DB_Safe($keyvalue).'";';
+  $rs = mysql_query($query, $GLOBALS['db_link']) or $DBERR = mysql_error($GLOBALS['db_link']).' { Query: "'.$query.'" }';
+  if ($DBERR != '') logError('error_sql', $DBERR);
+
+  if ($line = @mysql_fetch_array($rs, MYSQL_ASSOC))
   {
-    $result = array();
-    if ($keyvalue != '' && $keyvalue != '0')
-    {
-      checkTableName($tablename);
-      if ($keyname == null)
-      {
-        $keynames = DB_GetKeys($tablename);
-        $keyname = $keynames[0];
-      }
-
-      $query = 'SELECT '.$fields.' FROM '.$tablename.' '.$options['join'].' WHERE '.$keyname.'="'.
-        mysql_escape_string($keyvalue).'";';
-      $rs = mysql_query($query, $GLOBALS['db_link'])
-        or $DBERR = mysql_error($GLOBALS['db_link']).' { Query: "'.$query.'" }';
-      
-      if ($DBERR != '') logError('error_sql', $DBERR);
-
-      if ($line = @mysql_fetch_array($rs, MYSQL_ASSOC))
-      {
-        $result = $line;
-        mysql_free_result($rs);
-        if (cfg('db/packextended'))
-          DB_UnpackDataset($tablename, $result);
-      }
-      else
-        $result = array();
-    }
-    if (cfg('cfg/usecache'))
-      $GLOBALS['dbtmp'][$tablename][$keyname.'.'.$keyvalue] = $result;
+    mysql_free_result($rs);
+    return($line);    
   }
   else
-  {
-    $result = $GLOBALS['dbtmp'][$tablename][$keyname.'.'.$keyvalue];
-  }
+    $result = array();
+
 	profile_point('DB_GetDataSet('.$tablename.', '.$keyvalue.')');
   return $result;
 }
@@ -335,7 +187,7 @@ function DB_RemoveDataset($tablename, $keyvalue, $keyname = null)
   }
 
   $rs = mysql_query('DELETE FROM '.$tablename.' WHERE '.$keyname.'="'.
-  mysql_real_escape_string($keyvalue, $GLOBALS['db_link']).'";', $GLOBALS['db_link'])
+  DB_Safe($keyvalue).'";', $GLOBALS['db_link'])
     or $DBERR = mysql_error($GLOBALS['db_link']).'{ '.$query.' }';
   if (trim($DBERR)!='') logError('error_sql', $DBERR);
 }
@@ -351,7 +203,7 @@ function DB_ParseQueryParams($query, $parameters = null)
       $c = substr($query, $a, 1);
       if ($c == '?')
       {
-        $result .= '"'.mysql_real_escape_string($parameters[$pctr]).'"';
+        $result .= '"'.DB_Safe($parameters[$pctr]).'"';
         $pctr++;
       }
       else
