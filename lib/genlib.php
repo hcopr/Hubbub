@@ -88,7 +88,11 @@ function cache_data($key, $generateFunction)
     $result = $generateFunction();
     cache_set($key, json_encode($result));    
   }
-  return(json_decode($result, true));
+  else
+  {
+    $result = json_decode($result, true);
+  }
+  return($result);
 }
 
 function l10n($s, $silent = false)
