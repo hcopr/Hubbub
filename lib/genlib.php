@@ -80,15 +80,15 @@ function cache_region($key, $generateFunction)
   print($out);
 }
 
-function cache_get_array($key)
+function cache_data($key, $generateFunction)
 {
-  $value = cache_get($key);
-  if($value === false) return(false); else return(json_decode($value, true));
-}
-
-function cache_set_array($key, $value)
-{
-  cache_set($key, json_encode($value));
+  $result = cache_get($key);
+  if($result === false)
+  {
+    $result = $generateFunction();
+    cache_set($key, json_encode($result));    
+  }
+  return(json_decode($result, true));
 }
 
 function l10n($s, $silent = false)
