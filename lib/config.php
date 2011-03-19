@@ -73,7 +73,7 @@
     'menu' => 'home,profile,friends,mail',
     'sysmenu' => 'settings',
     'dateformat' => 'H:i d.m.Y',
-    'name' => 'Hubbub2',
+    'name' => 'Hubbub',
 		'defaultcontroller' => 'home',
 		'defaultaction' => 'index',
 		'version' => 2011.0303,

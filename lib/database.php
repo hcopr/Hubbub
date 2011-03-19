@@ -71,6 +71,7 @@ function DB_UpdateField($tableName, $rowId, $fieldName, $value)
 // gets a list of keys for the table
 function DB_GetKeys($tablename)
 {
+  DB_Connect();
   checkTableName($tablename);
   if (cfg('db/keys/'.$tablename)) return(cfg('db/keys/'.$tablename));
   if ($GLOBALS['db_link'] != null)
@@ -101,6 +102,7 @@ function DB_GetKeys($tablename)
 // updates/creates the $dataset in the $tablename
 function DB_UpdateDataset($tablename, &$dataset, $options = array())
 {
+  DB_Connect();
   checkTableName($tablename);
   $keynames = DB_GetKeys($tablename);
   $keyname = $keynames[0]; 
@@ -111,6 +113,7 @@ function DB_UpdateDataset($tablename, &$dataset, $options = array())
   mysql_query($query, $GLOBALS['db_link']) or $DBERR = (mysql_error().'{ '.$query.' }');
   if (trim($DBERR)!='') logError('error_sql', $DBERR);
   $dataset[$keyname] = getDefault($dataset[$keyname], mysql_insert_id($GLOBALS['db_link']));
+  cache_delete($tablename.':'.$dataset[$keyname].':'.$keyname);
   
   profile_point('DB_UpdateDataset('.$tablename.', '.DB_UpdateDataset.')');
   return $dataset[$keyname];
@@ -119,6 +122,7 @@ function DB_UpdateDataset($tablename, &$dataset, $options = array())
 // get all the tables in the current database
 function DB_GetTables()
 {
+  DB_Connect();
   $result = mysql_list_tables(cfg('db/database'), $GLOBALS['db_link']);
   $tableList = array();
   while ($row = mysql_fetch_row($result))
@@ -129,6 +133,7 @@ function DB_GetTables()
 
 function DB_GetDatasetMatch($table, $matchOptions, $fillIfEmpty = true, $noMatchOptions = array())
 {
+  DB_Connect();
   $where = array('1');
   if (!is_array($matchOptions))
     $matchOptions = stringParamsToArray($matchOptions);
@@ -147,15 +152,23 @@ function DB_GetDatasetMatch($table, $matchOptions, $fillIfEmpty = true, $noMatch
   return($resultDS);
 }
 
-// from table $tablename, get dataset with key $keyvalue
-function DB_GetDataSet($tablename, $keyvalue, $keyname = null, $options = array())
+function DB_GetDataSetCached($tablename, $keyvalue, $keyname = '', $options = array())
 {
+  return(cache_data($tablename.':'.$keyvalue.':'.$keyname, function() use ($tablename, $keyvalue, $keyname, $options) {
+    return(DB_GetDataset($tablename, $keyvalue, $keyname, $options));
+  }));
+}
+
+// from table $tablename, get dataset with key $keyvalue
+function DB_GetDataSet($tablename, $keyvalue, $keyname = '', $options = array())
+{
+  DB_Connect();
   $fields = @$options['fields'];
   $fields = getDefault($fields, '*'); 
   if (!$GLOBALS['db_link']) return(array());
 
   checkTableName($tablename);
-  if ($keyname == null)
+  if ($keyname == '')
   {
     $keynames = DB_GetKeys($tablename);
     $keyname = $keynames[0];
@@ -179,13 +192,14 @@ function DB_GetDataSet($tablename, $keyvalue, $keyname = null, $options = array(
 
 function DB_RemoveDataset($tablename, $keyvalue, $keyname = null)
 {
+  DB_Connect();
   checkTableName($tablename);
   if ($keyname == null)
   {
     $keynames = DB_GetKeys($tablename);
     $keyname = $keynames[0];
   }
-
+  cache_delete($tablename.':'.$dataset[$keyname].':'.$keyname);
   $rs = mysql_query('DELETE FROM '.$tablename.' WHERE '.$keyname.'="'.
   DB_Safe($keyvalue).'";', $GLOBALS['db_link'])
     or $DBERR = mysql_error($GLOBALS['db_link']).'{ '.$query.' }';
@@ -219,6 +233,7 @@ function DB_ParseQueryParams($query, $parameters = null)
 // retrieve dataset identified by SQL $query
 function DB_GetDataSetWQuery($query, $parameters = null)
 {
+  DB_Connect();
   $query = DB_ParseQueryParams($query, $parameters);
 
   $rs = mysql_query($query, $GLOBALS['db_link'])
@@ -240,6 +255,7 @@ function DB_GetDataSetWQuery($query, $parameters = null)
 // execute a simple update $query
 function DB_Update($query, $parameters = null)
 {
+  DB_Connect();
   $query = trim($query);
   $query = DB_ParseQueryParams($query, $parameters);
   if (substr($query, -1, 1) == ';')
@@ -253,6 +269,7 @@ function DB_Update($query, $parameters = null)
 // get a list of datasets matching the $query
 function DB_GetList($query, $parameters = null, $opt = array())
 {
+  DB_Connect();
   $result = array();
   $error = '';
 
@@ -280,30 +297,28 @@ function DB_GetList($query, $parameters = null, $opt = array())
   return $result;
 }
 
-// ***************************************************************************
-// include settings from database
-// ***************************************************************************
-
-profile_point('DB_Init: code');
-ob_start();
-$GLOBALS['db_link'] = mysql_pconnect(cfg('db/host'), cfg('db/user'), cfg('db/password')) or
-  $DBERR = 'The database connection to server '.cfg('db/user').'@'.cfg('db/host').' could not be established (code: '.@mysql_error($GLOBALS['db_link']).')';
-
-mysql_select_db(cfg('db/database'), $GLOBALS['db_link']) or
-  $DBERR = 'The database connection to database '.cfg('db/database').' on '.cfg('db/user').'@'.cfg('db/host').' could not be established. (code: '.@mysql_error($GLOBALS['db_link']).')';
-ob_get_clean();
-
-if ($DBERR != '')
+function DB_Connect()
 {
-  $startupErrors = 'Seems like something went wrong with the Hubbub database :-(<br/>'.$DBERR;
-  h2_errorhandler(0, $startupErrors, __FILE__);	
-	die();
-}
-else
-{
-  mysql_query("SET NAMES 'utf8'", $GLOBALS['db_link']);
+  if($GLOBALS['db_link']) return;
+  $DBERR = null;
+  $GLOBALS['db_link'] = mysql_pconnect(cfg('db/host'), cfg('db/user'), cfg('db/password')) or
+    $DBERR = 'The database connection to server '.cfg('db/user').'@'.cfg('db/host').' could not be established (code: '.@mysql_error($GLOBALS['db_link']).')';
+  if($DBERR == null)
+    mysql_select_db(cfg('db/database'), $GLOBALS['db_link']) or
+      $DBERR = 'The database connection to database '.cfg('db/database').' on '.cfg('db/user').'@'.cfg('db/host').' could not be established. (code: '.@mysql_error($GLOBALS['db_link']).')';
+  if ($DBERR != null)
+  {
+    $startupErrors = 'Seems like something went wrong with the Hubbub database :-(<br/>'.$DBERR;
+    h2_errorhandler(0, $startupErrors, __FILE__);	
+  	die();
+  }
+  else
+  {
+    mysql_query("SET NAMES 'utf8'", $GLOBALS['db_link']);
+  }
 }
 
-profile_point('DB_Init: mysql_connect/select_db');
+
+
 
 ?>

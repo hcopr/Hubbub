@@ -233,8 +233,15 @@ h2 {
   padding: <?= $stdMargin ?>;
   margin-bottom: <?= $stdMargin ?>;
 }
+.form_section {
+  color: gray;
+  margin-left: 144px; 
+  margin-top: <?= $stdMargin ?>;
+}
 .form-td-caption {
   width: 140px;
+  text-align: right;
+  vertical-align: middle;
 }
 input[type=text],input[type=password] {
   border: <?= $borderColor ?>;

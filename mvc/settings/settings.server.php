@@ -16,23 +16,23 @@ else
 $form = new CQForm('admin_server');
 $form
 
-  ->add('html', '<b class="smalltext">'.l10n('basic.settings').'</b>')
+  ->add('html', '<div class="form_section">'.l10n('basic.settings').'</div>')
   ->add('string', 'service/server')
   ->add('dropdown', 'theme/defaultcolor', array('options' => $colorSchemes, 'default' => 'default'))
   ->add('checkbox', 'service/url_rewrite')
   ->add('string', 'service/maxusers', array('default' => 30))
   ->add('checkbox', 'service/privateserver')
   
-  ->add('html', '<b class="smalltext">'.l10n('ping.settings').'</b>')
+  ->add('html', '<div class="form_section">'.l10n('ping.settings').'</div>')
   ->add('checkbox', 'ping/remote')
   ->add('string', 'ping/pingservice')
   ->add('string', 'ping/password')
 
-  ->add('html', '<b class="smalltext">'.l10n('memcache.enable').'</b>')
+  ->add('html', '<div class="form_section">'.l10n('memcache.enable').'</div>')
   ->add('checkbox', 'memcache/enabled')
   ->add('string', 'memcache/server')
   
-  ->add('html', '<b class="smalltext">'.l10n('s3.enable').'</b>')
+  ->add('html', '<div class="form_section">'.l10n('s3.enable').'</div>')
   ->add('checkbox', 's3/enabled')
   ->add('string', 's3/access_key')
   ->add('string', 's3/secret_key')
