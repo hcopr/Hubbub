@@ -10,11 +10,11 @@ function h2_init_hubbub_environment()
 {
   if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/')
     interpretQueryString($_SERVER['REQUEST_URI']);  
-      
+  profile_point('  - query strings');
 	$GLOBALS['obj']['user'] = new HubbubUser();
-	
+	profile_point('  - user');
 	l10n_load('mvc/l10n');
-	
+	profile_point('  - l10n');
 	if(isset($_REQUEST['hubbub_msg']))
 	{
 		// we're receiving a message from another server

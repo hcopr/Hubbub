@@ -71,13 +71,11 @@ function DB_UpdateField($tableName, $rowId, $fieldName, $value)
 // gets a list of keys for the table
 function DB_GetKeys($tablename)
 {
-  DB_Connect();
   checkTableName($tablename);
-  if (cfg('db/keys/'.$tablename)) return(cfg('db/keys/'.$tablename));
-  if ($GLOBALS['db_link'] != null)
+  if (!isset($GLOBALS['dbkeytmp'][$tablename]))
   {
-    if (!isset($GLOBALS['dbkeytmp'][$tablename]))
-    {
+    $result = cache_data('db/keys/'.$tablename, function() use ($tablename) {
+      DB_Connect();
       $pk = Array();
       $sql = 'SHOW KEYS FROM `'.$tablename.'`';
       $res = mysql_query($sql, $GLOBALS['db_link']) or $DBERR = (mysql_error().'{ '.$sql.' }');
@@ -90,13 +88,14 @@ function DB_GetKeys($tablename)
       }
       $GLOBALS['dbkeytmp'][$tablename] = $pk;
       profile_point('DB_GetKeys('.$tablename.')');
-    }
-    else
-    {
-      $pk = $GLOBALS['dbkeytmp'][$tablename];
-    }
+      return($pk);
+    });
   }
-  return $pk;
+  else
+  {
+    $result = $GLOBALS['dbkeytmp'][$tablename];
+  }
+  return $result;
 }
 
 // updates/creates the $dataset in the $tablename
