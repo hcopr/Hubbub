@@ -4,9 +4,10 @@
     
     $ctr = 1;
 	  // let's get the attributes exported to us from other services
-    $twitterInfo = h2_nv_retrieve('twitterinfo');
-  	$fbInfo = h2_nv_retrieve('fb.basic');
-  	$openInfo = h2_nv_retrieve('openid');
+	  $infoDS = DB_Getdataset('idaccounts', $this->user->key(), 'ia_user');
+    $twitterInfo = json_decode($infoDS['ia_properties'], true);
+  	$fbInfo = $twitterInfo;
+  	$openInfo = $twitterInfo;
 		
 		// let's try to determine sensible user data from the login services
 		$idAccountWithEmail = DB_GetDatasetWQuery('SELECT * FROM '.getTableName('idaccounts').'
@@ -31,7 +32,7 @@
 		
 		// other default data
     $defaultName = getDefault(
-      $openInfo['namePerson/first'].' '.$openInfo['namePerson/last'], 
+      trim($openInfo['namePerson/first'].' '.$openInfo['namePerson/last']), 
       $fbInfo['name'], 
       $twitterInfo['name'], 
       $openInfo['namePerson/friendly'],

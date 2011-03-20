@@ -13,6 +13,7 @@ class SigninController extends HubbubController
 	{ 
 		// this is for the Twitter sign in option
 		include_once('lib/cq-forms.php');
+		
 		if(isset($_REQUEST['oauth_token']))
 		{
 			$this->model->completeOAuth($_REQUEST['oauth_token']);
@@ -53,7 +54,6 @@ class SigninController extends HubbubController
 			else
 			{
 			  $_SESSION['msg'] = l10n('openid.fail');
-			  #logToFile('log/openid.error.log', $_REQUEST);
 				$this->redirect('index', 'signin');
 			}
 		}

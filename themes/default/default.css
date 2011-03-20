@@ -96,6 +96,10 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
   font-weight: bold;
   color: green;
 }
+.smallwin {
+  color: gray;
+  font-size: 90%;
+}
 .fail, .merde {
   font-weight: bold;
   color: red;

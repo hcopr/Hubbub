@@ -47,6 +47,18 @@ class SettingsController extends HubbubController
 	{
 	  $this->login();
   }
+  
+  function ajax_servercheck()
+  {
+	  access_policy('auth,admin');
+    include('mvc/settings/server.status.php');
+    print(json_encode(array(
+      'server_status' => $server_status,
+      'ping_status' => $ping_status,
+      'memcache_status' => $memcache_status,
+      's3_status' => $s3_status,
+      ))); 
+  }
 	
 	function ajax_changeurl()
 	{

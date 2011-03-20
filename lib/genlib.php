@@ -32,12 +32,16 @@ function cache_connect()
   if(isset($GLOBALS['obj']) && $GLOBALS['obj']['memcache']) return(true);
   
   $mcUrl = explode(':', cfg('memcache/server'));
+  $mc = null;
+  
+  $GLOBALS['errorhandler_ignore'] = true;
   $mc = @memcache_pconnect($mcUrl[0], $mcUrl[1]+0);
-
+  $GLOBALS['errorhandler_ignore'] = false;
+  
   if($mc === false)
   {
     $GLOBALS['config']['memcache']['enabled'] = false;
-    $GLOBALS['errors']['memcache'] = 'Could not connect';
+    $GLOBALS['errors']['memcache'] = 'Could not connect to memcache server '.cfg('memcache/server');
     logError('', 'memcache: could not connect to server '.cfg('memcache/server'));
     return(false);
   }  

@@ -17,9 +17,9 @@ class SigninModel extends HubbubModel
   
 	function initOAuth()
 	{
-    require('ext/oauth/epi_curl.php');
-    require('ext/oauth/epi_oauth.php');
-    require('ext/oauth/epi_twitter.php');
+    require_once('ext/oauth/epi_curl.php');
+    require_once('ext/oauth/epi_oauth.php');
+    require_once('ext/oauth/epi_twitter.php');
 	}
 	
 	function oAuthSignin()
@@ -48,7 +48,7 @@ class SigninModel extends HubbubModel
 		{
 			// if we're still logged in, add this to an existing account!
 			$ads['ia_user'] = $_SESSION['uid'];
-      DB_UpdateDataset('idaccounts', $ads);
+      $idkey = DB_UpdateDataset('idaccounts', $ads);
       $this->redirectOverride = array('auth', 'settings');
       return(false);			
 		}
@@ -79,8 +79,6 @@ class SigninModel extends HubbubModel
     $twitterInfo->response; 
 		$ads['ia_properties'] = json_encode($twitterInfo->response);
 		$this->newAccount($ads);
-    h2_nv_store('twitterinfo/'.$ads['ia_key'], $twitterInfo->response);
-    h2_nv_store('twitterinfo', $twitterInfo->response);
     $this->openid_error = ob_get_clean();
     return($url);
   }
@@ -113,8 +111,6 @@ class SigninModel extends HubbubModel
 		$attr = $openid->getAttributes();
 		$ads['ia_properties'] = json_encode($attr);
 		$this->newAccount($ads);
-    h2_nv_store('openid/'.$ads['ia_key'], $attr);
-    h2_nv_store('openid', $attr);
   }
 	
 }

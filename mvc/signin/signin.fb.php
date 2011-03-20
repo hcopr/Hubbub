@@ -46,11 +46,9 @@ if($cookie['access_token'])
   $ads = $this->model->getAccount('fb', $userdata['id']);
 	$ads['ia_properties'] = json_encode($userdata);
   $this->model->newAccount($ads);
-  h2_nv_store('fb.basic/'.$ads['ia_key'], $userdata);
-  h2_nv_store('fb.basic', $userdata);
   $this->user->login();
   ?><script>
-  document.location.href = '<?= actionUrl('index', 'home') ?>'; 
+    document.location.href = '<?= actionUrl('index', 'home') ?>'; 
   </script><?
 }
 

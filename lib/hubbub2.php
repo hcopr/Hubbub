@@ -233,7 +233,7 @@ class HubbubUser
       if(!is_array($GLOBALS['userds'])) 
       {
         // the first user object to be initialized is the current user
-        $GLOBALS['userds'] = DB_GetDatasetCached('users', $_SESSION['uid']);
+        $GLOBALS['userds'] = DB_GetDataset('users', $_SESSION['uid']);
         $this->ds = &$GLOBALS['userds'];
       }
 			$this->settings = unserialize($this->ds['u_settings']);

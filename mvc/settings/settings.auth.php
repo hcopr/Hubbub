@@ -35,7 +35,7 @@ foreach($openIDList as $ida)
 		{
 		  case('email'): {
 		    $desc = array();
-        $desc['email'] = htmlspecialchars($ida['ia_url']); 
+        $desc['email'] = $ida['ia_url']; 
         if($properties['verified'] > 0)
           $desc['email.verified'] = l10n('email.is.verified');
         else
@@ -51,17 +51,20 @@ foreach($openIDList as $ida)
         break;
       }
 		  default: {
-
+        $desc = $properties;
         break;
       }
     }
 		
 		$descLines = array();
-    foreach($desc as $k => $v)
+    foreach($desc as $k => $v) if(!is_array($v))
     {
       $caption = l10n(strtolower(trim($k)), true);
+      $v = htmlspecialchars($v);
+      if(strStartsWith($v, 'http://') || strStartsWith($v, 'https://'))
+        $v = '<a href="'.$v.'" target="_blank">'.$v.'</a>';
       if(trim($caption) != '')
-        $descLines[] = '<span style="color:gray">'.$caption.'</span>: '.htmlspecialchars($v).''; 
+        $descLines[] = '<span style="color:gray">'.$caption.'</span>: '.$v.''; 
     }        
 
     if(sizeof($descLines) > 0)
