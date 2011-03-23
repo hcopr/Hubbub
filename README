@@ -7,6 +7,17 @@ The source code for the protoype is no longer available, let's pretend it never 
 It was horrible, and hence true to its purpose, which it served well. Please don't install 
 this version, yet. It doesn't work. When it starts working, this message will change. 
 
+Prerequisites:
+---------------------------------------------------------------------------------------------
+Your server needs at least the following things:
+- Apache or NGinx
+- MySQL 3.23 or higher
+- PHP 5.3 or higher
+
+Optional:
+- Memcached
+- Access to your server's cron tab
+
 Installation:
 ---------------------------------------------------------------------------------------------
 Pull down the repository and execute the installer by opening up the pertinent location in

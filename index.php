@@ -1,6 +1,6 @@
 <?php
   $version = explode('.', phpversion());
-  if(!($version[0] > 4 && $version[1] > 2)) die('Error: PHP version 5.3 or greater required.');
+  if(!($version[0] > 4 && $version[1] > 2)) die('Error: PHP 5.3 or greater needed'); 
 
   $GLOBALS['profiler_start'] = microtime();
   $GLOBALS['APP.BASEDIR'] = dirname(__FILE__);
@@ -13,6 +13,7 @@
   require('lib/genlib.php');
   require('lib/hubbub2.php');
   require('lib/database.php'); 
+
   profile_point('classes ready');
   require('lib/config.php'); 
     
