@@ -11,7 +11,7 @@ if($req['result'] == 'OK')
 }
 else
 {
-  ?><div class="win banner">
+  ?><div class="fail banner">
     <?= l10n('friend_request.error').': '.getDefault($req['reason'], 'could not connect') ?>
   </div><? 
 }
