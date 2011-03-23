@@ -12,7 +12,7 @@ function friends_list_rowcallback($ds)
 print('<div class="balloonhelp">'.l10n('index.balloon').'</div>');
 
 include_once('templates/friendlist.php');
-tmpl_friendlist($this->model->getFriends('friend'), 'friends_list_rowcallback');
+tmpl_friendlist($this->myFriends, 'friends_list_rowcallback');
 
 ?><script>
   

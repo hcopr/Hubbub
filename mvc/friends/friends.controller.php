@@ -20,6 +20,11 @@ class FriendsController extends HubbubController
 	
 	function index()
 	{
+	  $this->myFriends = $this->model->getFriends('friend');
+	  if(sizeof($this->myFriends) == 0)
+	  {
+	    $this->redirect('add'); 
+    }
 	}
 	
 	function add()
