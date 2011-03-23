@@ -38,19 +38,44 @@ $server_status = ob_get_clean();
 
 
 ob_start();
+$pingServer = cfg('ping/pingservice');
+if(!strStartsWith($pingServer, 'http://')) $pingServer = 'http://'.$pingServer;
 if(file_exists('log/cron.last.log'))
 {
   $btype = 'smallwin';
   $lastPing = filectime('log/cron.last.log');
-  $lastPingText = ageToString($lastPing, 'very recently');
+  $lastPingText = 'Last ping: '.ageToString($lastPing, 'very recently');
 }
 else
 {
   $btype = 'fail';
-  $lastPingText = '(no ping detected)'; 
+  $lastPingText = 'Waiting for ping from '.$pingServer.'...'; 
 }  
+if(cfg('ping/remote') && cfg('ping/pingservice') != '')
+{
+  $pingStatus = h2_nv_retrieve('ping/status');
+  if($pingStatus['server'] != $pingServer)
+  {
+    $pingRequest = cqrequest($pingServer, array('origin' => 'http://'.cfg('service/server').'/cron.php', 'request' => 'activate', 'password' => cfg('ping/password')), 2);   
+    if($pingRequest['data']['result'] == 'OK')
+    {
+      $btype = 'win';
+      $lastPingText = 'Connection with ping server established, waiting for ping from '.$pingServer.'...';
+      $pingStatus = $pingRequest['data'];
+      $pingStatus['server'] = $pingServer;
+      h2_nv_store('ping/status', $pingStatus);
+      @unlink('log/cron.last.log');
+    }
+    else
+    {
+      $btype = 'fail';
+      $reason = $pingRequest['data']['reason'];
+      $lastPingText = 'Could not establish connection with ping server. Reason: '.getDefault($reason, 'server not found');
+    }
+  }
+}
 ?><div class="banner <?= $btype ?>">
-  Last ping: <?= $lastPingText ?>
+  <?= $lastPingText ?>
 </div><?
 $ping_status = ob_get_clean();
 

@@ -36,7 +36,7 @@ $loadergif = '<img src="themes/default/ajax-loader.gif"/>';
       ->add('html', '<div class="form_section">'.l10n('ping.settings').'</div>')
       ->add('checkbox', 'ping/remote')
       ->add('string', 'ping/pingservice')
-      ->add('string', 'ping/password')
+      ->add('string', 'ping/password', array('default' => randomHashId()))
       ->add('html', $side_column_start.'<div id="ping_status">'.$loadergif.'</div>'.$side_column_end)
     
       ->add('html', '<div class="form_section">'.l10n('memcache.enable').'</div>')

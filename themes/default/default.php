@@ -1,4 +1,10 @@
-<!DOCTYPE html>
+<?
+
+header('Content-Type: text/html; charset=utf-8');
+header('X-Frame-Options: SAMEORIGIN');
+header('X-UA-Compatible: IE=Edge,chrome=1');
+
+?><!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"> 
   <head>
     <title><?php echo l10n(cfg('page/title', 'unnamed'), true).' &middot; '.cfg('service/name', 'Hubbub') ?></title>

@@ -374,6 +374,28 @@ function file_get_fromurl($url, $post = array(), $timeout = 2)
   return($fle['body']);	
 }
 
+function http_parse_headers_ex( $header )
+{
+  $retVal = array();
+  $fields = explode("\r\n", preg_replace('/\x0D\x0A[\x09\x20]+/', ' ', $header));
+  foreach( $fields as $field ) 
+  {
+    if( preg_match('/([^:]+): (.+)/m', $field, $match) ) 
+    {
+      $match[1] = preg_replace('/(?<=^|[\x09\x20\x2D])./e', 'strtoupper("\0")', strtolower(trim($match[1])));
+      if( isset($retVal[$match[1]]) ) 
+      {
+        $retVal[$match[1]] = array($retVal[$match[1]], $match[2]);
+      } 
+      else 
+      {
+        $retVal[$match[1]] = trim($match[2]);
+      }
+    }
+  }
+  return $retVal;
+}
+
 /* makes a GET or POST request to an URL */
 function cqrequest($url, $post = array(), $timeout = 2, $headerMode = true, $onlyHeaders = false)
 {
@@ -395,37 +417,51 @@ function cqrequest($url, $post = array(), $timeout = 2, $headerMode = true, $onl
   if($headerMode) curl_setopt($ch, CURLOPT_HEADER, 1);  
   curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); 
   curl_setopt($ch, CURLOPT_RETURNTRANSFER  ,1);  // RETURN THE CONTENTS OF THE CALL
-  $result = curl_exec($ch);
+  $result = str_replace("\r", '', curl_exec($ch));
   curl_close($ch);
-    
-  $resBody = '';
-  foreach(explode(chr(13), $result) as $line)
+
+  $resHeaders = array();
+  $resBody = array();
+  
+  foreach(explode("\n", $result) as $line)
   {
-    $line = trim($line);
-    if($line == '') $headerMode = false;
-    if ($headerMode)
+    if($headerMode)
     {
-      if(substr($line, 0, 4) == 'HTTP')
+      if(strStartsWith($line, 'HTTP/'))
       {
-        $proto = CutSegment(' ', $line);
-        $resheaders['result'] = trim($line);
-        $resheaders['code'] = CutSegment(' ', $line);
-        if(substr($resheaders['code'], 0, 1) == '1') $ignoreELine = true;
+        $httpInfoRecord = explode(' ', trim($line));
+        if($httpInfoRecord[1] == '100') $ignoreUntilHTTP = true;
+        else 
+        {
+          $ignoreUntilHTTP = false;
+          $resHeaders['code'] = $httpInfoRecord[1];
+          $resHeaders['HTTP'] = $line;
+        }
       }
-      else
+      else if(trim($line) == '')
       {
-        $hkey = CutSegment(':', $line);
-        $resheaders[$hkey] = trim($line);
+        if(!$ignoreUntilHTTP) $headerMode = false;
+      }
+      else 
+      {
+        $hdr_key = trim(CutSegment(':', $line));
+        $resHeaders[strtolower($hdr_key)] = trim($line); 
       }
     }
     else
-      $resBody .= $line.chr(13);
+    {
+      $resBody[] = $line; 
+    }    
   }
-  
+
+  $body = trim(implode("\n", $resBody));
+  $data = json_decode($body, true);
+
   return(array(
-    'result' => $resheaders['code'],
-    'headers' => $resheaders,
-    'body' => trim($resBody)));
+    'result' => $resHeaders['code'],
+    'headers' => $resHeaders,
+    'data' => $data,
+    'body' => $body));
 }
 
 /* makes a Unix timestamp human-friendly, web-trendy and supercool */

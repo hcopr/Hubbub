@@ -1136,7 +1136,9 @@ function h2_nv_retrieve($name)
 {
   $nm = $_SESSION['uid'].'/'.$name;
 	$ds = DB_GetDatasetWQuery('SELECT * FROM '.getTableName('nvstore').' WHERE nv_name LIKE ?', array($nm));
-	return(json_decode($ds['nv_value'], true));
+	$arv = json_decode($ds['nv_value'], true);
+	if(!is_array($arv)) $arv = array();
+	return($arv);
 }
 
 ?>
