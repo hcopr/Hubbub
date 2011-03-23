@@ -11,7 +11,7 @@ class FriendsModel extends HubbubModel
 	{
 		$toEntity = new HubbubEntity(array('_key' => $connection->ds['c_to']));
     $res = $this->friend_request($toEntity);
-		if($res['data']['result'] == 'OK')
+		if($res['result'] == 'OK')
 		{
       $connection->status('friend');			
 		}

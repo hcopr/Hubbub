@@ -22,7 +22,7 @@ function friend_request_before_sendtourl(&$data, &$msg)
 function friend_request_after_sendtourl(&$data, &$msg)
 {
 	// if the friend request was received alright on the other side
-  if($msg->responseData['data']['result'] == 'OK')
+  if($msg->responseData['result'] == 'OK')
   {
 	  // get our side of the connection
 	  $con = new HubbubConnection($msg->authorEntity->key(), $msg->ownerEntity->key());

@@ -16,8 +16,7 @@ foreach(DB_GetList('SELECT * FROM '.getTableName('servers').'
   $srvObj = new HubbubServer($sds['s_url']);
   if(sizeof($srvObj->ds) > 0)
   {
-    $feedRaw = $this->model->pollFeed($srvObj, $sds['s_lastdata']);
-    $feed = $feedRaw['data'];
+    $feed = $this->model->pollFeed($srvObj, $sds['s_lastdata']);
     $sds['s_lastdata'] = getDefault($feed['listing_time'], time()-60);
     if(is_array($feed['feed'])) foreach($feed['feed'] as $item)
     {

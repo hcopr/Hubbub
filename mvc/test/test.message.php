@@ -63,8 +63,7 @@
   $er = hubbub2_loadurl($url);
   tlog(!(sizeof($er) == 0 || $er['user'] == '' || $er['server'] == ''), 'hubbub2_loadurl('.$url.')', 'OK', 'failure');
   $res = $p->sendToUrl($er['server']);  
-  tlog($res['headers']['response'] == 200, 'HubbubMessage->sendToUrl('.$url.') HTTP Code', 'OK', 'fail ('.$res['headers']['response'].')');
-  tlog($res['data']['result'] == 'OK', 'HubbubMessage->sendToUrl('.$url.') Result', 'OK ('.$res['data']['reason'].')', 'fail ('.$res['data']['reason'].')');
+  tlog($res['result'] == 'OK', 'HubbubMessage->sendToUrl('.$url.') Result', 'OK ('.$res['reason'].')', 'fail ('.$res['reason'].')');
   $con1 = new HubbubConnection($p->authorEntity->key(), $p->ownerEntity->key());
   $con2 = new HubbubConnection($p->ownerEntity->key(), $p->authorEntity->key());
   tlog($con1->ds['c_status'] == 'req.sent', 'HubbubConnection status '.$u1name.':'.$con1->ds['c_from'].' to '.$u2name.' == req.sent', 'OK', 'fail ('.$con1->ds['c_status'].')');
@@ -80,7 +79,7 @@
   $fp->author($ne2->ds);
   $fp->owner($r->authorEntity->ds);
 	$res = $fp->sendToUrl($r->authorEntity->ds['server']);
-  tlog($res['data']['result'] == 'OK', 'friend_request confirm ('.$url.') Result', 'OK ('.$res['data']['reason'].')', 'fail ('.$res['data']['reason'].')');
+  tlog($res['result'] == 'OK', 'friend_request confirm ('.$url.') Result', 'OK ('.$res['reason'].')', 'fail ('.$res['reason'].')');
   $con1 = new HubbubConnection($fp->authorEntity->key(), $fp->ownerEntity->key());
   $con2 = new HubbubConnection($fp->ownerEntity->key(), $fp->authorEntity->key());
   tlog($con1->ds['c_status'] == 'friend', 'HubbubConnection status '.$u2name.':'.$con1->ds['c_from'].' to '.$u1name.' == friend', 'OK', 'fail ('.$con1->ds['c_status'].')');
@@ -112,9 +111,8 @@
   // feed polling, let's pretend ne2 is polling ne1
 	$fpServ = new HubbubServer($ne1->ds['server']);
   $feed = $this->endpoint->pollFeed($fpServ, time()-1*60);
-  tlog($feed['headers']['response'] == 200, 'Endpoint pollFeed('.$ne1->ds['server'].') HTTP Code', 'OK', 'fail ('.$feed['headers']['response'].')');
-  tlog($feed['data']['result'] == 'OK', 'Endpoint pollFeed('.$ne1->ds['server'].') Result Code', 'OK', 'fail ('.$feed['data']['reason'].')');
-  foreach($feed['data']['feed'] as $item)
+  tlog($feed['result'] == 'OK', 'Endpoint pollFeed('.$ne1->ds['server'].') Result Code', 'OK', 'fail ('.$feed['reason'].')');
+  foreach($feed['feed'] as $item)
     if($item['msgid'] ==   $post->ds['m_id']) $postFound3 = $item;
   tlog(isset($postFound3), 'Posted item found in remote feed', 'OK', 'fail');  
   tlog($postFound3['text'] == $post->data['text'], 'Post content unicode test', 'OK', 'fail');  
@@ -131,16 +129,16 @@
 
   $res = $fpost->sendToUrl($fpost->ownerEntity->ds['server']);
   // see if the message was accepted on the "other" end
-  tlog($fpost->responseData['data']['result'] == 'OK', 'foreign_post sentToUrl('.$fpost->ownerEntity->ds['url'].')', 'OK ('.$fpost->data['msgid'].')', 'fail ('.$fpost->responseData['data']['reason'].')');
+  tlog($res['result'] == 'OK', 'foreign_post sentToUrl('.$fpost->ownerEntity->ds['url'].')', 'OK ('.$fpost->data['msgid'].')', 'fail ('.$fpost->responseData['reason'].')');
   // this tests whether the message was instantly published (a post record was returned)
-  tlog(sizeof($fpost->responseData['data']['post']) > 0, 'foreign_post auto_publish on receive', 'OK ('.$fpost->responseData['data']['post']['msgid'].')', 'fail');
+  tlog(sizeof($fpost->responseData['post']) > 0, 'foreign_post auto_publish on receive', 'OK ('.$fpost->responseData['post']['msgid'].')', 'fail');
   // is the message text uncorrupted?
-  tlog($fpost->responseData['data']['post']['text'] == $fpost->data['text'], 'foreign_post text unicode', 'OK', 'fail');
-  tlog($fpost->responseData['data']['post']['msgid'] != $fpost->data['msgid'], 'foreign_post-to-post ID change', 'OK', 'fail');
+  tlog($fpost->responseData['post']['text'] == $fpost->data['text'], 'foreign_post text unicode', 'OK', 'fail');
+  tlog($fpost->responseData['post']['msgid'] != $fpost->data['msgid'], 'foreign_post-to-post ID change', 'OK', 'fail');
   // now, this activity should appear on $ne2's profile stream
 	$wallPosts1 = $this->msg->getPostList($ne2->key());
 	foreach($wallPosts1['list'] as $pds)
-	  if($pds['m_id'] == $fpost->responseData['data']['post']['msgid']) $postFound4 = true; 
+	  if($pds['m_id'] == $fpost->responseData['post']['msgid']) $postFound4 = true; 
 	tlog($postFound4, 'post found on '.$u2name.'\'s profile', 'OK', 'fail '.dumpArray($wallPosts1));
 
   tsection('Realtime Updates');
@@ -153,32 +151,12 @@
   $post->data['text'] = 'This is a realtime message. Umlauts like üöä should be preserved.';
   // if we're the owner, we can send a realtime update to ne2
   $fpost->save();
-  /*
-  tlog($post->responseData['data']['result'] == 'OK', 'post sentToUrl('.$post->authorEntity->ds['url'].')', 'OK', 'fail ('.$post->responseData['data']['result'].':'.$post->responseData['data']['reason'].')');
-  // if the message was accepted, we should find it on the owner's profile stream (since the servers are identical)
-	$wallPosts1 = $this->msg->getPostList($ne1->key());
-	foreach($wallPosts1['list'] as $pds)
-	  if($pds['m_id'] == $post->data['msgid']) $postFound5 = true; 
-  tlog($postFound5, 'Update found on owner\'s profile', 'OK', 'fail');
-  // also, it should appear on the other guy's stream since they're friends
-	$streamPosts1 = $this->msg->getStream($ne2->key());
-  foreach($streamPosts1['list'] as $pds)
-    if($pds['m_id'] == $post->data['msgid']) $matchDS6 = $pds;
-  tlog(is_array($matchDS6), 'Update found on friend\'s stream', 'OK', 'fail');
-  tlog($post->data['text'] == $matchDS6['text'], 'Update on friend\'s stream is valid', 'OK', 'fail');
-  if($post->data['text'] != $matchDS6['text'])
-  {
-    foreach($post->data as $k => $v)
-    {
-      tlog($v == $matchDS6[$k], 'Post match field '.$k.' = '.$v, 'OK', '"'.$matchDS6[$k].'"'); 
-    }
-  }*/
 
   // now, we'll update an existing message that has already been committed to DB
   $post->data['text'] = 'This message text has changed now';
   $post->markChanged(time()+$ctr++);
   $post->sendToUrl($ne1->ds['server']);
-  tlog($post->responseData['data']['result'] == 'OK', 'updated post sentToUrl('.$post->authorEntity->ds['url'].')', 'OK', 'fail ('.$post->responseData['data']['reason'].')');
+  tlog($post->responseData['result'] == 'OK', 'updated post sentToUrl('.$post->authorEntity->ds['url'].')', 'OK', 'fail ('.$post->responseData['reason'].')');
 	$wallPosts1 = $this->msg->getPostList($ne1->key());
 	foreach($wallPosts1['list'] as $pds)
 	  if($pds['m_id'] == $post->data['msgid']) 
@@ -248,7 +226,7 @@
   $post->data['text'] = 'This update should not have happened.';
   $post->author($ne1->ds);
   $post->sendToUrl($ne1->ds['server']);
-  tlog($post->responseData['data']['result'] != 'OK', 'Rejection policy', 'OK ('.$post->responseData['data']['reason'].')', 'fail');
+  tlog($post->responseData['result'] != 'OK', 'Rejection policy', 'OK ('.$post->responseData['reason'].')', 'fail');
 
   tsection_end();
 ?>

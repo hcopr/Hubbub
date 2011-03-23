@@ -32,8 +32,7 @@ function trust_sendkey1_receive(&$data, &$msg)
 		$confirmMsg->author($server->localEntity());
 		$confirmMsg->owner($server->entity());
 		$confirmMsg->data['mykey'] = $server->ds['s_key_in'];
-		$response = $confirmMsg->sendtourl($server->ds['s_url'], $server->ds['s_newkey_out']);
-		$responseData = $response['data'];
+		$responseData = $confirmMsg->sendtourl($server->ds['s_url'], $server->ds['s_newkey_out']);
 		if($responseData['result'] == 'OK')
 		{
 		  /* we need to reload, because the server record might have changed in the meantime */

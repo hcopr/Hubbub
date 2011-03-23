@@ -730,14 +730,20 @@ class HubbubMessage
 	  $this->sanitizeDataset();
 	  $this->toServer = new HubbubServer($url, true);
 	  
+	  if(!$this->toServer->isTrusted() && !strStartsWith($this->type, 'trust'))
+	  {
+	    $r = $this->toServer->msg_trust_sendkey1();
+	    if($r['result'] != 'OK') return($r);
+    }
+	  
     $this->executeHandler('before_sendtourl', array('url' => $url));
     $this->payload = json_encode($this->data);
 		if($this->toServer->outboundKey() != '' || $forceKey != null) $this->signForServer($this->toServer, $forceKey);
 	  $result = HubbubEndpoint::request($url, array('hubbub_msg' => $this->payload, 'hubbub_sig' => $this->signature));
 		//h2_audit_log('msg.send:'.$this->data['type'], $this->signature.': '.$this->payload);
-	  $this->responseData = $result;
+	  $this->responseData = $result['data'];
     $this->executeHandler('after_sendtourl', array('url' => $url, 'result' => $result));
-		return($result);
+		return($result['data']);
 	}
 	
 	/**
@@ -799,19 +805,9 @@ class HubbubEntity
 				if(sizeof($this->ds) > 0) return;
 			}
 			$record['server'] = strtolower(trim($record['server']));
-			if(!$this->load($record['user'], $record['server']) && $record['server'] != cfg('service/server'))
+			if(!$this->load($record['user'], $record['server']))
 			{
-			  $this->server = new HubbubServer($record['server']);
-				// if this entity isn't known yet, create it
-				$this->ds = array(
-				  'user' => $record['user'],
-					'server' => $record['server'],
-					'url' => $record['url'],
-					'pic' => $record['pic'],
-					'name' => $record['name'],
-					'_serverkey' => $this->server->ds['s_key'],
-					);
-			  if(trim($this->ds['user']) != '') $this->ds['_key'] = DB_UpdateDataset('entities', $this->ds);
+        $this->create($record, $record['server'] == cfg('service/server'));
 			}
 		}
   }
@@ -820,7 +816,7 @@ class HubbubEntity
 	{
 		if(!$this->load($record['user'], $record['server']))
 		{
-		  $this->server = new HubbubServer($record['server']);
+		  $this->server = new HubbubServer($record['server'], true);
       $this->ds = array(
         'user' => $record['user'],
         'server' => $record['server'],
@@ -926,65 +922,10 @@ class HubbubEndpoint
     if($u['query'] != '') $s .= '?'.$u['query'];
     return($s);
   }
-  
-	function parseResponse($txt)
-	{
-    $result = array();
-    $headerMode = true;
-    foreach(explode("\n", $txt) as $line)
-    {
-      if(trim($line) == '' && $headerMode && $result['headers']['response'] != '100')
-      {
-        $headerMode = false;
-      }
-      else if($headerMode)
-      {
-        if(substr($line, 0, 5) == 'HTTP/') 
-        {
-          $key = 'response';
-          CutSegment(' ', $line);
-          $code = CutSegment(' ', $line);
-          $result['headers'][$key] = trim($code);
-          $result['headers'][$key.'-full'] = trim($code.' '.$line);
-          $result['headers']['signed'] = $recipient['e_key_outbound'];
-        }
-        else
-        {
-          $key = trim(CutSegment(':', $line));
-          if($key != '') $result['headers'][$key] = trim($line);
-        }
-      }
-      else
-      {
-        $result['body'] .= trim($line)."\n";
-      }
-    }
-		if(substr(trim($result['body']), 0, 1) == '{') $result['data'] = json_decode(trim($result['body']), true);
-		return($result);
-	}
 	
 	function request($url, $postData = array(), $options = array())
 	{
-		// set URL and other appropriate options
-		$defaults = array(
-        CURLOPT_POST => (sizeof($postData) > 0),
-        CURLOPT_HEADER => 1,
-        CURLOPT_URL => $url,
-        CURLOPT_FRESH_CONNECT => 1,
-				// sadly this doesn't work on servers with open_basedir, so we need to turn it off
-				#CURLOPT_FOLLOWLOCATION => 1,
-				CURLOPT_RETURNTRANSFER => 1,
-        CURLOPT_FORBID_REUSE => 1,
-        CURLOPT_TIMEOUT => 3,
-      );	
-		if(sizeof($postData) > 0) $defaults[CURLOPT_POSTFIELDS] = http_build_query($postData);
-    $ch = curl_init();
-    curl_setopt_array($ch, ($options + $defaults)); 
-		// grab URL and pass it to the browser
-		$result = HubbubEndpoint::parseResponse(curl_exec($ch));			
-		// close cURL resource, and free up system resources
-		curl_close($ch);
-		return($result);
+	  return(cqrequest($url, $postData, 3));
 	}
 }
 
@@ -1051,12 +992,12 @@ class HubbubServer
 		$this->save();
 		// make new key if there is none
     $this->ds['s_key_in'] = getDefault($this->ds['s_key_in'], randomHashId());
-		DB_UpdateField('servers', $this->ds['s_key'], 's_key_in', $this->ds['s_key_in']);
+		if($this->ds['s_url'] != '')
+      DB_UpdateField('servers', $this->ds['s_key'], 's_key_in', $this->ds['s_key_in']);
 		$msg->data['mykey'] = $this->ds['s_key_in'];
 		// we need to save at this point because the other server will try to make a trust_sendkey2-request in the meantime
 		// send message to other server
-		$response = $msg->sendToUrl($this->ds['s_url']);
-		$responseData = $response['data'];
+		$responseData = $msg->sendToUrl($this->ds['s_url']);
 		if($responseData['result'] == 'OK')
 		{
       $this->ds['s_status'] = 'OK';
@@ -1074,7 +1015,8 @@ class HubbubServer
 	
 	function save()
 	{
-    $this->ds['s_key'] = DB_UpdateDataset('servers', $this->ds);			
+	  if(trim($this->ds['s_url']) != '')
+      $this->ds['s_key'] = DB_UpdateDataset('servers', $this->ds);			
 	}
 	
 }

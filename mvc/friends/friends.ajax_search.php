@@ -8,7 +8,8 @@
   if($url_res['result'] == 'OK')
   {
     if($url_res['url'] == '') $url_res['url'] = $url; else $url_res['url'] = HubbubEndpoint::urlUnify($url_res['url']);
-    $results[] = $url_res;
+    if(trim($url_res['server']) != '' && trim($url_res['user']) != '') 
+      $results[] = $url_res;
   }
   
   if(sizeof($results) == 0)

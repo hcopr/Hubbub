@@ -125,8 +125,8 @@ function post_delete(&$data, &$msg)
     else
     {
       // remote delete didn't work out
-      WriteToFile('log/activity.log', $epfx.$data['msgid'].' remote delete failed: '.$msg->response['data']['reason'].chr(10));
-      $msg->fail('remote delete failed: '.$msg->response['data']['reason']);
+      WriteToFile('log/activity.log', $epfx.$data['msgid'].' remote delete failed: '.$msg->response['reason'].chr(10));
+      $msg->fail('remote delete failed: '.$msg->response['reason']);
       /* we'll save it regardless, because the other server might pick it up again later through the feed */
       $msg->save();
       return(false);
