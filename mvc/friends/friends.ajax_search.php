@@ -9,7 +9,12 @@
   {
     if($url_res['url'] == '') $url_res['url'] = $url; else $url_res['url'] = HubbubEndpoint::urlUnify($url_res['url']);
     if(trim($url_res['server']) != '' && trim($url_res['user']) != '') 
+    {
+      $server = new HubbubServer($url_res['server']);
+      if(!$server->isTrusted()) $server->msg_trust_sendkey1();
+      $url_res['server_trusted'] = $server->isTrusted();
       $results[] = $url_res;
+    }
   }
   
   if(sizeof($results) == 0)
@@ -31,7 +36,8 @@
         <td width="64" valign="top"><img src="img/anonymous.png" width="48"/></td>
         <td valign="top" width="250">
           <b><?= $item['name'] ?></b><br/>
-          <?= $item['url'] ?>
+          <?= $item['url'] ?><br/>
+          <?= ($url_res['server_trusted'] ? '' : l10n('server.nottrusted')) ?>
         </td>
         <td>&nbsp;</td>
         <td valign="top" width="*"><div id="frq_<?= $ent->key() ?>">

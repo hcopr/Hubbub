@@ -738,7 +738,7 @@ class HubbubMessage
 	  if(!$this->toServer->isTrusted() && !strStartsWith($this->type, 'trust'))
 	  {
 	    $r = $this->toServer->msg_trust_sendkey1();
-	    if($r['result'] != 'OK') return($r);
+	    if($r['result'] != 'OK') return($r); else return(array('result' => 'fail', 'reason' => 'waiting for server key'));
     }
 	  
     $this->executeHandler('before_sendtourl', array('url' => $url));

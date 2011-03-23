@@ -32,6 +32,11 @@ class FriendsController extends HubbubController
 	  include('lib/cq-forms.php');	
 	}
 	
+	function rcv()
+	{
+	  
+  }
+	
 	function ajax_search()
 	{
 	  $this->skipView = false;
