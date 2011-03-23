@@ -744,12 +744,10 @@ class HubbubMessage
     $this->executeHandler('before_sendtourl', array('url' => $url));
     $this->payload = json_encode($this->data);
 		if($this->toServer->outboundKey() != '' || $forceKey != null) $this->signForServer($this->toServer, $forceKey);
-		logToFile('log/request.log', 'REQ('.$url.'): '.json_encode($this->payload).chr(10));
 	  $result = HubbubEndpoint::request($url, array('hubbub_msg' => $this->payload, 'hubbub_sig' => $this->signature));
-		logToFile('log/request.log', 'RES('.$url.'): '.json_encode($result).chr(10));
-		//h2_audit_log('msg.send:'.$this->data['type'], $this->signature.': '.$this->payload);
 	  $this->responseData = $result['data'];
     $this->executeHandler('after_sendtourl', array('url' => $url, 'result' => $result));
+
 		return($result['data']);
 	}
 	
