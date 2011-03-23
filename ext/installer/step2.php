@@ -36,7 +36,7 @@ $form
   function checkFields(parm)
   {
     $('#db_check').html('<img src="themes/default/ajax-loader.gif"/>');
-    $.post('?p=step2_check', {'cmd' : parm, 'pingsvc' : $('#pingsvc').val(), 'adminpw' : $('#fld_adminpw').val(), 'serverurl' : $('#fld_hosturl').val(), 'path' : '<?= $surl['path'] ?>'}, function(data)
+    $.post('?p=step2_check', {'cmd' : parm, 'pingsvc' : $('#pingsvc:checked').val(), 'adminpw' : $('#fld_adminpw').val(), 'serverurl' : $('#fld_hosturl').val(), 'path' : '<?= $surl['path'] ?>'}, function(data)
       {
         $('#db_check').html(data);        
       }

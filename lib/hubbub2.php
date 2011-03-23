@@ -97,6 +97,9 @@ function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
   $bt = debug_backtrace();
   ?><div class="errormsg" style="border: 1px solid red; padding: 8px; font-size: 8pt; font-family: consolas; background: #ffffe0;">
     <b>Hubbub Runtime Error: <br/><span style="color: red"><?php echo $errstr ?></span></b><br/>
+    <?
+    if($errno > -1) {
+    ?>
     File: <?php echo basename($errfile) ?><pre style="margin:0;padding:0;"><?php 
     unset($bt[0]);
     foreach($bt as $trace)
@@ -105,7 +108,7 @@ function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
       if(cfg('debug/showparams') && is_array($trace['args'])) print(implode(', ', $trace['args']));
       print(') in '.basename($trace['file']).' | Line '.$trace['line']."\n");
     }
-  ?></pre></div><?php
+  ?></pre><? } ?></div><?php
   $report = 'Error: '.$errstr.' in '.$errfile.':'.$errline."\r\n";
   logError('log/error.log', $report);
   return(true);
@@ -354,11 +357,13 @@ class HubbubController
 		ob_clean();
 		if($_SESSION['redirect.override'])
 		{
+		  header('X-Redirect: '.$_SERVER['REQUEST_URI']);
 			header('location: '.$_SESSION['redirect.override']);
 			unset($_SESSION['redirect.override']);
 		}
 		else
 		{
+		  header('X-Redirect: '.$_SERVER['REQUEST_URI']);
       header('location: '.actionUrl($action, $controller, $params));
 		}
 		ob_end_flush();

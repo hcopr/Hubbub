@@ -38,7 +38,7 @@ $server_status = ob_get_clean();
 
 
 ob_start();
-$pingServer = cfg('ping/pingservice');
+$pingServer = cfg('ping/server');
 if(!strStartsWith($pingServer, 'http://')) $pingServer = 'http://'.$pingServer;
 if(file_exists('log/cron.last.log'))
 {
@@ -51,7 +51,7 @@ else
   $btype = 'fail';
   $lastPingText = 'Waiting for ping from '.$pingServer.'...'; 
 }  
-if(cfg('ping/remote') && cfg('ping/pingservice') != '')
+if(cfg('ping/remote') && cfg('ping/server') != '')
 {
   $pingStatus = h2_nv_retrieve('ping/status');
   if($pingStatus['server'] != $pingServer)

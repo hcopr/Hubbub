@@ -62,7 +62,7 @@
   else if(file_exists('conf/default.php'))
     require('conf/default.php');
   // if no config was found, load the installer
-	else
+	else if(!$_SERVER['NOREDIRECT'])
 	  require('ext/installer/entry_point.php');
   
   // setting some default values

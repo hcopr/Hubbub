@@ -20,7 +20,6 @@ switch($_REQUEST['part'])
   case(1): {
     $cv = array();
     include_once('lib/special-io.php');
-    $_SESSION['installer']['cfg']['cron']['password'] = randomHashId();
     $_SESSION['installer']['cfg']['service']['salt'] = randomHashId();
     $myUserName = trim(shell_exec('whoami'));
     $myUserName = getDefault($myUserName, 'root');
@@ -32,7 +31,7 @@ switch($_REQUEST['part'])
       @chmod('conf', 0777);
       WriteToFile($cfgFileName, $tmplFile);
       $cfgWritable = trim(file_get_contents($cfgFileName)) == trim($tmplFile);
-      if(!$_SESSION['installer']['cfg']['cron']['remote_svc']) $cronInfo = l10n('cron.setup').'
+      if(!$_SESSION['installer']['cfg']['ping']['remote']) $cronInfo = l10n('cron.setup').'
           <pre>* * * * * '.$myUserName.' php -f '.$GLOBALS['APP.BASEDIR'].'/cron.php > /dev/null 2>&1</pre>
           <a href="ext/installer/cronhelp.php" target="_blank">&gt; More information / help</a><br/>';
       if($cfgWritable)

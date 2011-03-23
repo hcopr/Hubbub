@@ -17,7 +17,7 @@ header("Expires: " . gmdate("D, d M Y H:i:s", time()+60*60*4) . " GMT");
 // ...which is stupid.
 
 $cfgCategory = 'config';
-require('conf/default.php');
+@include('conf/default.php');
 require('lib/genlib.php');
 
 #cache_delete('all.js');

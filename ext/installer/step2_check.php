@@ -30,7 +30,35 @@ $_SESSION['installer']['remote_cron_svc'] = $_REQUEST['pingsvc'];
 
 $_SESSION['installer']['cfg']['service']['server'] = $_REQUEST['serverurl'];
 $_SESSION['installer']['cfg']['service']['adminpw'] = $_REQUEST['adminpw'];
-$_SESSION['installer']['cfg']['cron']['remote_svc'] = $_REQUEST['pingsvc'] == 'Y';
+unset($_SESSION['installer']['cfg']['cron']);
+$_SESSION['installer']['cfg']['ping']['remote'] = $_REQUEST['pingsvc'] == 'Y';
+$_SESSION['installer']['cfg']['ping']['password'] = getDefault($_SESSION['installer']['cfg']['ping']['password'], randomHashId());
+$_SESSION['installer']['cfg']['ping']['server'] = getDefault($_SESSION['installer']['cfg']['ping']['server'], 'http://ping.openfu.net');
+
+if($_REQUEST['pingsvc'] == 'Y')
+{
+  newFile('conf/pingpassword', $_SESSION['installer']['cfg']['ping']['password']);
+  $pingRequest = cqrequest($_SESSION['installer']['cfg']['ping']['server'], array('origin' => 'http://'.$_SESSION['installer']['server_base'].'/cron.php', 'request' => 'activate', 
+    'password' => $_SESSION['installer']['cfg']['ping']['password']), 2);   
+  unlink('conf/pingpassword');
+  if($pingRequest['data']['result'] == 'OK')
+  {
+    $msg .= '<div class="green">✔ &nbsp; Joined remote ping service ('.$_SESSION['installer']['cfg']['ping']['server'].')</div>';
+    $pingStatus = $pingRequest['data'];
+    $pingStatus['server'] = $pingServer;
+  }
+  else
+  {
+    $pingStatus = array();
+    $msg .= '<div class="red">✘ &nbsp; Could not establish a connection with ping server ('.$pingRequest['data']['reason'].')</div>';
+  }
+}
+else
+{
+  $pingStatus = array();
+  $msg .= '<div class="gray">✔ &nbsp; Please remember to add an entry to your crontab later</div>';
+}
+h2_nv_store('ping/status', $pingStatus);
 
 @chmod('conf', 0775);
 @unlink('conf/probe');
@@ -74,6 +102,7 @@ if($prettyUrls) {
   $_SESSION['installer']['enable_rewrite'] = false;
   $_SESSION['installer']['cfg']['service']['url_rewrite'] = false;
 }
+
 ?>
 <table width="100%"><tr>
   <td valign="top" width="64"><img src="img/<?= $icon ?>.png"/></td>
@@ -87,6 +116,7 @@ if($prettyUrls) {
   
   ?></td>
 </tr></table>
+
 <script>
   $("button, input:submit, input:button, a.btn").button();
 </script>

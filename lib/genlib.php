@@ -356,6 +356,7 @@ function stringListToStrings($stringList)
 /* issues a HTTP redirect immediately */
 function redirect($tourl)
 {
+  header('X-Redirect-From: '.$_SERVER['REQUEST_URI']);
 	header('location: '.$tourl);
 	die();
 } 
