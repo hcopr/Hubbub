@@ -16,12 +16,9 @@
   $pingPassword = trim(cfg('ping/password'));
   if($pingPassword == '')
   {
-    $pingPassword = trim(file_get_contents('conf/pingpassword'));
-    logToFile('log/croncall.log', 'reading temp config: '.$pingPassword);
+    if(file_exists('conf/pingpassword'))
+      $pingPassword = trim(file_get_contents('conf/pingpassword'));
   }
-  else
-      logToFile('log/croncall.log', 'using password: '.$pingPassword);
-
  
   // instantiate controller, invoke action, render view	
   $action = 'cron';

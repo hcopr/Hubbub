@@ -58,7 +58,7 @@ else
   $pingStatus = array();
   $msg .= '<div class="gray">✔ &nbsp; Please remember to add an entry to your crontab later</div>';
 }
-h2_nv_store('ping/status', $pingStatus);
+#h2_nv_store('ping/status', $pingStatus);
 
 @chmod('conf', 0775);
 @unlink('conf/probe');
