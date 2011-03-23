@@ -29,7 +29,7 @@ class FriendsModel extends HubbubModel
 	function friend_request($toEntity, $msgtype = 'friend_request')
 	{
     $fr = new HubbubMessage($msgtype);
-    $fr->data['owner'] = array('server' => $toEntity->ds['server'], 'user' => $toEntity->ds['user']); 
+    $fr->to($toEntity->ds);
     $res = $fr->sendToUrl($toEntity->ds['server']);
 		return($res);
 	}

@@ -727,6 +727,11 @@ class HubbubMessage
 	 */
 	function sendToUrl($url, $forceKey = null)
 	{			
+	  if(trim($url) == '')
+	  {
+	    logError('', 'Message['.$this->type.']::sendToUrl(empty)');
+	    return(array('result' => 'fail', 'reason' => 'Server URL cannot be empty')); 
+    }
 	  $this->sanitizeDataset();
 	  $this->toServer = new HubbubServer($url, true);
 	  
@@ -786,6 +791,10 @@ class HubbubEntity
   {     
     if($record != null) 
 		{
+		  if(!is_array($record))
+		  {
+		    $record['_key'] = $record;
+      }
 		  if($record['type'] == 'server' || $record['user'] == '*')
 		  {
 		    $this->ds = $record;
