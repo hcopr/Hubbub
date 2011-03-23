@@ -7,7 +7,7 @@ class ProfileModel extends HubbubModel
 	{
 	  $userObj = object('user');
 	  
-	  $userObj->isNewUser = $this->ds['u_key'] > 0;
+	  $userObj->isNewUser = $this->ds['u_entity'] == 0;
 	  $userObj->server = new HubbubServer(cfg('service/server'), true);
 		$userObj->loadEntity();
 		
