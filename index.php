@@ -1,4 +1,6 @@
 <?php
+  $version = explode('.', phpversion());
+  if(!($version[0] > 4 && $version[1] > 2)) die('Error: PHP version 5.3 or greater required.');
 
   $GLOBALS['profiler_start'] = microtime();
   $GLOBALS['APP.BASEDIR'] = dirname(__FILE__);

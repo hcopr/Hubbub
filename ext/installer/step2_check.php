@@ -67,10 +67,10 @@ $cfgWritable = trim(implode('', file('conf/probe'))) == 'test';
 @unlink('conf/probe');
 
 $version = explode('.', phpversion());
-if($version[0] > 4)
-  $msg .= '<div class="green">✔ &nbsp; PHP version check ('.phpversion().')</div>';
+if($version[0] > 4 && $version[1] > 2)
+  $msg .= '<div class="green">✔ &nbsp; PHP version 5.3 or greater ('.phpversion().')</div>';
 else
-  $msg .= '<div class="gray">✘ &nbsp; please check PHP version (5.1 or greater required but '.phpversion().' installed)</div>';
+  $msg .= '<div class="gray">✘ &nbsp; please check PHP version (5.3 or greater required but '.phpversion().' installed)</div>';
 
 if(!is_callable('json_encode'))
   $msg .= '<div class="red">✘ &nbsp; please install JSON support</div>';
