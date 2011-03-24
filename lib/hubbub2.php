@@ -889,7 +889,7 @@ class HubbubEntity
 		if(object('user')->entity == $idkey)
       return('<a href="'.actionUrl('index', 'profile').'">'.getDefault($entityName, '(unknown)').'</a>');
 		else
-      return('<a href="'.actionUrl($idkey+0, 'view').'">'.getDefault($entityName, '(unknown)').'</a>');
+      return('<a href="'.actionUrl($idkey+0, 'profile').'">'.getDefault($entityName, '(unknown)').'</a>');
 	}
 	
 	function load($user, $server)
