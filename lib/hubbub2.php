@@ -725,7 +725,7 @@ class HubbubMessage
 		    'url' => $con['server'],
 		    'hubbub_sig' => md5($con['s_key_outbound'].trim($this->payload)),
 		    );
-		logToFile('log/multi.req.log', dumpArray(cqmrequest($requests, array('hubbub_msg' => $this->payload), 1));
+		logToFile('log/multi.req.log', dumpArray(cqmrequest($requests, array('hubbub_msg' => $this->payload), 1)));
   }
 	
 	/**
