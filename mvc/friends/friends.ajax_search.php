@@ -5,6 +5,10 @@
   $url = HubbubEndpoint::urlUnify($_REQUEST['q']);
   $url_res = $this->model->loadUrl($url);
 
+  $GLOBALS['group.options'] = array('<option value="0">Select...</option>');
+  foreach($this->model->getMyGroups() as $grp)
+  $GLOBALS['group.options'][] = '<option value="'.$grp['lg_key'].'">'.$grp['lg_name'].'</option>';
+  
   if($url_res['result'] == 'OK')
   {
     if($url_res['url'] == '') $url_res['url'] = $url; else $url_res['url'] = HubbubEndpoint::urlUnify($url_res['url']);
@@ -41,9 +45,13 @@
         </td>
         <td>&nbsp;</td>
         <td valign="top" width="*"><div id="frq_<?= $ent->key() ?>">
-          <input type="button" value="<?= l10n('friend.addnow') ?>" 
-            onclick="do_friend_request(<?= $ent->key() ?>);"/>          
-        </div>
+            <input type="button" value="<?= l10n('friend.addnow') ?>" 
+              onclick="do_friend_request(<?= $ent->key() ?>);"/>          
+            <?= l10n('addto') ?>
+            <select id="group_select_<?= $ent->key() ?>">
+              <?= implode('', $GLOBALS['group.options']) ?>
+            </select>
+          </div>
         </td>
       </tr><?      
     }
@@ -57,9 +65,10 @@
   function do_friend_request(id)
   {
     $('#frq_'+id).append(' <img src="themes/default/ajax-loader.gif" align="absmiddle">'); 
-    $.post('<?= actionUrl('ajax_friend_request', 'friends') ?>', { 'id': id }, function(data) {
+    $.post('<?= actionUrl('ajax_friend_request', 'friends') ?>', { 'id': id, 'group' : $('#group_select_'+id+' option:selected').val() }, function(data) {
       $('#frq_'+id).html(data);
       });
   }  
   
+  $("button, input:submit, input:button, a.btn").button(); 
 </script>

@@ -14,7 +14,7 @@ class FriendsController extends HubbubController
 		$countArray[] = '';
     if($menuCount['req.rcv'] > 0) $countArray[] = ' ('.$menuCount['req.rcv'].')'; else $countArray[] = '';
     if($menuCount['req.sent'] > 0) $countArray[] = ' ('.$menuCount['req.sent'].')'; else $countArray[] = '';
-    $this->menu = $this->makeMenu('index,add,rcv,pending', $countArray);
+    $this->menu = $this->makeMenu('index,add,rcv', $countArray);
 		$this->invokeModel();
 	}
 	
