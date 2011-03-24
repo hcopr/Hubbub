@@ -16,6 +16,11 @@ class ProfileController extends HubbubController
     $this->isMyProfile = true;
 	}
 
+  function user()
+  {
+    
+  }
+
   function __call($profileId, $args)
   {
     $this->viewName = 'index';
