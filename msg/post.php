@@ -5,16 +5,13 @@ function post_broadcast(&$data, &$msg)
 {
   if($msg->ownerEntity == $msg->localUserEntity)
   {
-    // if the sending user is the owner, we can send an update straight out to all connections
-    WriteToFile('log/activity.log', $data['msgid'].' sending out notifications [NOT IMPLEMENTED]'.chr(10));
+
   }
   else if($msg->authorEntity == $msg->localUserEntity)
   {
     // if we're just the author though, all we can do is send a foreign_post request
     $msg->type = 'foreign_post';
     $msg->data['type'] = 'foreign_post';
-    WriteToFile('log/activity.log', $data['msgid'].' changed type to foreign_post'.chr(10));
-    $msg->broadcast();
   }
 }
 

@@ -452,14 +452,18 @@ function cqmrequest($rq_array, $post = array(), $timeout = 1, $headerMode = true
   $rq = array();
   $content = array();
   $active = null;
+  $idx = 0;
   $multi_handler = curl_multi_init();
   
   // configure each request
-  foreach($rq_array as $rparam)
+  foreach($rq_array as $rparam) if(trim($rparam['url']) != '')
   {
+    $idx++;
     $channel = curl_init();
     curl_setopt($channel, CURLOPT_URL, $rparam['url']);
-    $combinedParams = $post + $rparam['params'];
+    $combinedParams = $post;
+    if(is_array($rparam['params'])) $combinedParams = array_merge($rparam['params'], $post);
+    #logToFile('log/multi.req.log', 'PARAMS: '.dumpArray($combinedParams));
     if(sizeof($combinedParams)>0) 
     {
       curl_setopt($channel, CURLOPT_POST, 1); 
@@ -467,10 +471,12 @@ function cqmrequest($rq_array, $post = array(), $timeout = 1, $headerMode = true
     }
     curl_setopt($channel, CURLOPT_HEADER, 1); 
     curl_setopt($channel, CURLOPT_TIMEOUT, $timeout); 
-    curl_setopt($channel, CURLOPT_RETURNTRANSFER, 0);
+    curl_setopt($channel, CURLOPT_RETURNTRANSFER, 1);
     curl_multi_add_handle($multi_handler, $channel);
-    $rq[] = $channel;
+    $rq[$idx] = array($channel, $rparam);
   }
+  
+  if(sizeof($rq) == 0) return(array());
   
   // execute
   do {
@@ -487,13 +493,16 @@ function cqmrequest($rq_array, $post = array(), $timeout = 1, $headerMode = true
   }
   
   // cleanup
-  foreach($rq as $channel)
+  foreach($rq as $idx => $rparam)
   {
-    $content[] = http_parse_request_ex(curl_multi_getcontent($channel));
+    $result = http_parse_request_ex(curl_multi_getcontent($rparam[0]));
+    $result['param'] = $rparam[1];
+    $content[] = $result;
     curl_multi_remove_handle($multi_handler, $channel);
   }
   
   curl_multi_close($multi_handler);
+  
   return($content);  
 }
 

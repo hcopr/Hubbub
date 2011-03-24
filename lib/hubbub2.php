@@ -716,16 +716,18 @@ class HubbubMessage
    */
   function broadcast()
   {
+    // fixme: obviously
+    if($GLOBALS['bcflag']) return; else $GLOBALS['bcflag'] = true;
 		$this->sanitizeDataset();
 		$this->executeHandler('broadcast');
     $this->payload = json_encode($this->data);
 		$requests = array();
 		foreach(HubbubConnection::GetClosestServers($this->authorEntity->key()) as $con)
 		  $requests[] = array(
-		    'url' => $con['server'],
-		    'hubbub_sig' => md5($con['s_key_outbound'].trim($this->payload)),
+		    'url' => $con['s_url'],
+		    'params' => array('hubbub_sig' => md5($con['s_key_out'].trim($this->payload))),
 		    );
-		logToFile('log/multi.req.log', dumpArray(cqmrequest($requests, array('hubbub_msg' => $this->payload), 1)));
+		$messageData = array('hubbub_msg' => $this->payload);
   }
 	
 	/**
