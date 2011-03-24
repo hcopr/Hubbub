@@ -21,7 +21,8 @@ function friend_remove_before_sendtourl(&$data, &$msg)
  */
 function friend_remove_after_sendtourl(&$data, &$msg)
 {
-
+  $con = new HubbubConnection($msg->authorEntity->key(), $msg->ownerEntity->key());
+  $con->status('undefined');
   return(true);
 }
 

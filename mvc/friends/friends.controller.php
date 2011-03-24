@@ -42,9 +42,29 @@ class FriendsController extends HubbubController
 	  $this->skipView = false;
   }
   
+  function ajax_remove()
+  {
+    $this->model->friend_remove($_REQUEST['key']);
+  }
+  
   function ajax_friend_request()
   {
 	  $this->skipView = false;
+  }
+	
+	function ajax_accept()
+	{
+    $res = $this->model->friend_accept($_REQUEST['key'], $_REQUEST['group']);
+    if($res['result'] == 'OK')
+      print('<span class="win">'.l10n('accepted').'</span>');
+    else
+      print('<span class="fail">'.l10n('accept_error').'</span>');
+  }
+  
+  function ajax_ignore()
+  {
+    $this->model->friend_ignore($_REQUEST['key']);
+    print('<span class="gray">'.l10n('ignored').'</span>');
   }
 	
 }

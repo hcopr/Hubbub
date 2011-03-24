@@ -24,10 +24,13 @@ tmpl_friendlist($this->myFriends, 'friends_list_rowcallback');
   
   function friend_remove(rowid, dskey)
   {
-    status_indicator(rowid);
-    $.post('<?= actionUrl('ajax_remove', 'friends') ?>', {'key' : dskey}, function(data) {
-			$('#'+rowid).html('<?= l10n('removed') ?>');
-      });
+    if(confirm('<?= l10n('areyousure') ?>'))
+    {
+      status_indicator(rowid);
+      $.post('<?= actionUrl('ajax_remove', 'friends') ?>', {'key' : dskey}, function(data) {
+  			$('#'+rowid).html('<?= l10n('removed') ?>');
+        });
+    }
   }
   
 </script>

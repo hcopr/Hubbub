@@ -1063,6 +1063,16 @@ class HubbubConnection
 		 return(getDefault($this->ds['c_status'], 'undefined'));
 	 }
 	 
+	 function group($group = null)
+	 {
+	   if($group != null)
+	   {
+	 	 	 $this->ds['c_group'] = $group;
+	 	 	 $this->save();
+     }
+     return($this->ds['c_group']);
+   }
+	 
 	 function increaseCount($fromId, $toId, $type = 'sent')
 	 {
 	   if($fromId == 0 || $toId == 0) return;

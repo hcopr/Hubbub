@@ -7,25 +7,6 @@ class FriendsModel extends HubbubModel
 		$connection->status('undefined');
 	}
 	
-	function accept($connection)
-	{
-		$toEntity = new HubbubEntity(array('_key' => $connection->ds['c_to']));
-    $res = $this->friend_request($toEntity);
-		if($res['result'] == 'OK')
-		{
-      $connection->status('friend');			
-		}
-		return($res);
-    #$connection->status('undefined');
-	}
-	
-	function remove($connection)
-	{
-    $toEntity = new HubbubEntity(array('_key' => $connection->ds['c_to']));
-    $res = $this->friend_request($toEntity, 'friend_remove');
-		$connection->status('undefined');
-	}
-	
 	function friend_request($toEntity, $msgtype = 'friend_request')
 	{
     $fr = new HubbubMessage($msgtype);
@@ -52,6 +33,28 @@ class FriendsModel extends HubbubModel
     return($result);
 	}
 	
+	function getMyGroups()
+	{
+	  l10n_load('mvc/friends/l10n');
+	  $result = array();
+	  $grpList = DB_GetList('SELECT * FROM '.getTableName('localgroups').' WHERE lg_entity = ?', array(object('user')->ds['u_entity'])); 
+	  if(sizeof($grpList) == 0)
+	  {
+	    foreach(explode(',', '_friends,_colleagues,_acquaintances,_family') as $gname)
+	    {
+	      $nds = array('lg_entity' => object('user')->ds['u_entity'], 'lg_name' => $gname);
+	      $nds['lg_key'] = DB_UpdateDataset('localgroups', $nds);
+	      $grpList[] = $nds; 
+      }
+    }
+    foreach($grpList as $grp)
+    {
+      if(substr($grp['lg_name'], 0, 1) == '_') $grp['lg_name'] = l10n($grp['lg_name']);
+      $result[] = $grp;
+    }
+    return($result);
+  }
+	
 	function getFriends($filter = 'friend', $forUserEntity = null)
 	{
 		if($forUserEntity == null) $forUserEntity = object('user')->entity;
@@ -60,6 +63,26 @@ class FriendsModel extends HubbubModel
 		  WHERE c_from=? AND c_status=?
 		  ORDER BY `name` ASC', array($forUserEntity, $filter)));
 	}
+	
+	function friend_ignore($entityKey)
+	{
+	  DB_Update('DELETE FROM '.getTableName('connections').' WHERE
+	    c_from = ? AND c_to = ?', array(object('user')->ds['u_entity'], $entityKey));
+  }
+  
+  function friend_accept($entityKey, $groupId)
+  {
+    $connection = new HubbubConnection(object('user')->ds['u_entity'], $entityKey);
+    $connection->group($groupId);
+	  $friendEntity = new HubbubEntity($entityKey);
+    return($this->friend_request($friendEntity));
+  }
+	
+  function friend_remove($entityKey)
+  {
+	  $friendEntity = new HubbubEntity($entityKey);
+    return($this->friend_request($friendEntity, 'friend_remove'));
+  }
 	
 	function contactServer($url)
 	{
