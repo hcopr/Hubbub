@@ -24,7 +24,10 @@ function checkTableName(&$table)
 
 function DB_Safe($raw)
 {
-  return(mysql_real_escape_string($raw, $GLOBALS['db_link']));
+  if($GLOBALS['db_link'] == null)
+    return(addslashes($raw));
+  else
+    return(mysql_real_escape_string($raw, $GLOBALS['db_link']));
 }
 
 function DB_StripPrefix($tableName)
