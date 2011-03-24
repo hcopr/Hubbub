@@ -718,6 +718,14 @@ class HubbubMessage
   {
 		$this->sanitizeDataset();
 		$this->executeHandler('broadcast');
+    $this->payload = json_encode($this->data);
+		$requests = array();
+		foreach(HubbubConnection::GetClosestServers($this->authorEntity->key()) as $con)
+		  $requests[] = array(
+		    'url' => $con['server'],
+		    'hubbub_sig' => md5($con['s_key_outbound'].trim($this->payload)),
+		    );
+		logToFile('log/multi.req.log', dumpArray(cqmrequest($requests, array('hubbub_msg' => $this->payload), 1));
   }
 	
 	/**
@@ -1080,10 +1088,11 @@ class HubbubConnection
 	   DB_Update('UPDATE '.getTableName('connections').' SET '.$varname.' = '.$varname.'+1 WHERE c_from=? AND c_to = ?', array($fromId, $toId)); 
    }
 	 
-	 function GetClosestConnections($entityId)
+	 function GetClosestServers($entityId)
 	 {
 	   return(DB_GetList('SELECT *,SUM(c_count_sent) as sent_count FROM '.getTableName('connections').' 
-	     WHERE c_from = "'.($entityId+0).'" and c_status="friend" and c_count_sent > 0
+	     LEFT JOIN '.getTableName('servers').' ON (c_toserverkey = s_key)
+	     WHERE c_from = "'.($entityId+0).'" and c_status="friend" 
 	     GROUP BY c_toserverkey
 	     ORDER BY sent_count DESC
 	     LIMIT '.getDefault($GLOBALS['config']['service']['dmn_maxsize'], 10)));

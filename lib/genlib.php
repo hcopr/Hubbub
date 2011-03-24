@@ -375,52 +375,8 @@ function file_get_fromurl($url, $post = array(), $timeout = 2)
   return($fle['body']);	
 }
 
-function http_parse_headers_ex( $header )
+function http_parse_request_ex($result, $headerMode = true)
 {
-  $retVal = array();
-  $fields = explode("\r\n", preg_replace('/\x0D\x0A[\x09\x20]+/', ' ', $header));
-  foreach( $fields as $field ) 
-  {
-    if( preg_match('/([^:]+): (.+)/m', $field, $match) ) 
-    {
-      $match[1] = preg_replace('/(?<=^|[\x09\x20\x2D])./e', 'strtoupper("\0")', strtolower(trim($match[1])));
-      if( isset($retVal[$match[1]]) ) 
-      {
-        $retVal[$match[1]] = array($retVal[$match[1]], $match[2]);
-      } 
-      else 
-      {
-        $retVal[$match[1]] = trim($match[2]);
-      }
-    }
-  }
-  return $retVal;
-}
-
-/* makes a GET or POST request to an URL */
-function cqrequest($url, $post = array(), $timeout = 2, $headerMode = true, $onlyHeaders = false)
-{
-  $ch = curl_init();
-  $resheaders = array();
-  $resbody = array();
-  curl_setopt($ch, CURLOPT_URL, $url);
-  if(sizeof($post)>0) 
-  {
-    $onlyHeader = false;
-    curl_setopt($ch, CURLOPT_POST, 1); 
-  }
-  if($onlyHeaders) curl_setopt($ch, CURLOPT_NOBODY, 1);
-  
-  // this is a workaround for a parameter bug that prevents params starting with an @ from working correctly
-  foreach($post as $k => $v) if(substr($v, 0, 1) == '@') $post[$k] = '\\'.$v;
-
-  if(sizeof($post)>0) curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
-  if($headerMode) curl_setopt($ch, CURLOPT_HEADER, 1);  
-  curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); 
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER  ,1);  // RETURN THE CONTENTS OF THE CALL
-  $result = str_replace("\r", '', curl_exec($ch));
-  curl_close($ch);
-
   $resHeaders = array();
   $resBody = array();
   
@@ -463,6 +419,82 @@ function cqrequest($url, $post = array(), $timeout = 2, $headerMode = true, $onl
     'headers' => $resHeaders,
     'data' => $data,
     'body' => $body));
+}
+
+/* makes a GET or POST request to an URL */
+function cqrequest($url, $post = array(), $timeout = 2, $headerMode = true, $onlyHeaders = false)
+{
+  $ch = curl_init();
+  $resheaders = array();
+  $resbody = array();
+  curl_setopt($ch, CURLOPT_URL, $url);
+  if(sizeof($post)>0) 
+  {
+    $onlyHeader = false;
+    curl_setopt($ch, CURLOPT_POST, 1); 
+  }
+  if($onlyHeaders) curl_setopt($ch, CURLOPT_NOBODY, 1);
+  
+  // this is a workaround for a parameter bug/feature that prevents params starting with an @ from working correctly
+  foreach($post as $k => $v) if(substr($v, 0, 1) == '@') $post[$k] = '\\'.$v;
+
+  if(sizeof($post)>0) curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+  if($headerMode) curl_setopt($ch, CURLOPT_HEADER, 1);  
+  curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); 
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER  ,1);  // RETURN THE CONTENTS OF THE CALL
+  $result = str_replace("\r", '', curl_exec($ch));
+  curl_close($ch);
+  return(http_parse_request_ex($result));
+}
+
+function cqmrequest($rq_array, $post = array(), $timeout = 1, $headerMode = true, $onlyHeaders = false)
+{
+  $rq = array();
+  $content = array();
+  $active = null;
+  $multi_handler = curl_multi_init();
+  
+  // configure each request
+  foreach($rq_array as $rparam)
+  {
+    $channel = curl_init();
+    curl_setopt($channel, CURLOPT_URL, $rparam['url']);
+    $combinedParams = $post + $rparam['params'];
+    if(sizeof($combinedParams)>0) 
+    {
+      curl_setopt($channel, CURLOPT_POST, 1); 
+      curl_setopt($channel, CURLOPT_POSTFIELDS, $combinedParams);
+    }
+    curl_setopt($channel, CURLOPT_HEADER, 1); 
+    curl_setopt($channel, CURLOPT_TIMEOUT, $timeout); 
+    curl_setopt($channel, CURLOPT_RETURNTRANSFER, 0);
+    curl_multi_add_handle($multi_handler, $channel);
+    $rq[] = $channel;
+  }
+  
+  // execute
+  do {
+      $mrc = curl_multi_exec($multi_handler, $active);
+  } while ($mrc == CURLM_CALL_MULTI_PERFORM);
+  
+  // wait for return
+  while ($active && $mrc == CURLM_OK) {
+    if (curl_multi_select($multi_handler) != -1) {
+        do {
+            $mrc = curl_multi_exec($multi_handler, $active);
+        } while ($mrc == CURLM_CALL_MULTI_PERFORM);
+    }
+  }
+  
+  // cleanup
+  foreach($rq as $channel)
+  {
+    $content[] = http_parse_request_ex(curl_multi_getcontent($channel));
+    curl_multi_remove_handle($multi_handler, $channel);
+  }
+  
+  curl_multi_close($multi_handler);
+  return($content);  
 }
 
 /* makes a Unix timestamp human-friendly, web-trendy and supercool */
