@@ -10,7 +10,7 @@ $DBERR = '';
 function getTableName($table)
 {
   checkTableName($table);
-  return(mysql_real_escape_string($table));
+  return(DB_Safe($table));
 }
 
 function checkTableName(&$table)
@@ -24,7 +24,7 @@ function checkTableName(&$table)
 
 function DB_Safe($raw)
 {
-  return(mysql_real_escape_string($raw));
+  return(mysql_real_escape_string($raw, $GLOBALS['db_link']));
 }
 
 function DB_StripPrefix($tableName)
