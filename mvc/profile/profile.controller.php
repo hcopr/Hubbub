@@ -12,23 +12,16 @@ class ProfileController extends HubbubController
 	
 	function index()
 	{
+    $this->profileId = object('user')->entity;
+    $this->isMyProfile = true;
+	}
 
-	}
-	
-	function user()
-	{
-	}
-	
-	function auth()
-	{
+  function __call($profileId, $args)
+  {
+    $this->viewName = 'index';
+    $this->profileId = $profileId;
+  }
 		
-	}
-	
-	function add_openid()  
-	{
-		
-	}
-	
 }
 
 ?>

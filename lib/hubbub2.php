@@ -874,7 +874,7 @@ class HubbubEntity
   function link($ds)
   {
   	return('<a href="'. 
-  	  actionUrl('view', 'profile', array('id' => 0+$ds['_key'])).
+  	  actionUrl(0+$ds['_key'], 'profile').
   	  '">'.htmlspecialchars(getDefault($ds['name'], $ds['url'])).'</a>');
   }
 	
@@ -889,7 +889,7 @@ class HubbubEntity
 		if(object('user')->entity == $idkey)
       return('<a href="'.actionUrl('index', 'profile').'">'.getDefault($entityName, '(unknown)').'</a>');
 		else
-      return('<a href="'.actionUrl('index', 'view', array('id' => $idkey)).'">'.getDefault($entityName, '(unknown)').'</a>');
+      return('<a href="'.actionUrl($idkey+0, 'view').'">'.getDefault($entityName, '(unknown)').'</a>');
 	}
 	
 	function load($user, $server)
