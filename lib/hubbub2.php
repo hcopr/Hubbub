@@ -1002,6 +1002,11 @@ class HubbubServer
 		return(trim($this->ds['s_key_out']) != '' && trim($this->ds['s_key_in']) != '');
 	}
 	
+	function isWaitingForKey()
+	{
+		return(trim($this->ds['s_key_out']) == '' && trim($this->ds['s_key_in']) != '');
+  }
+	
 	function msg_trust_sendkey1()
 	{
 		// make a trust_sendkey1 message

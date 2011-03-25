@@ -39,9 +39,29 @@
       ?><tr>
         <td width="64" valign="top"><img src="img/anonymous.png" width="48"/></td>
         <td valign="top" width="250">
-          <b><?= $item['name'] ?></b><br/>
-          <?= $item['url'] ?><br/>
-          <?= ($url_res['server_trusted'] ? '' : l10n('server.nottrusted')) ?>
+          <b><?= $item['name'] ?></b>
+          <div id="srvstat_<?= md5($item['server']) ?>">
+          <?
+          if(!$item['server_trusted'])
+          {
+            ?>contacting server...
+              <script>             
+              function reload_<?= md5($item['server']) ?>()
+              {
+                $.post('<?= actionUrl('ajax_pingserver', 'friends', $item) ?>', function(data) {
+                  $('#srvstat_<?= md5($item['server']) ?>').html(data);
+                  });                
+              }
+              reload_<?= md5($item['server']) ?>();
+              </script>
+            <?  
+          }
+          else
+          {
+            ?><span class="green"><?= $item['url'] ?></span><?
+          }
+          ?>
+          </div>
         </td>
         <td>&nbsp;</td>
         <td valign="top" width="*"><div id="frq_<?= $ent->key() ?>">

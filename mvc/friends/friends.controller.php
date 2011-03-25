@@ -37,6 +37,42 @@ class FriendsController extends HubbubController
 	  
   }
 	
+	function ajax_pingserver()
+	{
+	  $server = new HubbubServer($_REQUEST['server'], true);
+	  $reload = '<script>
+	      setTimeout("reload_'.md5($_REQUEST['server']).'()", 2000);
+	    </script>';
+	  if($server->isTrusted())
+	  {
+	    ?><span class="green">
+        <?= htmlspecialchars($_REQUEST['url']) ?>
+      </span><? 
+    } 
+    else if($server->isWaitingForKey())
+    {
+      ?><?= htmlspecialchars($_REQUEST['url']) ?><div class="gray">
+        waiting for response...
+      </div><?= $reload ?><?
+    }
+    else
+    {
+      $res = $server->msg_trust_sendkey1();
+      if($res['result'] == 'OK')
+      {
+        ?><?= htmlspecialchars($_REQUEST['url']) ?><div class="gray">
+          exchanging credentials...
+        </div><?= $reload ?><?
+      }
+      else
+      {
+        ?><div class="red">
+          ✘ <a class="red" title="<?= htmlspecialchars(getDefault($res['reason'], 'no connection')) ?>"><?= htmlspecialchars($_REQUEST['url']) ?></a>
+        </div><?
+      }
+    }
+  }
+	
 	function ajax_search()
 	{
 	  $this->skipView = false;

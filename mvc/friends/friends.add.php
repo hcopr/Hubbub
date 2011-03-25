@@ -29,7 +29,7 @@
     var fr_url = $('#friend_url').val();
     $.post('<?= actionUrl('ajax_search', 'friends') ?>', { 'q': fr_url }, function(data) {
       $('#search_results').html(data);
-      apply_style();
+      //apply_style();
       });
   }
   
