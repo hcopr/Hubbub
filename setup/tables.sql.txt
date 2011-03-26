@@ -250,6 +250,7 @@ CREATE TABLE IF NOT EXISTS `h2_notifications` (
   `n_msgkey` int(11) NOT NULL,
   `n_tag` varchar(8) NOT NULL,
   `n_status` varchar(1) NOT NULL,
+  `n_time` int(11) NOT NULL,
   PRIMARY KEY (`n_key`),
   KEY `n_user` (`n_user`),
   KEY `n_entity` (`n_entity`),

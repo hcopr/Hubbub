@@ -15,9 +15,7 @@ class HomeController extends HubbubController
 	
 	function ajax_notifications()
 	{
-	  return(json_encode(array(
-	    'events' => $this->user->getNotifications(),
-	    )));
+	  $this->skipView = false;
   }
 }
 

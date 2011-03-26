@@ -26,12 +26,13 @@ function friend_request_after_sendtourl(&$data, &$msg)
   {
 	  // get our side of the connection
 	  $con = new HubbubConnection($msg->authorEntity->key(), $msg->ownerEntity->key());
+    $usr = new HubbubUser($msg->authorEntity->key());
 	  switch($con->status())
 	  {
 	    case('req.rcv'): {
 	      // if this entity already requested a connection, complete the request
 	      $con->status('friend');
-	      object('user')->notify('friend/added', $msg->ownerEntity);
+	      $usr->notify('friend/added', $msg->ownerEntity);
 	      break;
 	    }
 	    case('undefined'): {
@@ -57,17 +58,20 @@ function friend_request_receive(&$data, &$msg)
 	if(!$msg->validateSignature()) return(true);
   
   $con = new HubbubConnection($msg->ownerEntity->key(), $msg->authorEntity->key());
+  $usr = new HubbubUser($msg->ownerEntity->key());
+  WriteToFile('log/activity.log', $data['msgid'].' friend_request received'.chr(10));
+  
   switch($con->status())
     {
   	case('req.sent'): {
       // if we already sent a request to them, complete the process
       $con->status('friend');
-      object('user')->notify('friend/added', $msg->ownerEntity);
+      $usr->notify('friend/added', $msg->authorEntity);
   		break;
   	}
   	case('undefined'): {
   		$con->status('req.rcv');
-      object('user')->notify('friend/request', $msg->ownerEntity);
+      $usr->notify('friend/request', $msg->authorEntity);
   		break;
   	}
   }    

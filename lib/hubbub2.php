@@ -25,6 +25,19 @@ function h2_init_hubbub_environment()
 	}
 }
 
+function h2_render_text($template, $actors = array())
+{
+  $find = array();
+  $repl = array();
+  foreach($actors as $actor)
+  {
+    $act++;
+    $find[] = '$actor'.$act;
+    $repl[] = HubbubEntity::link($actor);
+  }
+  return(str_replace($find, $repl, $template));
+}
+
 function h2_uibanner($msg, $flag = '')
 {
   $after = '';
@@ -216,8 +229,17 @@ function h2_execute_event($event_name, &$data, &$d2 = array(), &$d3 = array())
 /* class for the currently signed-in user */
 class HubbubUser
 {
-	function __construct()
+	function __construct($fromEntityId = null)
 	{
+	  if(isset($fromEntityId))
+	  {
+	    $this->ds = DB_GetDataset('users', $fromEntityId, 'u_entity');
+			$this->settings = unserialize($this->ds['u_settings']);
+			$this->id = $this->ds['u_key'];
+			$this->entity = $this->ds['u_entity'];
+			if(!is_array($this->settings)) $this->settings = array();
+	    return; 
+    }
 		$GLOBALS['userobj'] = &$this;
 		if($_SESSION['uid'] == 0 && $_COOKIE['session-key'] != '')
 		{
@@ -257,6 +279,7 @@ class HubbubUser
   {
     if(is_object($msgkey)) $msgkey = $msgkey->ds['m_key'];
     if(is_object($entity)) $entity = $entity->key();
+    WriteToFile('log/activity.log', 'notify '.$event_tag.' '.$entity.' '.$msgkey.chr(10));
     $event_type = CutSegment('/', $event_tag);
     $nds = array(
       'n_user' => $this->id,
@@ -267,18 +290,17 @@ class HubbubUser
     $fp = md5(json_encode($nds));
     $ntfy = DB_GetDatasetMatch('notifications', $nds);
     $nds['n_tag'] = $event_tag;
+    $nds['n_time'] = time();
+    $nds['n_status'] = getDefault($nds['n_status'], 'N');
     DB_UpdateDataset('notifications', $nds);
-    if(isset($_SESSION['notifications']))
-    {
-      array_unshift($_SESSION['notifications'], $nds);
-      while(sizeof($_SESSION['notifications']) > 10) array_pop($_SESSION['notifications']);
-    }
+    unset($_SESSION['notifications']);
   }
   
   function getNotifications()
   {
     if(!isset($_SESSION['notifications'])) 
       $_SESSION['notifications'] = DB_GetList('SELECT * FROM '.getTableName('notifications').' 
+        LEFT JOIN '.getTableName('entities').' ON (_key = n_entity)
         WHERE n_user=?
         ORDER BY n_key DESC
         LIMIT 10', array($this->id));
@@ -905,11 +927,13 @@ class HubbubEntity
 		return($this->ds['_key']);
 	}
 	
-  function link($ds)
+  function link($ds, $justUrl = false)
   {
-  	return('<a href="'. 
-  	  actionUrl(0+$ds['_key'], 'profile').
-  	  '">'.htmlspecialchars(getDefault($ds['name'], $ds['url'])).'</a>');
+    $url = actionUrl(0+$ds['_key'], 'profile');
+    if($justUrl) 
+      return($url);
+    else
+    	return('<a href="'.$url.'">'.htmlspecialchars(getDefault($ds['name'], $ds['url'])).'</a>');
   }
 	
 	function linkFromId($idkey, $options = array())

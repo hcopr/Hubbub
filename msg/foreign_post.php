@@ -12,6 +12,7 @@ function foreign_post_receive(&$data, &$msg)
   
   $con = new HubbubConnection($msg->ownerEntity->key(), $msg->authorEntity->key());
   if($con->status() != 'friend') return($msg->fail('no connection'));
+  $usr = new HubbubUser($msg->ownerEntity->key());
   
   if($con->ds['c_auto_approve'] == 'Y')
   {
@@ -31,12 +32,12 @@ function foreign_post_receive(&$data, &$msg)
     WriteToFile('log/activity.log', $post->data['msgid'].' created from foreign_post'.chr(10));
     $msg->response['post'] = $post->data;
     $msg->doSave = false;
-    object('user')->notify('fpost/new', $msg->authorEntity, $msg);
+    $usr->notify('fpost/new', $msg->authorEntity, $msg);
   }
   else
   {
     // if not, let's store this message for later approval
-    object('user')->notify('fpost/approve', $msg->authorEntity, $msg);
+    $usr->notify('fpost/approve', $msg->authorEntity, $msg);
     $msg->vTag = 'A';
     $msg->save();  
   }

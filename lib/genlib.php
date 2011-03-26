@@ -509,6 +509,7 @@ function cqmrequest($rq_array, $post = array(), $timeout = 1, $headerMode = true
 /* makes a Unix timestamp human-friendly, web-trendy and supercool */
 function ageToString($unixDate, $new = 'new', $ago = 'ago')
 {
+  if($unixDate == 0) return('-');
   $result = '';
   $oneMinute = 60;
   $oneHour = $oneMinute*60;
