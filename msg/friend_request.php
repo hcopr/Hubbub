@@ -31,6 +31,7 @@ function friend_request_after_sendtourl(&$data, &$msg)
 	    case('req.rcv'): {
 	      // if this entity already requested a connection, complete the request
 	      $con->status('friend');
+	      object('user')->notify('friend/added', $msg->ownerEntity);
 	      break;
 	    }
 	    case('undefined'): {
@@ -61,10 +62,12 @@ function friend_request_receive(&$data, &$msg)
   	case('req.sent'): {
       // if we already sent a request to them, complete the process
       $con->status('friend');
+      object('user')->notify('friend/added', $msg->ownerEntity);
   		break;
   	}
   	case('undefined'): {
   		$con->status('req.rcv');
+      object('user')->notify('friend/request', $msg->ownerEntity);
   		break;
   	}
   }    

@@ -253,6 +253,38 @@ class HubbubUser
 		}
 	}
 		
+  function notify($event_tag, $entity = 0, $msgkey = 0)
+  {
+    if(is_object($msgkey)) $msgkey = $msgkey->ds['m_key'];
+    if(is_object($entity)) $entity = $entity->key();
+    $event_type = CutSegment('/', $event_tag);
+    $nds = array(
+      'n_user' => $this->id,
+      'n_type' => $event_type,
+      'n_entity' => $entity,
+      'n_msgkey' => $msgkey,
+      );
+    $fp = md5(json_encode($nds));
+    $ntfy = DB_GetDatasetMatch('notifications', $nds);
+    $nds['n_tag'] = $event_tag;
+    DB_UpdateDataset('notifications', $nds);
+    if(isset($_SESSION['notifications']))
+    {
+      array_unshift($_SESSION['notifications'], $nds);
+      while(sizeof($_SESSION['notifications']) > 10) array_pop($_SESSION['notifications']);
+    }
+  }
+  
+  function getNotifications()
+  {
+    if(!isset($_SESSION['notifications'])) 
+      $_SESSION['notifications'] = DB_GetList('SELECT * FROM '.getTableName('notifications').' 
+        WHERE n_user=?
+        ORDER BY n_key DESC
+        LIMIT 10', array($this->id));
+    return($_SESSION['notifications']);
+  }
+		
 	function isAdmin()
 	{
 	  return($this->ds['u_type'] == 'A' || $this->ds['u_key'] == 1);
@@ -401,9 +433,11 @@ class HubbubController
     }
     
     if(is_callable(array($this, $action)))
-      $this->$action($_REQUEST);
+      $output = $this->$action($_REQUEST);
     else
       h2_errorhandler(0, 'Action not defined: '.$this->name.'.'.$action);
+      
+    if($output != null) print($output);
       
     $GLOBALS['config']['page']['title'] = $action;      
   }

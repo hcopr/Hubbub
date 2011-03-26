@@ -12,6 +12,13 @@ class HomeController extends HubbubController
 	function index()
 	{
 	}
+	
+	function ajax_notifications()
+	{
+	  return(json_encode(array(
+	    'events' => $this->user->getNotifications(),
+	    )));
+  }
 }
 
 ?>

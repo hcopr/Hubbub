@@ -240,3 +240,20 @@ CREATE TABLE IF NOT EXISTS `h2_votes` (
   `v_count` int(11) NOT NULL,
   PRIMARY KEY (`v_msg`,`v_choice`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS `h2_notifications` (
+  `n_key` int(11) NOT NULL AUTO_INCREMENT,
+  `n_user` int(11) NOT NULL,
+  `n_type` varchar(8) NOT NULL,
+  `n_entity` int(11) NOT NULL,
+  `n_msgkey` int(11) NOT NULL,
+  `n_tag` varchar(8) NOT NULL,
+  `n_status` varchar(1) NOT NULL,
+  PRIMARY KEY (`n_key`),
+  KEY `n_user` (`n_user`),
+  KEY `n_entity` (`n_entity`),
+  KEY `n_status` (`n_status`),
+  KEY `n_type` (`n_type`),
+  KEY `n_msgkey` (`n_msgkey`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
