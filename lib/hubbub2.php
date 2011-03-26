@@ -763,7 +763,7 @@ class HubbubMessage
 	/* send this message to the owner's server */
 	function sendToOwner()
 	{
-    $ownerServer = $msg->ownerEntity->ds['server'];
+    $ownerServer = $this->ownerEntity->ds['server'];
     return($this->sendToUrl($ownerServer));
   }
 

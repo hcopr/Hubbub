@@ -63,9 +63,9 @@ class MsgModel extends HubbubModel
 	  // note/todo: if this works correctly, we should see a duplicate message if we're posting on someone else's profile
 		$msg = new HubbubMessage($type);
 		foreach($post as $k => $v) $msg->data[$k] = $v;
-    $msg->broadcast();
     $msg->save();
-		return($msg);
+    WriteToFile('log/activity.log', $type.' created: '.$msg->data['msgid'].chr(10));
+    return($msg);
 	}
 	
 	function Post($p)
@@ -80,7 +80,9 @@ class MsgModel extends HubbubModel
 		else
 		{
       $msg = $this->makePostMessage('foreign_post', $p);
-      $msg->sendToOwner();
+      WriteToFile('log/activity.log', $type.' sending: '.$msg->data['msgid'].' '.dumpArray($msg->data).chr(10));
+      $res = $msg->sendToOwner();
+      WriteToFile('log/activity.log', $type.' sent to owner: '.$msg->data['msgid'].' '.$res['result'].' '.$res['reason'].chr(10));
 		}
 		return($msg->ds);
 	}  
