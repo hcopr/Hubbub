@@ -30,6 +30,9 @@ td,div,p,body,textarea,input {
   font-size: 10.5pt;
   color: <?= $textColor ?>;
 }
+.disabled {
+  opacity: 0.5; 
+}
 textarea,input {
   color: #000; 
 }

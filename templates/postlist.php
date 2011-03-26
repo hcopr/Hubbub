@@ -18,7 +18,7 @@ function tmpl_postlist($list, $withContainer = false)
 		$typeFunction = 'dyn_type_'.$ds['m_type'];
 		if(!is_callable($typeFunction)) $typeFunction = 'tmpl_type_notsupported';
 		if($list['blurp_entity'] && $ds['m_owner'] != $list['blurp_entity']) $typeFunction = 'dyn_foreign_post_blurp';
-		?><div class="dynamic_box post_item post_type_<?= $ds['m_type'] ?>"><?
+		ob_start();
     if(!is_callable($typeFunction)) 
     {
       if(isset($GLOBALS['config']['plugins']['show_'.$ds['m_type']]))
@@ -36,7 +36,8 @@ function tmpl_postlist($list, $withContainer = false)
         h2_execute_event('display_'.$ds['m_type'], $data, $ds, $flags);
       $typeFunction($data, $ds, $flags);
     }
-    ?></div><?
+    $content = ob_get_clean();
+    if(trim($content) != '') print('<div class="dynamic_box post_item post_type_'.$ds['m_type'].'">'.$content.'</div>');
 	}
 
   if($withContainer) { ?></div><script>
@@ -212,6 +213,38 @@ function dyn_type_post(&$data, &$ds, &$flags)
       </div>
 		</div>
   </div><?
+}
+
+/*
+ * Single post display handler: for standard posts
+ */
+function dyn_type_foreign_post(&$data, &$ds, &$flags)
+{
+  /* are there any comments? */
+  if($ds['m_created'] < time() - 60*30) return;
+	$comments = MsgModel::getComments($ds['m_key']);
+	/* define the standard actions for this post */
+	$metaElements = array();//array(ageToString($ds['m_created']));
+	/* insert entries from the cmd array in $flags (these come from plugins) */
+	if(is_array($flags['cmd'])) foreach($flags['cmd'] as $cmd) $metaElements[] = $cmd;
+	/* admin users get to see an "inspect" button */
+  if(object('user')->isAdmin()) $metaElements[] = '<a target="_blank" href="'.actionUrl('inspect', 'test', array('id' => $ds['m_key'])).'">Inspect</a>';
+  $metaElements[] = 'not published yet';
+  $text = h2_post_excerpt($data['text'], $ds['m_key']);
+  /* onward to the actual display of the message: */
+  ?><div class="post disabled" id="post_<?= $ds['m_key'] ?>">
+  	  <div class="postimg"><img src="img/anonymous.png" width="64"/></div>
+		  <div class="postcontent">
+			  <div>
+    			<? if($ds['m_author'] != $ds['m_owner']) print(HubbubEntity::linkFromId($ds['m_author']).' ► '); ?>
+  			  <?= HubbubEntity::linkFromId($ds['m_owner']) ?>
+			    <?= $text ?>
+			  </div>
+			  <div class="postmeta"><?= implode(' · ', $metaElements) ?></div>
+      </div>
+			<div class="post_actions" id="post_<?= $ds['m_key'] ?>_actions"></div>
+      <div id="post_<?= $ds['m_key'] ?>_temp" style="display:none"></div>
+		</div><?
 }
 
 ?>
