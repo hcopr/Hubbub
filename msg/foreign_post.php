@@ -9,6 +9,7 @@ function foreign_post_save(&$data, &$msg)
 function foreign_post_receive(&$data, &$msg)
 {
   if(!$msg->validateSignature()) return(true);
+  WriteToFile('log/activity.log', $data['msgid'].' foreign_post '.$msg->ownerEntity->key().' to '.$msg->authorEntity->key().chr(10));
   
   $con = new HubbubConnection($msg->ownerEntity->key(), $msg->authorEntity->key());
   if($con->status() != 'friend') return($msg->fail('no connection'));

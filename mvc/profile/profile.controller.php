@@ -25,6 +25,7 @@ class ProfileController extends HubbubController
   {
     $this->viewName = 'index';
     $this->profileId = $profileId;
+    $this->viewEntity = $this->profileId;
   }
 		
 }
