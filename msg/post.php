@@ -77,7 +77,15 @@ function post_receive(&$data, &$msg)
 function post_receive_single(&$data, &$msg)
 {
   // we're receiving this message because the sender(=owner) has published something on their profile
-  WriteToFile('log/activity.log', $data['msgid'].':'.$msg->authorEntity->ds['_key'].':'.$msg->ownerEntity->ds['_key'].' received'.chr(10));
+  WriteToFile('log/activity.log', $data['msgid'].':'.$msg->authorEntity->key().':'.$msg->ownerEntity->key().' received'.chr(10));
+  // if this was created from a foreign message
+  if($data['rel']['foreign'] != '')
+  {
+    // let's check if the foreign message can be deleted
+    $fods = new HubbubMessage();
+    $fods->load(array('id' => $data['rel']['foreign'], 'field' => 'm_id'));
+    if($fods->data['type'] == 'foreign_post' && $fods->ownerEntity->key() == $msg->ownerEntity->key()) $fods->delete();
+  }
   $msg->save();  
   $msg->ok();
 }

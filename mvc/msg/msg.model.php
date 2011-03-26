@@ -52,7 +52,7 @@ class MsgModel extends HubbubModel
 	{
 	  $msg = new HubbubMessage('post');
 	  $msg->load(array('id' => $postKey, 'field' => 'm_key'));
-	  $result = $msg->executeHandler('delete');
+	  $result = $msg->delete();
     $msg->broadcast();
 	  $this->msg = $msg;
 	  return($result);
@@ -82,7 +82,13 @@ class MsgModel extends HubbubModel
       $msg = $this->makePostMessage('foreign_post', $p);
       WriteToFile('log/activity.log', $type.' sending: '.$msg->data['msgid'].' '.dumpArray($msg->data).chr(10));
       $res = $msg->sendToOwner();
-      WriteToFile('log/activity.log', $type.' sent to owner: '.$msg->data['msgid'].' '.$res['result'].' '.$res['reason'].chr(10));
+      // if the post was accepted right away:
+      if(sizeof($res['post']) > 0)
+      {
+        $msg->delete();
+        $msg = new HubbubMessage();
+        $msg->receive_single($res['post']);
+      }
 		}
 		return($msg->ds);
 	}  

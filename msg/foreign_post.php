@@ -29,6 +29,7 @@ function foreign_post_receive(&$data, &$msg)
     $post->owner($msg->ownerEntity->ds);
     $post->data['changed'] = time();
     $post->data['received'] = time();
+    $post->data['rel']['foreign'] = $data['msgid'];
     $post->save();
     WriteToFile('log/activity.log', $post->data['msgid'].' created from foreign_post'.chr(10));
     $msg->response['post'] = $post->data;
@@ -44,6 +45,14 @@ function foreign_post_receive(&$data, &$msg)
   }
   
   $msg->ok();
+}
+
+function foreign_post_delete(&$data, &$msg)
+{
+  if($msg->ds['m_key'] == 0) return(false);
+  DB_RemoveDataset('messages', $msg->ds['m_key']);
+  $msg->data = array();
+  return(true);
 }
 
 ?>

@@ -608,9 +608,12 @@ class HubbubMessage
 		$this->initEntities();
     $this->ds = $ds;
 		return($this->executeHandler('load'));
-    return(true);		  
   }
-	
+  
+  function delete()
+  {
+ 		return($this->executeHandler('delete'));
+  }
 	
 	function compareWithDS($ds, $fields)
 	{
