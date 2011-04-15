@@ -782,11 +782,17 @@ class HubbubMessage
     $this->payload = json_encode($this->data);
 		$requests = array();
 		foreach(HubbubConnection::GetClosestServers($this->authorEntity->key()) as $con)
+		{
 		  $requests[] = array(
 		    'url' => $con['s_url'],
 		    'params' => array('hubbub_sig' => md5($con['s_key_out'].trim($this->payload))),
 		    );
+		  WriteToFile('log/activity.log', '- broadcast to server '.$con['s_url'].chr(10));
+		}
 		$messageData = array('hubbub_msg' => $this->payload);
+		HubbubEndpoint::multiRequest($requests, $messageData);
+		WriteToFile('log/activity.log', json_encode($messageData).chr(10));
+		WriteToFile('log/activity.log', '- broadcast done ('.ceil(strlen($this->payload)/1024).'KB)'.chr(10));
   }
 	
 	/**
@@ -1007,6 +1013,11 @@ class HubbubEndpoint
 	{
 	  return(cqrequest($url, $postData, 3));
 	}
+	
+	function multiRequest($reqList, $postData = array(), $options = array())
+	{
+	  return(cqmrequest($reqList, $postData, 1)); 
+  }
 }
 
 class HubbubServer
