@@ -11,7 +11,7 @@ header("Expires: " . gmdate("D, d M Y H:i:s", time()+60*60*4) . " GMT");
 ob_start("ob_gzhandler");
 
 // this is also defined in the main config, ugly redundancy for the sake of speed ;-)
-define('CSS_COL_QUANTUM', 170);
+define('CSS_COL_QUANTUM', 180);
 
 function dechex2($a)
 {
