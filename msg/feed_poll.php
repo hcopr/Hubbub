@@ -1,4 +1,4 @@
-<?
+<?php
 
 function feed_poll_receive(&$data, &$msg)
 {

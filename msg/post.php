@@ -1,4 +1,4 @@
-<?
+<?php
 
 /* event handler to notify closest connections when a message changes */
 function post_broadcast(&$data, &$msg)

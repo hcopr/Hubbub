@@ -1,4 +1,4 @@
-<?
+<?php
 
 /**
  * This handler prepares a message to be sent as a friend_request. The message must already have

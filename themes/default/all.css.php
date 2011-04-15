@@ -10,7 +10,8 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 header("Expires: " . gmdate("D, d M Y H:i:s", time()+60*60*4) . " GMT");
 ob_start("ob_gzhandler");
 
-define('CSS_COL_QUANTUM', 205);
+// this is also defined in the main config, ugly redundancy for the sake of speed ;-)
+define('CSS_COL_QUANTUM', 170);
 
 function dechex2($a)
 {

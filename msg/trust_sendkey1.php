@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * On-receive event handler
  * 

@@ -1,4 +1,4 @@
-<?
+<?php
 
 function foreign_post_save(&$data, &$msg)
 {

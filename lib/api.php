@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * Author: udo.schroeter@gmail.com
  * Project: Hubbub2

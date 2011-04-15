@@ -1,4 +1,4 @@
-<?
+<?php
 
 /* templated mail sending func */
 function send_mail($to, $template, $params = array())
