@@ -17,7 +17,7 @@
 
   profile_point('classes ready');
   require('lib/config.php'); 
-    
+  
   profile_point('config loaded');
   h2_init_hubbub_environment();  
   // if there was output up to this point, it has to be an error message
@@ -25,7 +25,6 @@
 
   // enable gzip compression by default
   profile_point('environment ready');
-
   WriteToFile('log/activity.log', 'call '.$_REQUEST['controller'].'-'.$_REQUEST['action']."\n");
 
   // instantiate controller, invoke action, render view	

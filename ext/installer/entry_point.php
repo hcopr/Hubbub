@@ -9,6 +9,8 @@
   $GLOBALS['page.h1'] = 'Hubbub 0.2 Installer';
   l10n_load('ext/installer/l10n');
   
+  $GLOBALS['errorhandler_ignore'] = true;
+  
   $installerFN = 'ext/installer/'.getDefault(getDefault($_REQUEST['p'], $_REQUEST['controller']), 'index').'.php';
   if (file_exists($installerFN))
     include($installerFN);
