@@ -443,7 +443,7 @@ class HubbubController
 		return($result);
 	}
 
-	function invokeAction($action)
+	function invokeAction($action, $params = null)
   {
     $action = getDefault($action, cfg('service/defaultaction'));
 		$this->lastAction = $action;
@@ -454,8 +454,10 @@ class HubbubController
       $GLOBALS['config']['page']['template'] = 'blank';
     }
     
+    if($params == null) $params = &$_REQUEST;
+    
     if(is_callable(array($this, $action)))
-      $output = $this->$action($_REQUEST);
+      $output = $this->$action($params);
     else
       h2_errorhandler(0, 'Action not defined: '.$this->name.'.'.$action);
       
@@ -732,9 +734,9 @@ class HubbubMessage
   function initEntities()
   {
 		$this->type = &$this->data['type'];
-    $this->ownerEntity = new HubbubEntity($this->data['owner']);
+    $this->ownerEntity = new HubbubEntity($this->data['owner'], true);
 		if(sizeof($this->data['author']) > 0)
-      $this->authorEntity = new HubbubEntity($this->data['author']);
+      $this->authorEntity = new HubbubEntity($this->data['author'], false);
     else
       $this->authorEntity = $this->ownerEntity;
     $this->authorKey = $this->authorEntity->key();
@@ -862,38 +864,49 @@ class HubbubMessage
 
 class HubbubEntity
 {
-	function __construct($record = null)
+	function __construct($record = null, $updateIfDifferent = false)
   {     
     if($record != null) 
 		{
-		  if(!is_array($record))
-		  {
-		    $record['_key'] = $record;
-      }
+		  if(!is_array($record)) $record['_key'] = $record;
+		  // if this is a server record
+		  // fixme: are we even using these?
 		  if($record['type'] == 'server' || $record['user'] == '*')
 		  {
 		    $this->ds = $record;
 		    return;
       }
-			// if the record contains a "_key"
-			if($record['_key'] > 0)
-			{
-			  $this->ds = DB_GetDataset('entities', $record['_key']);
-				if($this->ds['_local'] == 'Y') $this->ds['server'] = cfg('service/server');
-				if($this->ds['_key'] > 0) return;
-			}
-			// if the user is identified by their Hubbub URL:
-			if($record['url'] != '')
-			{
-				$this->ds = DB_GetDatasetWQuery('SELECT * FROM '.getTableName('entities').' WHERE url=?', array($record['url']));
-				if(sizeof($this->ds) > 0) return;
-			}
-			$record['server'] = strtolower(trim($record['server']));
+			// if the record contains a "_key", load from DB with that key
+			foreach(array('_key', 'url') as $field)
+			  if($this->loadBy($field, $record['_key'])) return; 			
+      // if all else fails, load by server and user name
 			if(!$this->load($record['user'], $record['server']))
 			{
+			  // if user doesn't exist, create it
         $this->create($record, $record['server'] == cfg('service/server'));
 			}
+			if($updateIfDifferent)
+			{
+			  $oldChecksum = md5(json_encode($this->ds));
+			  foreach($record as $k => $v)
+			    if(substr($k, 0, 1) != '_') $this->ds[$k] = $v;
+			  if($oldChecksum != md5(json_encode($this->ds)))
+			    $this->save();
+      }
 		}
+  }
+
+  function save()
+  {
+    if(trim($this->ds['user']) != '') 
+      DB_UpdateDataset('entities', $this->ds); 
+  }
+
+  function loadBy($field, $value)
+  {
+	  $this->ds = DB_GetDataset('entities', $record['_key']);
+		if($this->ds['_local'] == 'Y') $this->ds['server'] = cfg('service/server');
+		return($this->ds['_key'] > 0);
   }
 	
 	function create($record, $isLocal)
@@ -910,7 +923,7 @@ class HubbubEntity
         '_serverkey' => $this->server->ds['s_key'],
         );
       if($isLocal) $this->ds['_local'] = 'Y'; else $this->ds['_local'] = 'N';
-      if(trim($this->ds['user']) != '') $this->ds['_key'] = DB_UpdateDataset('entities', $this->ds);
+      $this->save();
 		}
 		return($this->ds);
 	}
@@ -925,6 +938,7 @@ class HubbubEntity
 	function ds2arrayShort($ds)
 	{
     return(array(
+      'name' => $ds['name'],
       'url' => $ds['url'],
       'server' => $ds['server'],
       'user' => $ds['user'],

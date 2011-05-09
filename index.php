@@ -1,4 +1,5 @@
 <?php
+
   $version = explode('.', phpversion());
   if(!($version[0] > 4 && $version[1] > 2)) die('Error: PHP 5.3 or greater needed'); 
 
