@@ -210,7 +210,7 @@ function logToFile($filename, $content, $clearfile = false)
   if (is_array($content)) $content = dumpArray($content);
 	$uri = $_SERVER['REQUEST_URI'];
 	if(stristr($uri, 'password') != '') $uri = '***';
-  WriteToFile($filename,
+  @WriteToFile($filename,
     $_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_HOST'].' '.$uri.' '.$_SESSION['uid'].
     ' '.session_id().' '.date('Y-m-d H:i:s').' '.profiler_microtime_diff(microtime(), $GLOBALS['profiler_start']).
     '  '.trim($content)."\r\n");
@@ -240,26 +240,28 @@ function logError($logfile, $msg, $level = 0)
 function interpretQueryString($qs)
 {
   $uri = parse_url('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
-  
   if($uri['query'] != '') 
   {
     parse_str($uri['query'], $_REQUEST_new);
     $_REQUEST = array_merge($_REQUEST, $_REQUEST_new);
-  }
-  if(substr($_SERVER['REQUEST_URI'], 0, 1) == '?')
-  {
-    $segments = explode('&', $uri['query']);
-    $path = $segments[0];
+    $firstPart = CutSegment('&', $uri['query']);
+    if(!inStr($firstPart, '=')) $path = $firstPart;
   }
   else
   {
-    $path = substr($uri['path'], 1);  
+    if($GLOBALS['config']['service']['url_rewrite'])
+      $path = substr($uri['path'], 1);  
+    else
+      $path = '';
   }
   $call = explode(URL_CA_SEPARATOR, $path);
   if(!array_search($path, array('robots.txt', 'favicon.ico')) === false) return;
+  foreach(explode('/', $call[0]) as $ctrPart)
+    if(trim($ctrPart) != '') $controllerPart = $ctrPart;
 
-  $_REQUEST['controller'] = getDefault($call[0], cfg('service/defaultcontroller'));
+  $_REQUEST['controller'] = getDefault($controllerPart, cfg('service/defaultcontroller'));
   $_REQUEST['action'] = getDefault($call[1], cfg('service/defaultaction'));
+  
 }
 
 /* makes an URL calling a specific controller with a specific action */

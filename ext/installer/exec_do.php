@@ -40,7 +40,7 @@ switch($_REQUEST['part'])
           '.$cronInfo.'
           <br/>
           <br/>
-          <input type="button" value="Access your Hubbub instance" onclick="document.location.href=\'/\';"/>';
+          <input type="button" value="Access your Hubbub instance" onclick="document.location.href=\'./\';"/>';
       else
         $msg .= '<div class="red">✘ &nbsp; Error: could not write configuration file</div>
           <input type="button" value="Retry" onclick="document.location.href=\'?p=exec\';"/>';
