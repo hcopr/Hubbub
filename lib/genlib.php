@@ -240,20 +240,17 @@ function logError($logfile, $msg, $level = 0)
 function interpretQueryString($qs)
 {
   $uri = parse_url('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+  $path = '';
   if($uri['query'] != '') 
   {
     parse_str($uri['query'], $_REQUEST_new);
     $_REQUEST = array_merge($_REQUEST, $_REQUEST_new);
     $firstPart = CutSegment('&', $uri['query']);
-    if(!inStr($firstPart, '=')) $path = $firstPart;
+    if(!$GLOBALS['config']['service']['url_rewrite'] && !inStr($firstPart, '=')) $path = $firstPart;
   }
-  else
-  {
-    if($GLOBALS['config']['service']['url_rewrite'])
-      $path = substr($uri['path'], 1);  
-    else
-      $path = '';
-  }
+  if($GLOBALS['config']['service']['url_rewrite'])
+    $path = substr($uri['path'], 1);  
+
   $call = explode(URL_CA_SEPARATOR, $path);
   if(!array_search($path, array('robots.txt', 'favicon.ico')) === false) return;
   foreach(explode('/', $call[0]) as $ctrPart)

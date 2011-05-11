@@ -88,6 +88,7 @@ class SigninModel extends HubbubModel
     require('ext/lightopenid/openid.php');
     $this->openid = new LightOpenID;
     $this->openid->identity = $identity;
+    #$this->openid->returnUrl = actionUrl('index', 'signin', array(), true);
 		$this->openid->required = array('namePerson/friendly', 'contact/email', 'namePerson/first', 'namePerson/last', 'birthDate', 'person/gender', 'contact/country/home', 'pref/language', 'pref/timezone');
   }
 	
@@ -97,7 +98,7 @@ class SigninModel extends HubbubModel
 	  ob_start();
 	  try
 	  {
-      $url = $this->openid->authUrl();
+	    $url = $this->openid->authUrl();
     } catch (Exception $e) { 
       logError('', $e->getMessage());
     }

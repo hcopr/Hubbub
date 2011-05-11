@@ -49,7 +49,8 @@ class SigninController extends HubbubController
       {
         $this->model->completeOpenID($this->model->openid);
 				$this->user->login();
-				$this->redirectAfterSignin();
+        $this->redirectAfterSignin();
+        $this->viewName = 'index';
       }
 			else
 			{

@@ -17,7 +17,7 @@
 
   profile_point('classes ready');
   require('lib/config.php'); 
-  
+    
   profile_point('config loaded');
   h2_init_hubbub_environment();  
   // if there was output up to this point, it has to be an error message
