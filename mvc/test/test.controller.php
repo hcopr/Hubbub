@@ -26,6 +26,8 @@ class TestController extends HubbubController
   
   function inspect() { }
   
+  function rewrite() { }
+  
 	function clearAllTables()
 	{
 		$this->skipView = true;

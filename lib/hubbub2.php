@@ -50,16 +50,18 @@ function h2_uibanner($msg, $flag = '')
 }
 
 /* logs a transaction into the database */
-function h2_audit_log($op, $data = '', $code = '', $result = '', $reason = '')
+function h2_audit_log($op, $data = array(), $message = '')
 {
-	if(object('user') != null) $usrname = object('user')->getUsername();
+	if(object('user') != null) $usrname = object('user')->key().'/'.object('user')->getUsername();
+	$adt = ''; 
+	if(sizeof($data) > 0) $adt = json_encode($data);
 	$log = array(
 	  'l_op' => $op,
 		'l_user' => $usrname,
-		'l_data' => $data,
-    'l_returncode' => $code,
-    'l_result' => $result,
-    'l_reason' => $reason,
+		'l_data' => $adt,
+    'l_message' => $message,
+    'l_ip' => $_SERVER['REMOTE_ADDR'],
+    'l_session' => session_id(),
 		);
 	DB_UpdateDataset('auditlog', $log);
 }
@@ -345,12 +347,14 @@ class HubbubUser
       setcookie('session-key', $this->ds['u_sessionkey'], time()+3600*24*30*3);
     }
     $this->save();
+    h2_audit_log('account/login');
     h2_execute_event('user_login', $this->entityDS, $this->ds);
 	}
 	
 	function logout()
 	{
 	  h2_execute_event('user_logout', $this->entityDS, $this->ds);
+		h2_audit_log('account/logout');
 		$_SESSION = array();
 		foreach($_COOKIE as $k => $v)
 			setcookie($k, '', time()-3600);
@@ -530,7 +534,7 @@ class HubbubMessage
   function owner($ads) { $this->data['owner'] = $ads; }
 	function to($ads) { $this->owner($ads); }
   function from($ads) { $this->author($ads); }
-	function newMsgId() {	return(randomHashId()); }
+	function newMsgId() {	return(cfg('service/server').'/'.randomHashId()); }
 	function getExistingDS()	{ return(DB_GetDataset('messages', $this->data['msgid'], 'm_id')); }
   function markChanged($time = null) { if($time == null) $time = time(); $this->data['changed'] = $time; }
 	function index(&$ds)	{ /* indexing hook, not used right now */ }
@@ -614,6 +618,7 @@ class HubbubMessage
   
   function delete()
   {
+    h2_audit_log('msg/delete', null, $this->data['msgid']);
  		return($this->executeHandler('delete'));
   }
 	
@@ -655,6 +660,7 @@ class HubbubMessage
 		  {
 		    // fields have changed, we cannot allow this
 		    $this->fail('Immutable field violation: '.implode(', ', $compareFails)); 
+        h2_audit_log('msg/field_violation', implode(', ', $compareFails), $this->data['msgid']);
 		    return(false);
       }
     }
@@ -692,6 +698,7 @@ class HubbubMessage
 			  #if($this->existingDS['m_changed'] > 0 && $this->data['changed'] <= $this->existingDS['m_changed']) return(false);
 			}
 			$this->ds['m_key'] = DB_UpdateDataset('messages', $this->ds);
+      h2_audit_log('msg/save', null, $this->data['msgid']);
 			$this->index($this->ds);
 			return(true);
 		}
@@ -712,6 +719,7 @@ class HubbubMessage
 		$this->response = array();
 		$this->initEntities();
     $this->sanitizeFields();
+    h2_audit_log('msg/receive', $this->data, $this->data['msgid']);
 		return($this->executeHandler('receive'));
 	}
 	
@@ -727,6 +735,7 @@ class HubbubMessage
 		$this->type = &$this->data['type'];
 		$this->initEntities();
     $this->sanitizeFields();
+    h2_audit_log('msg/receive_single', null, $this->data['msgid']);
 		return($this->executeHandler('receive_single'));
   }
 
@@ -785,6 +794,7 @@ class HubbubMessage
 		$requests = array();
 		foreach(HubbubConnection::GetClosestServers($this->authorEntity->key()) as $con)
 		{
+		  $req_urls[] = $con['s_url'];
 		  $requests[] = array(
 		    'url' => $con['s_url'],
 		    'params' => array('hubbub_sig' => md5($con['s_key_out'].trim($this->payload))),
@@ -793,6 +803,8 @@ class HubbubMessage
 		}
 		$messageData = array('hubbub_msg' => $this->payload);
 		HubbubEndpoint::multiRequest($requests, $messageData);
+
+    h2_audit_log('msg/broadcast', array('to' => $req_urls), $this->data['msgid']);
 		WriteToFile('log/activity.log', json_encode($messageData).chr(10));
 		WriteToFile('log/activity.log', '- broadcast done ('.ceil(strlen($this->payload)/1024).'KB)'.chr(10));
   }
@@ -825,6 +837,7 @@ class HubbubMessage
 	  $this->responseData = $result['data'];
     $this->executeHandler('after_sendtourl', array('url' => $url, 'result' => $result));
 
+    h2_audit_log('msg/send', array('to' => array($url), 'text' => $this->data['text'], 'result' => $result['result']), $this->data['msgid']);
 		return($result['data']);
 	}
 	
@@ -868,7 +881,6 @@ class HubbubEntity
   {     
     if($record != null) 
 		{
-		  if(!is_array($record)) $record['_key'] = $record;
 		  // if this is a server record
 		  // fixme: are we even using these?
 		  if($record['type'] == 'server' || $record['user'] == '*')
@@ -876,15 +888,10 @@ class HubbubEntity
 		    $this->ds = $record;
 		    return;
       }
-			// if the record contains a "_key", load from DB with that key
-			foreach(array('_key', 'url') as $field)
-			  if($this->loadBy($field, $record['_key'])) return; 			
       // if all else fails, load by server and user name
-			if(!$this->load($record['user'], $record['server']))
-			{
-			  // if user doesn't exist, create it
+      // if user doesn't exist, create it
+      if(!$this->loadFromDB($record))
         $this->create($record, $record['server'] == cfg('service/server'));
-			}
 			if($updateIfDifferent)
 			{
 			  $oldChecksum = md5(json_encode($this->ds));
@@ -898,34 +905,46 @@ class HubbubEntity
 
   function save()
   {
-    if(trim($this->ds['user']) != '') 
+    // only update if the dataset actually changed
+    foreach($this->ds as $k => $v) if($v == null) $this->ds[$k] = '';
+    if(trim($this->ds['user']) != '' && md5(json_encode($this->ds)) != $this->checksum) 
+    {
       DB_UpdateDataset('entities', $this->ds); 
+      h2_audit_log('entity/update', array($this->checksum, md5(json_encode($this->ds)), $this->ds, $this->old), $this->ds['_key'].'/'.$this->ds['url']);
+    }
   }
 
   function loadBy($field, $value)
   {
-	  $this->ds = DB_GetDataset('entities', $record['_key']);
+    if($value == '') return(false);
+    $this->ds = DB_GetDataset('entities', $value, $field);
 		if($this->ds['_local'] == 'Y') $this->ds['server'] = cfg('service/server');
+	  $this->checksum = md5(json_encode($this->ds));
+	  $this->old = $this->ds;
 		return($this->ds['_key'] > 0);
+  }
+
+  function loadFromDB($record)
+  {
+		// if the record contains a "_key", load from DB with that key
+		foreach(array('_key', 'url') as $field)
+		  if($this->loadBy($field, $record[$field])) return(true);
+		return(false); 			
   }
 	
 	function create($record, $isLocal)
 	{
-		if(!$this->load($record['user'], $record['server']))
-		{
-		  $this->server = new HubbubServer($record['server'], true);
-      $this->ds = array(
-        'user' => $record['user'],
-        'server' => $record['server'],
-        'url' => $record['url'],
-        'pic' => $record['pic'],
-        'name' => $record['name'],
-        '_serverkey' => $this->server->ds['s_key'],
-        );
-      if($isLocal) $this->ds['_local'] = 'Y'; else $this->ds['_local'] = 'N';
-      $this->save();
-		}
-		return($this->ds);
+	  $this->server = new HubbubServer($record['server'], true);
+    $this->ds = array(
+      'user' => $record['user'],
+      'server' => $record['server'],
+      'url' => $record['url'],
+      'pic' => $record['pic'],
+      'name' => $record['name'],
+      '_serverkey' => $this->server->ds['s_key'],
+      );
+    if($isLocal) $this->ds['_local'] = 'Y'; else $this->ds['_local'] = 'N';
+    $this->save();
 	}
 	
 	function ds2array($ds)
@@ -971,17 +990,6 @@ class HubbubEntity
       return('<a href="'.actionUrl('index', 'profile').'">'.getDefault($entityName, '(unknown)').'</a>');
 		else
       return('<a href="'.actionUrl($idkey+0, 'profile').'">'.getDefault($entityName, '(unknown)').'</a>');
-	}
-	
-	function load($user, $server)
-	{
-		$this->ds = $this->findEntityGlobal(array('user' => $user, 'server' => $server));
-		if(sizeof($ds) > 0)
-		{
-			// todo: some other stuff
-			return(true);
-		}
-		else return(false);
 	}
 	
 	function isNameAvailable($username)
@@ -1158,6 +1166,7 @@ class HubbubConnection
 	 {
 	 	 if($status != null) 
 	 	 {
+       h2_audit_log('connection/status', array('new' => $status, 'old' => $this->ds['c_status']), $this->ds['c_key'].'/'.$this->ds['c_from'].':'.$this->ds['c_to']);
 	 	 	 $this->ds['c_status'] = $status;
 	 	 	 $this->save();
 	 	 }

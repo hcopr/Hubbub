@@ -49,6 +49,7 @@ class SigninModel extends HubbubModel
 			// if we're still logged in, add this to an existing account!
 			$ads['ia_user'] = $_SESSION['uid'];
       $idkey = DB_UpdateDataset('idaccounts', $ads);
+      h2_audit_log('account/add_to_existing', array('idaccounts/key' => $idkey));
       $this->redirectOverride = array('auth', 'settings');
       return(false);			
 		}
@@ -59,6 +60,7 @@ class SigninModel extends HubbubModel
 	    $_SESSION['uid'] = $ukey;
 	    $ads['ia_user'] = $ukey;
 	    $ads['ia_key'] = DB_UpdateDataset('idaccounts', $ads);
+      h2_audit_log('account/update', array('idaccounts/key' => $ads['ia_key']));
 	    return(true);
 		}
 	}

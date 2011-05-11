@@ -61,13 +61,13 @@
 	$url = $ne2->ds['url'];
   require_once('lib/hubbub2_loadurl.php');
   $er = hubbub2_loadurl($url);
-  tlog(!(sizeof($er) == 0 || $er['user'] == '' || $er['server'] == ''), 'hubbub2_loadurl('.$url.')', 'OK', 'failure');
+  tlog(!(sizeof($er) == 0 || $er['user'] == '' || $er['server'] == ''), 'hubbub2_loadurl('.$url.')', 'OK ('.$er['user'].'@'.$er['server'].')', 'failure');
   $res = $p->sendToUrl($er['server']);  
-  tlog($res['result'] == 'OK', 'HubbubMessage->sendToUrl('.$url.') Result', 'OK ('.$res['reason'].')', 'fail ('.$res['reason'].')');
+  tlog($res['result'] == 'OK', 'HubbubMessage->sendToUrl('.$url.') Message '.$p->data['msgid'], 'OK ('.json_encode($res).')', 'fail ('.$res['reason'].')');
   $con1 = new HubbubConnection($p->authorEntity->key(), $p->ownerEntity->key());
   $con2 = new HubbubConnection($p->ownerEntity->key(), $p->authorEntity->key());
-  tlog($con1->ds['c_status'] == 'req.sent', 'HubbubConnection status '.$u1name.':'.$con1->ds['c_from'].' to '.$u2name.' == req.sent', 'OK', 'fail ('.$con1->ds['c_status'].')');
-  tlog($con2->ds['c_status'] == 'req.rcv', 'HubbubConnection status '.$u2name.':'.$con2->ds['c_from'].' to '.$u1name.' == req.rcv', 'OK', 'fail ('.$con2->ds['c_status'].')');
+  tlog($con1->ds['c_status'] == 'req.sent', 'HubbubConnection status '.$u1name.':'.$con1->ds['c_from'].' to '.$u2name.':'.$con1->ds['c_to'].' == req.sent', 'OK', 'fail ('.$con1->ds['c_status'].')');
+  tlog($con2->ds['c_status'] == 'req.rcv', 'HubbubConnection status '.$u2name.':'.$con2->ds['c_from'].' to '.$u1name.':'.$con2->ds['c_to'].' == req.rcv', 'OK', 'fail ('.json_encode($con2->ds).')');
 	
 	// if everything went right, there should be a friend request waiting for user u1
 	$frRcvList = $this->friends->getFriends('req.rcv', $u2['u_entity']);
