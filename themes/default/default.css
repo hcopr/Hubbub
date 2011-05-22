@@ -30,6 +30,9 @@ td,div,p,body,textarea,input {
   font-size: 10.5pt;
   color: <?= $textColor ?>;
 }
+.btn :hover {
+  color: white;
+}
 .disabled {
   opacity: 0.5; 
 }

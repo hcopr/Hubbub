@@ -14,8 +14,9 @@ class FriendsController extends HubbubController
 		$countArray[] = '';
     if($menuCount['req.rcv'] > 0) $countArray[] = ' ('.$menuCount['req.rcv'].')'; else $countArray[] = '';
     if($menuCount['req.sent'] > 0) $countArray[] = ' ('.$menuCount['req.sent'].')'; else $countArray[] = '';
-    $this->menu = $this->makeMenu('index,add,rcv', $countArray);
+    $this->menu = $this->makeMenu('index,add,ab,rcv', $countArray);
 		$this->invokeModel();
+    $this->myEntity = $this->user->selfEntity();
 	}
 	
 	function index()
@@ -35,6 +36,24 @@ class FriendsController extends HubbubController
 	function rcv()
 	{
 	  
+  }
+  
+  function ab()
+  {
+    
+  }
+  
+  function ajax_abstatus()
+  {
+    $this->skipView = false;
+    $this->myEntry = $this->model->ABGetEntry($this->myEntity['url']); 
+    $this->reqStatus = h2_nv_retrieve('abreq/'.$this->myEntity['_key']);
+  }
+	
+	function ajax_abnew()
+	{
+	  $this->skipView = false;
+    $this->myEntry = $this->model->ABNewEntry($this->myEntity, $_REQUEST['comment']); 
   }
 	
 	function ajax_pingserver()

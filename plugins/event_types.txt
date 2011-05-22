@@ -29,51 +29,71 @@ Supported Events
 =============================================
 
 USER EVENTS:
+
 - user_new(&$entityDS, &$userDS)
   gets called every time a new user is created
+  
 - user_save(&$entityDS, &$userDS)
   when user data is committed to local storage
+  
 - user_logout(&$entityDS, &$userDS)
   when a user logs off from Hubbub
+  
 - user_login(&$entityDS, &$userDS)
   shortly after a user logs into the server
 
 MESSAGE EVENTS:
-The general naming format of the message events is "msg_$type$_$event$_$time$" where $type$ is the message
-type and $event$ is the message event. $time$ is either "init" or "done" depending on whether the handler
-should be called before the base system performs its inbuilt handlers or after. Please note that "done" 
-events do not necessarily mean that data has been committed to DB or the network. The following message 
-events are generally supported for all messages:
+
+The general naming format of the message events is "msg_$type$_$event$" where $type$ is the message
+type and $event$ is the message event. The following message events are generally supported for all
+messages:
+
 - create(&$data, &$msgObject)
   shortly after a new message object is initiated
+  
 - load(&$data, &$msgObject)
   after a message is loaded from DB
+  
 - save(&$data, &$msgObject)
   before a message is saved to disk
+  
 - receive(&$data, &$msgObject)
   when a message is received (from a remote endpoint)
+  
 - receive_single(&$data, &$msgObject)
   when a message is received as part of a stream
+  
 - send_notifications(&$data, &$msgObject)
   when direct message notifications are sent
+  
 - before_sendtourl(&$data, &$msgObject)
-  after_sendtourl(&$data, &$msgObject)
+- after_sendtourl(&$data, &$msgObject)
   server one-on-one message calls
 
 CUSTOM MESSAGE DISPLAY:
+
 Message types that are not handled by internal templates can be hooked up to the following event:
+
 - show_$messagetype$(&$data, &$ds)
   where $messagetype$ is the type of message to be displayed
+
+AUGMENTING EXISTING DISPLAY HANDLERS:
   
 Hubbub handles the display of the standard message types internally. However, plugins can modify
 message data or inject additional code via the 
-- display_$messagetype$(&$data, &$ds, &$flags) event.
 
-The $flags array offers a mechanism to inject additional information into a message. Supported are
-- $flags['cmd'] = array('<a href="bla">my link</a>')  
-  to add one or more command links or short infos to a message
-- $flags['infoblock'] = 'some text'
-  adds an arbitrary HTML segment below the message text
+- display_$messagetype$(&$data, &$ds, &$flags) 
+
+event. Use this only if you want to augment another display handler for
+this message type.
+
+  The $flags array offers a mechanism to inject additional information into a message. Supported are
+  
+  - $flags['cmd'] = array('<a href="bla">my link</a>')  
+    to add one or more command links or short infos to a message
+  
+  - $flags['infoblock'] = 'some text'
+    adds an arbitrary HTML segment below the message text
   
 
   

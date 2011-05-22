@@ -2,7 +2,7 @@
 
 function friendlyui_user_new(&$entityDS, &$userDS)
 {
-  // welcome message
+  // create a welcome message for the new user's stream
   $welcome = new HubbubMessage('notice');
   $welcome->owner($entityDS);
   $welcome->data['notice_type'] = 'welcome';

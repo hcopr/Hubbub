@@ -698,7 +698,7 @@ class HubbubMessage
 			  #if($this->existingDS['m_changed'] > 0 && $this->data['changed'] <= $this->existingDS['m_changed']) return(false);
 			}
 			$this->ds['m_key'] = DB_UpdateDataset('messages', $this->ds);
-      h2_audit_log('msg/save', null, $this->data['msgid']);
+      h2_audit_log('msg/save', array('type' => $this->data['type']), $this->data['msgid']);
 			$this->index($this->ds);
 			return(true);
 		}
@@ -802,11 +802,12 @@ class HubbubMessage
 		  WriteToFile('log/activity.log', '- broadcast to server '.$con['s_url'].chr(10));
 		}
 		$messageData = array('hubbub_msg' => $this->payload);
-		HubbubEndpoint::multiRequest($requests, $messageData);
-
-    h2_audit_log('msg/broadcast', array('to' => $req_urls), $this->data['msgid']);
-		WriteToFile('log/activity.log', json_encode($messageData).chr(10));
-		WriteToFile('log/activity.log', '- broadcast done ('.ceil(strlen($this->payload)/1024).'KB)'.chr(10));
+		
+		if(sizeof($req_urls) > 0)
+    {
+      HubbubEndpoint::multiRequest($requests, $messageData);
+      h2_audit_log('msg/broadcast', array('to' => $req_urls), $this->data['msgid']);
+    }
   }
 	
 	/**
@@ -1202,16 +1203,28 @@ class HubbubConnection
 	 		
 }
 
-function h2_nv_store($name, $value)
+// a simple name-value store interface
+// defaults to per-user storage, for system-wide storage use $uid = 'sys'
+function h2_nv_store($name, $value, $uid = null)
 {
-  $nm = $_SESSION['uid'].'/'.$name;
-	$ds = array('nv_name' => $nm, 'nv_value' => json_encode($value));
-	DB_UpdateDataset('nvstore', $ds);
+  if($uid == null) $uid = $_SESSION['uid'];
+  $nm = $uid.'/'.$name;
+  if($value == null)
+  {
+    // a value of null removes the entry from the DB
+    DB_RemoveDataset('nvstore', $nm, 'nv_name');
+  }
+  else
+  {
+  	$ds = array('nv_name' => $nm, 'nv_value' => json_encode($value));
+  	DB_UpdateDataset('nvstore', $ds);
+  }
 }
 
-function h2_nv_retrieve($name)
+function h2_nv_retrieve($name, $uid = null)
 {
-  $nm = $_SESSION['uid'].'/'.$name;
+  if($uid == null) $uid = $_SESSION['uid'];
+  $nm = $uid.'/'.$name;
 	$ds = DB_GetDatasetWQuery('SELECT * FROM '.getTableName('nvstore').' WHERE nv_name LIKE ?', array($nm));
 	$arv = json_decode($ds['nv_value'], true);
 	if(!is_array($arv)) $arv = array();
