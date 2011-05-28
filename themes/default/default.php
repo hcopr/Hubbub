@@ -22,6 +22,7 @@ header('X-UA-Compatible: IE=Edge,chrome=1');
             $uname = object('user')->ds['u_name'];
             if(trim($uname) == '') $uname = l10n('profile');
           	?><div id="mainmenu"><?
+          	
           	foreach(explode(',', cfg('service/menu')) as $url)
           	{
           	  $caption = l10n($url);

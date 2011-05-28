@@ -257,7 +257,8 @@ function interpretQueryString($qs)
     if(trim($ctrPart) != '') $controllerPart = $ctrPart;
 
   $_REQUEST['controller'] = getDefault($controllerPart, cfg('service/defaultcontroller'));
-  $_REQUEST['action'] = getDefault($call[1], cfg('service/defaultaction'));
+  unset($call[0]);
+  $_REQUEST['action'] = getDefault(implode(URL_CA_SEPARATOR, $call), cfg('service/defaultaction'));
   
 }
 
@@ -266,6 +267,8 @@ function actionUrl($action = '', $controller = '', $params = array(), $fullUrl =
 { 
   $p = '';
   $controller = getDefault($controller, $_REQUEST['controller']);
+  if(isset($GLOBALS['subcontrollers'][$controller]))
+    $controller = $GLOBALS['subcontrollers'][$controller].URL_CA_SEPARATOR.$controller;
   $action = getDefault($action, $_REQUEST['action']);
   if (!is_array($params)) $params = stringParamsToArray($params);
   if(sizeof($params) > 0) 

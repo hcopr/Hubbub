@@ -130,11 +130,11 @@ function h2_errorhandler($errno, $errstr, $errfile = __FILE__, $errline = -1)
 }
 	
 /* use this to instance a controller object */
-function h2_getController($controllerName)
+function h2_getController($controllerName, $isRootController = true)
 {
   $controllerName = safeName($controllerName);
 	$controllerFile = 'mvc/'.strtolower($controllerName).'/'.strtolower($controllerName).'.controller.php';
-	if(!file_exists($controllerFile))
+	if(!file_exists($controllerFile) && $isRootController)
 	{
 		// maybe this is a user URL
 	  $entityDS = DB_GetDatasetWQuery('SELECT * FROM '.getTableName('entities').' WHERE 
@@ -159,7 +159,7 @@ function h2_getController($controllerName)
 	$thisController = new $controllerClassName($controllerName);
 	if (is_callable(array($thisController, '__init'))) $thisController->__init();
 	$GLOBALS['controllers'][] = &$thisController;
-	$GLOBALS['obj']['controller'] = &$thisController;
+	if($isRootController) $GLOBALS['obj']['controller'] = &$thisController;
 	return($thisController);
 }
 
@@ -404,9 +404,10 @@ class HubbubController
     $this->name = $name;
 		$this->user = &$GLOBALS['obj']['user'];
 		$this->menu = array();
-		$GLOBALS['submenu'] = &$this->menu;
-		$GLOBALS['currentcontroller'] = &$this;
-    l10n_load('mvc/'.$this->name.'/l10n');
+		$this->subControllers = array();
+		if(!isset($GLOBALS['submenu'])) $GLOBALS['submenu'] = &$this->menu;
+		if(!isset($GLOBALS['currentcontroller'])) $GLOBALS['currentcontroller'] = &$this;
+		l10n_load('mvc/'.$this->name.'/l10n');
 	}		
 	
 	function redirect($action, $controller = null, $params = array())
@@ -446,20 +447,45 @@ class HubbubController
 		} 
 		return($result);
 	}
+	
+	function integrate($subController)
+	{
+	  // first let's init the sub controller
+	  // fixme: technically, we'd need this only if it's actually used so it would make
+	  // sense to only init the sub controller as needed when it's called
+	  $this->subControllers[$subController] = h2_getController($subController, false);
+	  $this->subControllers[$subController]->parent = &$this;
+	  // sub controllers are awesome to compartmentalize functionality into smaller
+	  // packages, but they break the default behavior of actionUrl() - so we need to
+	  // make sure actionUrl() knows that this controller is slaved to its parent or
+	  // else we're screwing up the URL call path for it:
+	  $GLOBALS['subcontrollers'][$subController] = $this->name;
+  }
 
 	function invokeAction($action, $params = null)
   {
     $action = getDefault($action, cfg('service/defaultaction'));
 		$this->lastAction = $action;
+    if($params == null) $params = &$_REQUEST;
 
+    // let's see if we have a sub controller for this, if so: call it!
+    $subAction = $action;
+    $subController = CutSegment(URL_CA_SEPARATOR, $subAction);
+    if(isset($this->subControllers[$subController]))
+    {
+      $this->subControllers[$subController]->invokeAction($subAction, $params);
+      $this->deferredViewController = &$this->subControllers[$subController];
+      return;
+    } 
+
+    // by convention, actions starting with "ajax_" don't return the whole page template
+    // since they're intended to be partial content 
     if(substr($action, 0, 5) == 'ajax_')
     {
       $this->skipView = true;
       $GLOBALS['config']['page']['template'] = 'blank';
     }
-    
-    if($params == null) $params = &$_REQUEST;
-    
+        
     if(is_callable(array($this, $action)))
       $output = $this->$action($params);
     else
@@ -472,6 +498,9 @@ class HubbubController
   		
 	function invokeView($action)
 	{
+	  // if we have invoked a sub controller for this, we'll also need to call its view now:
+	  if(is_object($this->deferredViewController)) 
+	    return($this->deferredViewController->invokeView($this->deferredViewController->lastAction));
     $this->pageTitle = l10n($action.'.title', $action);
     ob_start();
     $action = getDefault($action, cfg('service/defaultaction'));
