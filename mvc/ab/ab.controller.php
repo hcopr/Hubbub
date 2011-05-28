@@ -24,8 +24,16 @@ class AbController extends HubbubController
 	
 	function ajax_abnew()
 	{
+	  access_policy('write');
 	  $this->skipView = false;
     $this->myEntry = $this->model->ABNewEntry($this->myEntity, $_REQUEST['comment']); 
+  }
+  
+  function ajax_abremove()
+  {
+    access_policy('write');
+	  $this->skipView = false;
+    $this->myEntry = $this->model->ABRemoveEntry($this->myEntity); 
   }
 	
 }
